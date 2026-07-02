@@ -7,7 +7,7 @@ import { lazyConnect, getFailureAgeSeconds } from "./init.ts";
 import { isServerCacheValid } from "./metadata-cache.ts";
 import { formatSchema } from "./tool-metadata.ts";
 import { transformMcpContent } from "./tool-registrar.ts";
-import { guardMcpOutput, resolveMcpOutputGuardOptions, type GuardedMcpOutput } from "./mcp-output-guard.ts";
+import { guardMcpOutput, guardedMcpDetails, resolveMcpOutputGuardOptions } from "./mcp-output-guard.ts";
 import { maybeStartUiSession, type UiSessionRuntime } from "./ui-session.ts";
 import { formatToolName, isToolExcluded } from "./types.ts";
 import { resourceNameToToolName } from "./resource-tools.ts";
@@ -20,13 +20,6 @@ type DirectAutoAuthResult =
   | { status: "skipped" }
   | { status: "success" }
   | { status: "failed"; message: string };
-
-function guardedDetails(guarded: GuardedMcpOutput): Record<string, unknown> {
-  return {
-    ...(guarded.mcpResult ? { mcpResult: guarded.mcpResult } : {}),
-    ...(guarded.outputGuard ? { outputGuard: guarded.outputGuard } : {}),
-  };
-}
 
 function getDirectAuthRequiredMessage(
   state: McpExtensionState,
@@ -366,7 +359,7 @@ export function createDirectToolExecutor(
         const guarded = await guardMcpOutput(content.length > 0 ? content : [{ type: "text" as const, text: "(empty resource)" }], outputGuardOptions);
         return {
           content: guarded.content,
-          details: { server: spec.serverName, resourceUri: spec.resourceUri, ...guardedDetails(guarded) },
+          details: { server: spec.serverName, resourceUri: spec.resourceUri, ...guardedMcpDetails(guarded) },
         };
       }
 
@@ -399,7 +392,7 @@ export function createDirectToolExecutor(
         const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, rawMcpResult: result, disabledMcpResult: "omit" });
         return {
           content: guarded.content,
-          details: { error: "tool_error", server: spec.serverName, ...guardedDetails(guarded) },
+          details: { error: "tool_error", server: spec.serverName, ...guardedMcpDetails(guarded) },
         };
       }
 
@@ -410,14 +403,14 @@ export function createDirectToolExecutor(
         const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, suffix: `\n\n${uiMessage}`, rawMcpResult: result, disabledMcpResult: "omit" });
         return {
           content: guarded.content,
-          details: { server: spec.serverName, tool: spec.originalName, uiOpen: true, ...guardedDetails(guarded) },
+          details: { server: spec.serverName, tool: spec.originalName, uiOpen: true, ...guardedMcpDetails(guarded) },
         };
       }
 
       const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, rawMcpResult: result, disabledMcpResult: "omit" });
       return {
         content: guarded.content,
-        details: { server: spec.serverName, tool: spec.originalName, ...guardedDetails(guarded) },
+        details: { server: spec.serverName, tool: spec.originalName, ...guardedMcpDetails(guarded) },
       };
     } catch (error) {
       if (error instanceof UrlElicitationRequiredError) {
@@ -437,7 +430,7 @@ export function createDirectToolExecutor(
       const guarded = await guardMcpOutput([{ type: "text" as const, text: message }], { ...outputGuardOptions, prefix: "Failed to call tool: ", suffix: schemaText });
       return {
         content: guarded.content,
-        details: { error: "call_failed", server: spec.serverName, ...guardedDetails(guarded) },
+        details: { error: "call_failed", server: spec.serverName, ...guardedMcpDetails(guarded) },
       };
     } finally {
       if (uiSession?.reused) {

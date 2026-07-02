@@ -7,7 +7,7 @@ import { getServerPrefix, parseUiPromptHandoff } from "./types.ts";
 import { lazyConnect, updateServerMetadata, updateMetadataCache, getFailureAgeSeconds, updateStatusBar } from "./init.ts";
 import { buildToolMetadata, getToolNames, findToolByName, formatSchema } from "./tool-metadata.ts";
 import { transformMcpContent } from "./tool-registrar.ts";
-import { guardMcpOutput, resolveMcpOutputGuardOptions, type GuardedMcpOutput } from "./mcp-output-guard.ts";
+import { guardMcpOutput, guardedMcpDetails, resolveMcpOutputGuardOptions } from "./mcp-output-guard.ts";
 import { maybeStartUiSession, type UiSessionRuntime } from "./ui-session.ts";
 import { formatAuthRequiredMessage, truncateAtWord } from "./utils.ts";
 import { authenticate, completeAuthFromInput, startAuth, supportsOAuth } from "./mcp-auth-flow.ts";
@@ -20,13 +20,6 @@ const REGEX_SAFETY_CHECK_PARAMS = {
   incubationTimeout: 50,
   timeout: 250,
 } as const;
-
-function guardedDetails(guarded: GuardedMcpOutput): Record<string, unknown> {
-  return {
-    ...(guarded.mcpResult ? { mcpResult: guarded.mcpResult } : {}),
-    ...(guarded.outputGuard ? { outputGuard: guarded.outputGuard } : {}),
-  };
-}
 
 type AutoAuthResult =
   | { status: "skipped" }
@@ -848,7 +841,7 @@ export async function executeCall(
       const guarded = await guardMcpOutput(content.length > 0 ? content : [{ type: "text" as const, text: "(empty resource)" }], outputGuardOptions);
       return {
         content: guarded.content,
-        details: { mode: "call", resourceUri: toolMeta.resourceUri, server: serverName, ...guardedDetails(guarded) },
+        details: { mode: "call", resourceUri: toolMeta.resourceUri, server: serverName, ...guardedMcpDetails(guarded) },
       };
     }
 
@@ -880,7 +873,7 @@ export async function executeCall(
         const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, rawMcpResult: result });
         return {
           content: guarded.content,
-          details: { mode: "call", error: "tool_error", ...guardedDetails(guarded) },
+          details: { mode: "call", error: "tool_error", ...guardedMcpDetails(guarded) },
         };
       }
 
@@ -890,7 +883,7 @@ export async function executeCall(
       const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, suffix: `\n\n${uiMessage}`, rawMcpResult: result });
       return {
         content: guarded.content,
-        details: { mode: "call", ...guardedDetails(guarded), server: serverName, tool: toolMeta.originalName, uiOpen: true },
+        details: { mode: "call", ...guardedMcpDetails(guarded), server: serverName, tool: toolMeta.originalName, uiOpen: true },
       };
     }
 
@@ -905,14 +898,14 @@ export async function executeCall(
       const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, rawMcpResult: result });
       return {
         content: guarded.content,
-        details: { mode: "call", error: "tool_error", ...guardedDetails(guarded) },
+        details: { mode: "call", error: "tool_error", ...guardedMcpDetails(guarded) },
       };
     }
 
     const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, rawMcpResult: result });
     return {
       content: guarded.content,
-      details: { mode: "call", ...guardedDetails(guarded), server: serverName, tool: toolMeta.originalName },
+      details: { mode: "call", ...guardedMcpDetails(guarded), server: serverName, tool: toolMeta.originalName },
     };
   } catch (error) {
     if (error instanceof UrlElicitationRequiredError) {
@@ -934,7 +927,7 @@ export async function executeCall(
 
     return {
       content: guarded.content,
-      details: { mode: "call", error: "call_failed", message: guarded.outputGuard ? "output truncated; see outputGuard.fullOutputPath" : message, ...guardedDetails(guarded) },
+      details: { mode: "call", error: "call_failed", message: guarded.outputGuard ? "output truncated; see outputGuard.fullOutputPath" : message, ...guardedMcpDetails(guarded) },
     };
   } finally {
     if (uiSession?.reused) {

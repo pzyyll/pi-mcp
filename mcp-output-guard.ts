@@ -20,6 +20,8 @@ export interface McpOutputGuardDetails {
   returnedBytes: number;
   originalLines: number;
   returnedLines: number;
+  /** Number of image content blocks returned untouched alongside the truncated text. */
+  imageBlocksPassedThrough?: number;
   fullOutputPath?: string;
   writeError?: string;
 }
@@ -33,10 +35,9 @@ export interface McpResultSummary {
   structuredContent?: Record<string, unknown>;
   meta?: Record<string, unknown>;
   extraFields?: Array<Record<string, unknown>>;
-  rawResultBytes?: number;
+  rawResultBytes: number;
   fullResultPath?: string;
   resultWriteError?: string;
-  outputGuard?: McpOutputGuardDetails;
 }
 
 export interface McpOutputGuardOptions {
@@ -47,6 +48,7 @@ export interface McpOutputGuardOptions {
   maxLines?: number;
   detailsMaxBytes?: number;
   rawMcpResult?: unknown;
+  /** How to expose rawMcpResult in details when the guard is disabled. */
   disabledMcpResult?: "raw" | "omit";
 }
 
@@ -57,14 +59,29 @@ export interface GuardedMcpOutput {
 }
 
 export function resolveMcpOutputGuardOptions(settings?: McpSettings): Pick<McpOutputGuardOptions, "enabled" | "maxBytes" | "maxLines" | "detailsMaxBytes"> {
+  const configured = settings?.outputGuard;
+  const tuning = typeof configured === "object" && configured !== null ? configured : undefined;
   return {
-    enabled: envBoolean("MCP_OUTPUT_GUARD", "PI_MCP_OUTPUT_GUARD") ?? settings?.outputGuard ?? true,
-    maxBytes: envPositiveInt("MCP_OUTPUT_MAX_BYTES", "PI_MCP_OUTPUT_MAX_BYTES") ?? positiveInt(settings?.outputMaxBytes) ?? DEFAULT_MCP_OUTPUT_MAX_BYTES,
-    maxLines: envPositiveInt("MCP_OUTPUT_MAX_LINES", "PI_MCP_OUTPUT_MAX_LINES") ?? positiveInt(settings?.outputMaxLines) ?? DEFAULT_MCP_OUTPUT_MAX_LINES,
-    detailsMaxBytes: envPositiveInt("MCP_DETAILS_MAX_BYTES", "PI_MCP_DETAILS_MAX_BYTES") ?? positiveInt(settings?.detailsMaxBytes) ?? DEFAULT_MCP_DETAILS_MAX_BYTES,
+    enabled: envKillSwitch("MCP_OUTPUT_GUARD") ?? configured !== false,
+    maxBytes: positiveInt(tuning?.maxBytes) ?? DEFAULT_MCP_OUTPUT_MAX_BYTES,
+    maxLines: positiveInt(tuning?.maxLines) ?? DEFAULT_MCP_OUTPUT_MAX_LINES,
+    detailsMaxBytes: positiveInt(tuning?.detailsMaxBytes) ?? DEFAULT_MCP_DETAILS_MAX_BYTES,
   };
 }
 
+/** Spread helper for tool-result details: includes mcpResult/outputGuard only when present. */
+export function guardedMcpDetails(guarded: GuardedMcpOutput): Record<string, unknown> {
+  return {
+    ...(guarded.mcpResult !== undefined ? { mcpResult: guarded.mcpResult } : {}),
+    ...(guarded.outputGuard ? { outputGuard: guarded.outputGuard } : {}),
+  };
+}
+
+/**
+ * Bound model-facing MCP output. Text output is capped at maxBytes/maxLines and
+ * spilled to a temp file when oversized. Image blocks pass through untouched —
+ * they are delivered to the provider as native image content, not text context.
+ */
 export async function guardMcpOutput(
   content: ContentBlock[],
   options: McpOutputGuardOptions = {},
@@ -86,15 +103,18 @@ export async function guardMcpOutput(
     };
   }
 
-  const textOutput = serializeContent(normalizedContent);
+  const imageBlocks = normalizedContent.filter((block) => block.type === "image");
+  const textOutput = normalizedContent
+    .filter((block) => block.type === "text")
+    .map((block) => (block as { text: string }).text)
+    .join("\n");
   const composedOutput = `${prefix}${textOutput}${suffix}`;
   const stats = textStats(composedOutput);
-  const oversizedPayload = hasOversizedNonTextPayload(normalizedContent, maxBytes);
 
   let guardedContent: ContentBlock[] = addAffixes(normalizedContent, prefix, suffix);
   let outputGuard: McpOutputGuardDetails | undefined;
 
-  if (stats.bytes > maxBytes || stats.lines > maxLines || oversizedPayload) {
+  if (stats.bytes > maxBytes || stats.lines > maxLines) {
     const { path: fullOutputPath, error: writeError } = await saveArtifact("output", composedOutput);
     const notice = formatTruncationNotice(stats, fullOutputPath, writeError);
     const previewBudget = reserveBudget(maxBytes, maxLines, notice);
@@ -102,13 +122,14 @@ export async function guardMcpOutput(
     const finalText = `${preview.content}\n\n${notice}`;
     const finalStats = textStats(finalText);
 
-    guardedContent = [{ type: "text" as const, text: finalText }];
+    guardedContent = [{ type: "text" as const, text: finalText }, ...imageBlocks];
     outputGuard = {
       truncated: true,
       originalBytes: stats.bytes,
       returnedBytes: finalStats.bytes,
       originalLines: stats.lines,
       returnedLines: finalStats.lines,
+      ...(imageBlocks.length > 0 ? { imageBlocksPassedThrough: imageBlocks.length } : {}),
       fullOutputPath,
       writeError,
     };
@@ -116,7 +137,7 @@ export async function guardMcpOutput(
 
   const mcpResult = options.rawMcpResult === undefined
     ? undefined
-    : await summarizeMcpResult(options.rawMcpResult, outputGuard, detailsMaxBytes);
+    : await boundMcpResult(options.rawMcpResult, detailsMaxBytes);
 
   return { content: guardedContent, outputGuard, mcpResult };
 }
@@ -140,18 +161,6 @@ function addAffixes(content: ContentBlock[], prefix: string, suffix: string): Co
   return next;
 }
 
-function serializeContent(content: ContentBlock[]): string {
-  return content.map((block) => {
-    if (block.type === "text") return block.text;
-    const dataBytes = block.data ? byteLength(block.data) : 0;
-    return `[Image content omitted from text preview: ${block.mimeType ?? "image/*"}, ${formatSize(dataBytes)} base64 payload]`;
-  }).join("\n");
-}
-
-function hasOversizedNonTextPayload(content: ContentBlock[], maxBytes: number): boolean {
-  return content.some((block) => block.type === "image" && byteLength(block.data ?? "") > maxBytes);
-}
-
 function reserveBudget(maxBytes: number, maxLines: number, notice: string): { maxBytes: number; maxLines: number } {
   const noticeStats = textStats(`\n\n${notice}`);
   return {
@@ -171,7 +180,7 @@ function truncateHead(text: string, maxBytes: number, maxLines: number): { conte
     const lineBytes = byteLength(line);
     if (bytes + separatorBytes + lineBytes > maxBytes) {
       const remaining = maxBytes - bytes - separatorBytes;
-      if (remaining > 0 && output.length < maxLines) {
+      if (remaining > 0) {
         output.push(truncateStringToBytes(line, remaining));
       }
       break;
@@ -198,41 +207,39 @@ function formatTruncationNotice(
   fullOutputPath: string | undefined,
   writeError: string | undefined,
 ): string {
-  const base = `[MCP output truncated: original ${stats.lines.toLocaleString()} lines / ${formatSize(stats.bytes)}.`;
+  const base = `[MCP text output truncated: original ${stats.lines.toLocaleString()} lines / ${formatSize(stats.bytes)}.`;
   if (fullOutputPath) {
-    return `${base} Full output saved to: ${fullOutputPath}]`;
+    return `${base} Full text saved to: ${fullOutputPath} — use read with offset/limit or grep to inspect.]`;
   }
   return `${base} Full output could not be saved: ${writeError ?? "unknown error"}]`;
 }
 
-async function summarizeMcpResult(
-  result: unknown,
-  outputGuard: McpOutputGuardDetails | undefined,
-  detailsMaxBytes: number,
-): Promise<McpResultSummary> {
+/**
+ * Bound details.mcpResult: keep the raw result when its JSON fits within
+ * detailsMaxBytes; otherwise replace it with a compact summary and spill the
+ * raw JSON to a temp file.
+ */
+async function boundMcpResult(result: unknown, detailsMaxBytes: number): Promise<unknown> {
   const raw = safeStringify(result);
   const rawBytes = byteLength(raw);
-  let fullResultPath: string | undefined;
-  let resultWriteError: string | undefined;
+  if (rawBytes <= detailsMaxBytes) return result;
+  return summarizeMcpResult(result, raw, rawBytes);
+}
 
-  if (rawBytes > detailsMaxBytes) {
-    const saved = await saveArtifact("mcp-result", raw);
-    fullResultPath = saved.path;
-    resultWriteError = saved.error;
-  }
+async function summarizeMcpResult(result: unknown, raw: string, rawBytes: number): Promise<McpResultSummary> {
+  const { path: fullResultPath, error: resultWriteError } = await saveArtifact("mcp-result", raw);
 
   const record = asRecord(result);
   const content = Array.isArray(record?.content) ? record.content : [];
   const summary: McpResultSummary = {
     omitted: true,
-    reason: "Raw MCP result omitted from Pi session details to keep model/session context bounded.",
+    reason: "Raw MCP result exceeded the details size limit and was replaced with this summary to keep session context bounded.",
     isError: record?.isError === true,
     contentBlocks: content.length,
     contentSummary: summarizeContent(content),
     rawResultBytes: rawBytes,
     fullResultPath,
     resultWriteError,
-    outputGuard,
   };
 
   if (record && "structuredContent" in record) {
@@ -339,23 +346,11 @@ function positiveInt(value: unknown): number | undefined {
   return integer > 0 ? integer : undefined;
 }
 
-function envPositiveInt(...names: string[]): number | undefined {
-  for (const name of names) {
-    const value = process.env[name]?.trim();
-    if (!value) continue;
-    const parsed = Number.parseInt(value, 10);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  }
-  return undefined;
-}
-
-function envBoolean(...names: string[]): boolean | undefined {
-  for (const name of names) {
-    const value = process.env[name]?.trim().toLowerCase();
-    if (!value) continue;
-    if (["0", "false", "no", "off"].includes(value)) return false;
-    if (["1", "true", "yes", "on"].includes(value)) return true;
-  }
+function envKillSwitch(name: string): boolean | undefined {
+  const value = process.env[name]?.trim().toLowerCase();
+  if (!value) return undefined;
+  if (["0", "false", "no", "off"].includes(value)) return false;
+  if (["1", "true", "yes", "on"].includes(value)) return true;
   return undefined;
 }
 
