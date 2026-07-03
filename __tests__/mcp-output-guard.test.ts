@@ -15,6 +15,32 @@ describe("guardMcpOutput", () => {
     expect(guarded.mcpResult).toBe(rawMcpResult);
   });
 
+  it("merges prefixes and suffixes into small text output", async () => {
+    const guarded = await guardMcpOutput(
+      [{ type: "text", text: "upstream failed" }],
+      { prefix: "Error: ", suffix: "\n\nExpected parameters:\n{}" },
+    );
+
+    expect(guarded.content).toEqual([{ type: "text", text: "Error: upstream failed\n\nExpected parameters:\n{}" }]);
+  });
+
+  it("uses the empty text fallback before applying affixes", async () => {
+    const guarded = await guardMcpOutput(
+      [{ type: "text", text: "" }],
+      { prefix: "Error: ", emptyTextFallback: "Tool execution failed" },
+    );
+
+    expect(guarded.content).toEqual([{ type: "text", text: "Error: Tool execution failed" }]);
+
+    const image = { type: "image" as const, data: "abc", mimeType: "image/png" };
+    const withImage = await guardMcpOutput(
+      [image],
+      { prefix: "Error: ", emptyTextFallback: "Tool execution failed" },
+    );
+
+    expect(withImage.content).toEqual([{ type: "text", text: "Error: Tool execution failed" }, image]);
+  });
+
   it("truncates large text output and saves the full output to a file", async () => {
     const text = Array.from({ length: 20 }, (_, i) => `line-${i} ${"x".repeat(40)}`).join("\n");
     const guarded = await guardMcpOutput(
@@ -119,6 +145,13 @@ describe("guardMcpOutput", () => {
     expect(guarded.content).toEqual([{ type: "text", text }]);
     expect(guarded.outputGuard).toBeUndefined();
     expect(guarded.mcpResult).toBe(rawMcpResult);
+
+    const withPrefix = await guardMcpOutput(
+      [{ type: "text", text: "body" }],
+      { enabled: false, prefix: "Error: ", rawMcpResult },
+    );
+
+    expect(withPrefix.content).toEqual([{ type: "text", text: "Error: body" }]);
   });
 
   it("returns no mcpResult when rawMcpResult is not provided", async () => {

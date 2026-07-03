@@ -44,6 +44,7 @@ export interface McpOutputGuardOptions {
   enabled?: boolean;
   prefix?: string;
   suffix?: string;
+  emptyTextFallback?: string;
   maxBytes?: number;
   maxLines?: number;
   detailsMaxBytes?: number;
@@ -96,9 +97,12 @@ export async function guardMcpOutput(
   const prefix = options.prefix ?? "";
   const suffix = options.suffix ?? "";
 
-  const normalizedContent = content.length > 0
-    ? sanitizeContent(content)
-    : [{ type: "text" as const, text: "(empty result)" }];
+  const normalizedContent = withEmptyTextFallback(
+    content.length > 0
+      ? sanitizeContent(content)
+      : [{ type: "text" as const, text: options.emptyTextFallback ?? "(empty result)" }],
+    options.emptyTextFallback,
+  );
 
   if (options.enabled === false) {
     return {
@@ -156,12 +160,46 @@ function sanitizeContent(content: ContentBlock[]): ContentBlock[] {
   });
 }
 
+function withEmptyTextFallback(content: ContentBlock[], fallback: string | undefined): ContentBlock[] {
+  if (!fallback) return content;
+  const textOutput = content
+    .filter((block) => block.type === "text")
+    .map((block) => (block as { text: string }).text)
+    .join("\n");
+  if (textOutput) return content;
+  return [{ type: "text", text: fallback }, ...content.filter((block) => block.type === "image")];
+}
+
 function addAffixes(content: ContentBlock[], prefix: string, suffix: string): ContentBlock[] {
   if (!prefix && !suffix) return content;
-  const next: ContentBlock[] = [];
-  if (prefix) next.push({ type: "text", text: prefix });
-  next.push(...content);
-  if (suffix) next.push({ type: "text", text: suffix });
+  const next: ContentBlock[] = [...content];
+
+  if (prefix) {
+    const index = next.findIndex((block) => block.type === "text");
+    const block = next[index];
+    if (index >= 0 && block.type === "text") {
+      next[index] = { ...block, text: `${prefix}${block.text}` };
+    } else {
+      next.unshift({ type: "text", text: prefix });
+    }
+  }
+
+  if (suffix) {
+    let index = -1;
+    for (let i = next.length - 1; i >= 0; i--) {
+      if (next[i].type === "text") {
+        index = i;
+        break;
+      }
+    }
+    const block = next[index];
+    if (index >= 0 && block.type === "text") {
+      next[index] = { ...block, text: `${block.text}${suffix}` };
+    } else {
+      next.push({ type: "text", text: suffix });
+    }
+  }
+
   return next;
 }
 

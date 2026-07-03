@@ -870,7 +870,7 @@ export async function executeCall(
 
       if (result.isError) {
         const schemaText = toolMeta.inputSchema ? `\n\nExpected parameters:\n${formatSchema(toolMeta.inputSchema)}` : "";
-        const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, rawMcpResult: result });
+        const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, emptyTextFallback: "Tool execution failed", rawMcpResult: result });
         return {
           content: guarded.content,
           details: { mode: "call", error: "tool_error", ...guardedMcpDetails(guarded) },
@@ -895,7 +895,7 @@ export async function executeCall(
 
     if (result.isError) {
       const schemaText = toolMeta.inputSchema ? `\n\nExpected parameters:\n${formatSchema(toolMeta.inputSchema)}` : "";
-      const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, rawMcpResult: result });
+      const guarded = await guardMcpOutput(outputContent, { ...outputGuardOptions, prefix: "Error: ", suffix: schemaText, emptyTextFallback: "Tool execution failed", rawMcpResult: result });
       return {
         content: guarded.content,
         details: { mode: "call", error: "tool_error", ...guardedMcpDetails(guarded) },
