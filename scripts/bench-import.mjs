@@ -1,5 +1,5 @@
-// ABOUTME: Cold-process jiti import timer for the extension factory entrypoint.
-// ABOUTME: Reports import_ms for index.ts (or --probe=<module>) under a fresh process.
+// ABOUTME: Cold-process import timer for the extension factory entrypoint.
+// ABOUTME: Prefers prebuilt dist/index.js (native import); falls back to jiti on index.ts.
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
@@ -8,6 +8,8 @@ import { performance } from "node:perf_hooks";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
+const DIST_ENTRY = "./dist/index.js";
+const SOURCE_ENTRY = "./index.ts";
 
 function resolveJitiEntry() {
   const candidates = [
@@ -34,21 +36,31 @@ function parseProbeArg(argv) {
   return value.length > 0 ? value : null;
 }
 
-const probe = parseProbeArg(process.argv.slice(2));
-const targetRelative = probe ?? "./index.ts";
-const targetPath = resolve(root, targetRelative);
+function defaultTarget() {
+  return existsSync(join(root, "dist/index.js")) ? DIST_ENTRY : SOURCE_ENTRY;
+}
 
-const { createJiti } = await import(pathToFileURL(resolveJitiEntry()).href);
-const jiti = createJiti(import.meta.url, {
-  moduleCache: false,
-  interopDefault: true,
-});
+const probe = parseProbeArg(process.argv.slice(2));
+const targetRelative = probe ?? defaultTarget();
+const targetPath = resolve(root, targetRelative);
+const useNativeImport = targetRelative.endsWith(".js") || targetRelative.endsWith(".mjs");
 
 const startedAt = performance.now();
-const imported = await jiti.import(targetPath, { default: true });
+let imported;
+if (useNativeImport) {
+  imported = await import(pathToFileURL(targetPath).href);
+} else {
+  const { createJiti } = await import(pathToFileURL(resolveJitiEntry()).href);
+  const jiti = createJiti(import.meta.url, {
+    moduleCache: false,
+    interopDefault: true,
+  });
+  imported = await jiti.import(targetPath, { default: true });
+}
 const importMs = performance.now() - startedAt;
 
 const defaultExport = imported?.default ?? imported;
 console.log(`target=${targetRelative}`);
+console.log(`loader=${useNativeImport ? "native" : "jiti"}`);
 console.log(`import_ms=${importMs.toFixed(1)}`);
 console.log(`factory_type=${typeof defaultExport}`);

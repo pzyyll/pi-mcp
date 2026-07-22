@@ -1,0 +1,33 @@
+# Project tool versions and common tasks for local development.
+# Personal overrides: create mise.local.toml (gitignored).
+
+[tools]
+node = "26"
+
+[tasks.install]
+description = "Install npm dependencies"
+run = "npm install"
+
+[tasks.build]
+description = "Prebuild extension sources to dist/ with tsdown"
+run = "npm run build"
+
+[tasks.test]
+description = "Run the Vitest suite"
+run = "npm test"
+
+[tasks."test:watch"]
+description = "Run Vitest in watch mode"
+run = "npm run test:watch"
+
+[tasks."test:coverage"]
+description = "Run tests with coverage"
+run = "npm run test:coverage"
+
+[tasks."test:oauth-provider"]
+description = "Run OAuth provider node:test suite"
+run = "npm run test:oauth-provider"
+
+[tasks."bench:import"]
+description = "Benchmark cold-start import cost"
+run = "npm run bench:import"

@@ -3,6 +3,9 @@ node_modules/
 *.log
 .DS_Store
 
+# mise local overrides (personal env/tools)
+mise.local.toml
+
 progress.md
 worker-summary.md
 worker-*.md
