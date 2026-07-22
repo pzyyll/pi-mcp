@@ -1,6 +1,7 @@
+// ABOUTME: Proxy MCP tool mode handlers (status/list/search/call/auth/UI messages).
+// ABOUTME: Regex safety loads recheck lazily; rest of runtime stays on the call path.
 import type { AgentToolResult, ToolInfo } from "@earendil-works/pi-coding-agent";
 import { UrlElicitationRequiredError } from "@modelcontextprotocol/sdk/types.js";
-import { checkSync } from "recheck";
 import type { McpExtensionState } from "./state.ts";
 import type { ToolMetadata, McpContent } from "./types.ts";
 import { getServerPrefix, parseUiPromptHandoff } from "./types.ts";
@@ -358,13 +359,13 @@ export function executeDescribe(state: McpExtensionState, toolName: string): Pro
   };
 }
 
-export function executeSearch(
+export async function executeSearch(
   state: McpExtensionState,
   query: string,
   regex?: boolean,
   server?: string,
   includeSchemas?: boolean,
-): ProxyToolResult {
+): Promise<ProxyToolResult> {
   const showSchemas = includeSchemas !== false;
 
   const matches: Array<{ server: string; tool: ToolMetadata }> = [];
@@ -382,6 +383,7 @@ export function executeSearch(
       pattern = new RegExp(query, "i");
       let safety;
       try {
+        const { checkSync } = await import("recheck");
         safety = checkSync(query, "i", REGEX_SAFETY_CHECK_PARAMS);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

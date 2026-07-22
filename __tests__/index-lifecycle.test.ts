@@ -12,6 +12,10 @@ const mocks = vi.hoisted(() => ({
   createDirectToolExecutor: vi.fn(() => vi.fn()),
   getMissingConfiguredDirectToolServers: vi.fn(() => []),
   resolveDirectTools: vi.fn(() => []),
+  buildDirectToolParameters: vi.fn((schema: unknown) => schema && typeof schema === "object" && !Array.isArray(schema)
+    ? Object.fromEntries(Object.entries(schema as Record<string, unknown>).filter(([key]) => key !== "$schema" && key !== "additionalProperties"))
+    : { type: "object", properties: {} }),
+  buildProxyToolParameters: vi.fn(() => ({ type: "object", properties: {} })),
   showStatus: vi.fn(),
   showTools: vi.fn(),
   reconnectServers: vi.fn(),
@@ -53,6 +57,17 @@ vi.mock("../config.ts", () => ({
 
 vi.mock("../metadata-cache.ts", () => ({
   loadMetadataCache: mocks.loadMetadataCache,
+}));
+
+vi.mock("../direct-tools-resolve.ts", () => ({
+  buildProxyDescription: mocks.buildProxyDescription,
+  getMissingConfiguredDirectToolServers: mocks.getMissingConfiguredDirectToolServers,
+  resolveDirectTools: mocks.resolveDirectTools,
+}));
+
+vi.mock("../direct-tool-register.ts", () => ({
+  buildDirectToolParameters: mocks.buildDirectToolParameters,
+  buildProxyToolParameters: mocks.buildProxyToolParameters,
 }));
 
 vi.mock("../direct-tools.ts", () => ({
@@ -150,6 +165,10 @@ describe("mcpAdapter session lifecycle", () => {
     mocks.createDirectToolExecutor.mockReturnValue(vi.fn());
     mocks.getMissingConfiguredDirectToolServers.mockReturnValue([]);
     mocks.resolveDirectTools.mockReturnValue([]);
+    mocks.buildDirectToolParameters.mockImplementation((schema: unknown) => schema && typeof schema === "object" && !Array.isArray(schema)
+      ? Object.fromEntries(Object.entries(schema as Record<string, unknown>).filter(([key]) => key !== "$schema" && key !== "additionalProperties"))
+      : { type: "object", properties: {} });
+    mocks.buildProxyToolParameters.mockReturnValue({ type: "object", properties: {} });
     mocks.getConfigPathFromArgv.mockReturnValue(undefined);
     mocks.normalizeDirectToolInputSchema.mockImplementation((schema: unknown) => schema && typeof schema === "object" && !Array.isArray(schema)
       ? Object.fromEntries(Object.entries(schema).filter(([key]) => key !== "$schema" && key !== "additionalProperties"))
@@ -224,7 +243,7 @@ describe("mcpAdapter session lifecycle", () => {
     const { api } = createPi();
     mcpAdapter(api);
 
-    expect(mocks.normalizeDirectToolInputSchema).toHaveBeenCalledWith(schema);
+    expect(mocks.buildDirectToolParameters).toHaveBeenCalledWith(schema);
     const directTool = api.registerTool.mock.calls.find((call: any[]) => call[0].name === "demo_search")?.[0];
     expect(directTool.parameters).toMatchObject({
       type: "object",
@@ -359,19 +378,18 @@ describe("mcpAdapter session lifecycle", () => {
 
     const activeState = createState();
     second.resolve(activeState);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(mocks.updateStatusBar).toHaveBeenCalledWith(activeState);
+    await vi.waitFor(() => {
+      expect(mocks.updateStatusBar).toHaveBeenCalledWith(activeState);
+    });
     expect(activeState.lifecycle.gracefulShutdown).not.toHaveBeenCalled();
 
     const staleState = createState();
     first.resolve(staleState);
-    await Promise.resolve();
-    await Promise.resolve();
+    await vi.waitFor(() => {
+      expect(mocks.flushMetadataCache).toHaveBeenCalledWith(staleState);
+    });
 
     expect(mocks.updateStatusBar).not.toHaveBeenCalledWith(staleState);
-    expect(mocks.flushMetadataCache).toHaveBeenCalledWith(staleState);
     expect(staleState.lifecycle.gracefulShutdown).toHaveBeenCalledTimes(1);
   });
 

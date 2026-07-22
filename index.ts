@@ -1,16 +1,44 @@
+// ABOUTME: Pi extension factory for the MCP adapter (thin cold-start entry).
+// ABOUTME: Heavy runtime modules load on first use via dynamic import trampolines.
 import type { ExtensionAPI, ToolInfo } from "@earendil-works/pi-coding-agent";
 import type { McpExtensionState } from "./state.ts";
-import { Type } from "typebox";
-import { showStatus, showTools, reconnectServers, authenticateServer, logoutServer, openMcpAuthPanel, openMcpPanel, openMcpSetup } from "./commands.ts";
+import type { DirectToolSpec } from "./types.ts";
 import { loadMcpConfig } from "./config.ts";
-import { buildProxyDescription, createDirectToolExecutor, getMissingConfiguredDirectToolServers, resolveDirectTools } from "./direct-tools.ts";
-import { flushMetadataCache, initializeMcp, updateStatusBar } from "./init.ts";
+import {
+  buildProxyDescription,
+  getMissingConfiguredDirectToolServers,
+  resolveDirectTools,
+} from "./direct-tools-resolve.ts";
+import { buildDirectToolParameters, buildProxyToolParameters } from "./direct-tool-register.ts";
 import { loadMetadataCache } from "./metadata-cache.ts";
-import { executeAuthComplete, executeAuthStart, executeCall, executeConnect, executeDescribe, executeList, executeSearch, executeStatus, executeUiMessages } from "./proxy-modes.ts";
-import { getConfigPathFromArgv, normalizeDirectToolInputSchema, truncateAtWord } from "./utils.ts";
-import { initializeOAuth, shutdownOAuth } from "./mcp-auth-flow.ts";
+import { getConfigPathFromArgv, truncateAtWord } from "./utils.ts";
 import { createMcpDirectToolCallRenderer, renderMcpProxyToolCall, renderMcpToolResult } from "./tool-result-renderer.ts";
 import { toolErrorOverride } from "./error-signal.ts";
+
+type DirectToolExecutor = (
+  toolCallId: string,
+  params: Record<string, unknown>,
+  signal: AbortSignal | undefined,
+  onUpdate: unknown,
+  ctx: unknown,
+) => Promise<unknown>;
+
+function createDirectToolTrampoline(
+  getState: () => McpExtensionState | null,
+  getInitPromise: () => Promise<McpExtensionState> | null,
+  spec: DirectToolSpec,
+): DirectToolExecutor {
+  let executorPromise: Promise<DirectToolExecutor> | null = null;
+  return async (toolCallId, params, signal, onUpdate, ctx) => {
+    if (!executorPromise) {
+      executorPromise = import("./direct-tools.ts").then((mod) =>
+        mod.createDirectToolExecutor(getState, getInitPromise, spec) as DirectToolExecutor,
+      );
+    }
+    const executor = await executorPromise;
+    return executor(toolCallId, params, signal, onUpdate, ctx);
+  };
+}
 
 export default function mcpAdapter(pi: ExtensionAPI) {
   let state: McpExtensionState | null = null;
@@ -27,6 +55,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
 
     let flushError: unknown;
     try {
+      const { flushMetadataCache } = await import("./init.ts");
       flushMetadataCache(currentState);
     } catch (error) {
       flushError = error;
@@ -73,8 +102,8 @@ export default function mcpAdapter(pi: ExtensionAPI) {
       label: `MCP: ${spec.originalName}`,
       description: spec.description || "(no description)",
       promptSnippet: truncateAtWord(spec.description, 100) || `MCP tool from ${spec.serverName}`,
-      parameters: Type.Unsafe(normalizeDirectToolInputSchema(spec.inputSchema) as never),
-      execute: createDirectToolExecutor(() => state, () => initPromise, spec),
+      parameters: buildDirectToolParameters(spec.inputSchema),
+      execute: createDirectToolTrampoline(() => state, () => initPromise, spec),
       renderCall: createMcpDirectToolCallRenderer(spec.prefixedName),
       renderResult: renderMcpToolResult,
     });
@@ -94,6 +123,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
     initPromise = null;
 
     try {
+      const { shutdownOAuth } = await import("./mcp-auth-flow.ts");
       await Promise.all([
         shutdownState(previousState, "session_restart"),
         shutdownOAuth(),
@@ -106,10 +136,12 @@ export default function mcpAdapter(pi: ExtensionAPI) {
       return;
     }
 
+    const { initializeOAuth } = await import("./mcp-auth-flow.ts");
     await initializeOAuth().catch(err => {
       console.error("MCP OAuth initialization failed:", err);
     });
 
+    const { initializeMcp, updateStatusBar } = await import("./init.ts");
     const promise = initializeMcp(pi, ctx);
     initPromise = promise;
 
@@ -145,6 +177,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
     initPromise = null;
 
     try {
+      const { shutdownOAuth } = await import("./mcp-auth-flow.ts");
       await Promise.all([
         shutdownState(currentState, "session_shutdown"),
         shutdownOAuth(),
@@ -173,6 +206,15 @@ export default function mcpAdapter(pi: ExtensionAPI) {
         if (ctx.hasUI) ctx.ui.notify("MCP not initialized", "error");
         return;
       }
+
+      const {
+        showStatus,
+        showTools,
+        reconnectServers,
+        logoutServer,
+        openMcpPanel,
+        openMcpSetup,
+      } = await import("./commands.ts");
 
       const parts = args?.trim()?.split(/\s+/) ?? [];
       const subcommand = parts[0] ?? "";
@@ -242,6 +284,8 @@ export default function mcpAdapter(pi: ExtensionAPI) {
         return;
       }
 
+      const { authenticateServer, openMcpAuthPanel } = await import("./commands.ts");
+
       if (!serverName) {
         await openMcpAuthPanel(state, pi, ctx, earlyConfigPath);
         return;
@@ -258,17 +302,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
       description: buildProxyDescription(earlyConfig, earlyCache, directSpecs),
       promptSnippet: "MCP gateway - connect to MCP servers and call their tools",
       renderCall: renderMcpProxyToolCall,
-      parameters: Type.Object({
-        tool: Type.Optional(Type.String({ description: "Tool name to call (e.g., 'xcodebuild_list_sims')" })),
-        args: Type.Optional(Type.String({ description: "Arguments as JSON string (e.g., '{\"key\": \"value\"}')" })),
-        connect: Type.Optional(Type.String({ description: "Server name to connect (lazy connect + metadata refresh)" })),
-        describe: Type.Optional(Type.String({ description: "Tool name to describe (shows parameters)" })),
-        search: Type.Optional(Type.String({ description: "Search tools by name/description" })),
-        regex: Type.Optional(Type.Boolean({ description: "Treat search as regex (default: substring match)" })),
-        includeSchemas: Type.Optional(Type.Boolean({ description: "Include parameter schemas in search results (default: true)" })),
-        server: Type.Optional(Type.String({ description: "Filter to specific server (also disambiguates tool calls)" })),
-        action: Type.Optional(Type.String({ description: "Action: 'ui-messages', 'auth-start', or 'auth-complete'" })),
-      }),
+      parameters: buildProxyToolParameters(),
       renderResult: renderMcpToolResult,
       async execute(_toolCallId, params: {
         tool?: string;
@@ -315,8 +349,10 @@ export default function mcpAdapter(pi: ExtensionAPI) {
           };
         }
 
+        const proxyModes = await import("./proxy-modes.ts");
+
         if (params.action === "ui-messages") {
-          return executeUiMessages(state);
+          return proxyModes.executeUiMessages(state);
         }
         if (params.action === "auth-start") {
           if (!params.server) {
@@ -325,7 +361,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
               details: { mode: "auth-start", error: "missing_server" },
             };
           }
-          return executeAuthStart(state, params.server);
+          return proxyModes.executeAuthStart(state, params.server);
         }
         if (params.action === "auth-complete") {
           if (!params.server) {
@@ -341,24 +377,24 @@ export default function mcpAdapter(pi: ExtensionAPI) {
               details: { mode: "auth-complete", error: "missing_input" },
             };
           }
-          return executeAuthComplete(state, params.server, input);
+          return proxyModes.executeAuthComplete(state, params.server, input);
         }
         if (params.tool) {
-          return executeCall(state, params.tool, parsedArgs, params.server, getPiTools, signal);
+          return proxyModes.executeCall(state, params.tool, parsedArgs, params.server, getPiTools, signal);
         }
         if (params.connect) {
-          return executeConnect(state, params.connect, signal);
+          return proxyModes.executeConnect(state, params.connect, signal);
         }
         if (params.describe) {
-          return executeDescribe(state, params.describe);
+          return proxyModes.executeDescribe(state, params.describe);
         }
         if (params.search) {
-          return executeSearch(state, params.search, params.regex, params.server, params.includeSchemas);
+          return proxyModes.executeSearch(state, params.search, params.regex, params.server, params.includeSchemas);
         }
         if (params.server) {
-          return executeList(state, params.server);
+          return proxyModes.executeList(state, params.server);
         }
-        return executeStatus(state);
+        return proxyModes.executeStatus(state);
       },
     });
   }

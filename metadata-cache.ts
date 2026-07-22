@@ -1,13 +1,14 @@
-// metadata-cache.ts - Persistent MCP metadata cache
+// ABOUTME: Persistent on-disk cache of MCP tool/resource metadata for cold start.
+// ABOUTME: Pure FS/hash helpers only; UI URI extraction uses a local pure helper.
 import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { getAgentPath } from "./agent-dir.ts";
 import { createHash } from "node:crypto";
-import { getToolUiResourceUri } from "@modelcontextprotocol/ext-apps/app-bridge";
 import type { McpTool, McpResource, ServerEntry, ToolMetadata } from "./types.ts";
 import { formatToolName, isToolExcluded } from "./types.ts";
 import { resourceNameToToolName } from "./resource-tools.ts";
 import { extractToolUiStreamMode, interpolateEnvRecord, resolveBearerToken, resolveConfigPath } from "./utils.ts";
+import { getToolUiResourceUri } from "./tool-ui-uri.ts";
 
 const CACHE_VERSION = 1;
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;

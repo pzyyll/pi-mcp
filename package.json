@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:oauth-provider": "node --import tsx --test mcp-oauth-provider.test.ts"
+    "test:oauth-provider": "node --import tsx --test mcp-oauth-provider.test.ts",
+    "bench:import": "node scripts/bench-import.mjs"
   },
   "repository": {
     "type": "git",
@@ -48,6 +49,10 @@
     "ui-session.ts",
     "proxy-modes.ts",
     "direct-tools.ts",
+    "direct-tools-resolve.ts",
+    "direct-tool-register.ts",
+    "schema-format.ts",
+    "tool-ui-uri.ts",
     "commands.ts",
     "onboarding-state.ts",
     "mcp-setup-panel.ts",

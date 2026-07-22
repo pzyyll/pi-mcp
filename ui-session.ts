@@ -1,3 +1,5 @@
+// ABOUTME: MCP Apps UI session lifecycle (start, stream, messages, close).
+// ABOUTME: Defers loading ui-server until a session actually starts.
 import { randomUUID } from "node:crypto";
 import { UrlElicitationRequiredError, type CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { McpExtensionState } from "./state.ts";
@@ -12,7 +14,7 @@ import {
   type UiStreamMode,
 } from "./types.ts";
 import { logger } from "./logger.ts";
-import { startUiServer, type UiServerHandle } from "./ui-server.ts";
+import type { UiServerHandle } from "./ui-server.ts";
 import { isGlimpseAvailable, openGlimpseWindow } from "./glimpse-ui.ts";
 
 let activeGlimpseWindow: { close(): void } | null = null;
@@ -205,6 +207,7 @@ export async function maybeStartUiSession(
       }
     };
 
+    const { startUiServer } = await import("./ui-server.ts");
     handle = await startUiServer({
       serverName: request.serverName,
       toolName: request.toolName,

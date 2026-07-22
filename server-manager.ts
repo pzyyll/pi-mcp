@@ -1,3 +1,5 @@
+// ABOUTME: MCP server connection manager (stdio/HTTP transports, OAuth, tools/resources).
+// ABOUTME: Sampling/elicitation handler modules load at connect time, not import time.
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
@@ -21,12 +23,8 @@ import { resolveNpxBinary } from "./npx-resolver.ts";
 import { logger } from "./logger.ts";
 import { McpOAuthProvider } from "./mcp-oauth-provider.ts";
 import { extractOAuthConfig, supportsOAuth } from "./mcp-auth-flow.ts";
-import { registerSamplingHandler, type ServerSamplingConfig } from "./sampling-handler.ts";
-import {
-  handleUrlElicitation,
-  registerElicitationHandler,
-  type ServerElicitationConfig,
-} from "./elicitation-handler.ts";
+import type { ServerSamplingConfig } from "./sampling-handler.ts";
+import type { ServerElicitationConfig } from "./elicitation-handler.ts";
 import { interpolateEnvRecord, resolveBearerToken, resolveConfigPath } from "./utils.ts";
 import { abortable, throwIfAborted } from "./abort.ts";
 
@@ -127,7 +125,7 @@ export class McpServerManager {
     signal?: AbortSignal,
   ): Promise<ServerConnection> {
     throwIfAborted(signal);
-    const client = this.createClient(name);
+    const client = await this.createClient(name);
 
     let transport: Transport;
 
@@ -220,16 +218,18 @@ export class McpServerManager {
     };
   }
 
-  private createClient(serverName: string): Client {
+  private async createClient(serverName: string): Promise<Client> {
     const capabilities = this.buildClientCapabilities();
     const client = new Client(
       { name: `pi-mcp-${serverName}`, version: "1.0.0" },
       Object.keys(capabilities).length > 0 ? { capabilities } : undefined,
     );
     if (this.samplingConfig) {
+      const { registerSamplingHandler } = await import("./sampling-handler.ts");
       registerSamplingHandler(client, { ...this.samplingConfig, serverName });
     }
     if (this.elicitationConfig) {
+      const { registerElicitationHandler } = await import("./elicitation-handler.ts");
       registerElicitationHandler(client, {
         ...this.elicitationConfig,
         serverName,
@@ -254,6 +254,7 @@ export class McpServerManager {
     error: UrlElicitationRequiredError,
   ): Promise<"accept" | "decline" | "cancel"> {
     if (!this.elicitationConfig?.allowUrl) return "cancel";
+    const { handleUrlElicitation } = await import("./elicitation-handler.ts");
     for (const params of error.elicitations) {
       const result = await handleUrlElicitation({
         ...this.elicitationConfig,

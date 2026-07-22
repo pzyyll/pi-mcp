@@ -30,39 +30,39 @@ function createState(): McpExtensionState {
 }
 
 describe("proxy discovery", () => {
-  it("searches MCP tools only", () => {
-    const result = executeSearch(createState(), "read");
+  it("searches MCP tools only", async () => {
+    const result = await executeSearch(createState(), "read");
 
     expect(result.content[0].text).toBe('No tools matching "read"');
     expect(result.details).toMatchObject({ count: 0, matches: [] });
   });
 
-  it("rejects regex queries longer than the safety cap", () => {
-    const result = executeSearch(createState(), "a".repeat(257), true);
+  it("rejects regex queries longer than the safety cap", async () => {
+    const result = await executeSearch(createState(), "a".repeat(257), true);
 
     expect(result.details).toMatchObject({ error: "query_too_long", maxLength: 256 });
   });
 
-  it("reports malformed regex queries separately from unsafe patterns", () => {
-    const result = executeSearch(createState(), "[", true);
+  it("reports malformed regex queries separately from unsafe patterns", async () => {
+    const result = await executeSearch(createState(), "[", true);
 
     expect(result.details).toMatchObject({ error: "invalid_pattern" });
   });
 
-  it("rejects catastrophic-backtracking regex queries", () => {
-    const result = executeSearch(createState(), "(a+)+$", true);
+  it("rejects catastrophic-backtracking regex queries", async () => {
+    const result = await executeSearch(createState(), "(a+)+$", true);
 
     expect(result.details).toMatchObject({ error: "unsafe_pattern", safetyStatus: "vulnerable" });
   });
 
-  it("accepts safe regex queries", () => {
-    const result = executeSearch(createState(), "^demo_[a-z]+$", true);
+  it("accepts safe regex queries", async () => {
+    const result = await executeSearch(createState(), "^demo_[a-z]+$", true);
 
     expect(result.details).toMatchObject({ count: 1, query: "^demo_[a-z]+$" });
   });
 
-  it("keeps non-regex searches unaffected by the regex length cap", () => {
-    const result = executeSearch(createState(), "search terms ".repeat(40), false);
+  it("keeps non-regex searches unaffected by the regex length cap", async () => {
+    const result = await executeSearch(createState(), "search terms ".repeat(40), false);
 
     expect(result.details).not.toMatchObject({ error: "query_too_long" });
   });

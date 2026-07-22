@@ -1,3 +1,5 @@
+// ABOUTME: Sync TUI renderers for MCP proxy/direct tool calls and results.
+// ABOUTME: Stays light (pi-tui primitives only) so the factory can import it eagerly.
 import type { AgentToolResult, ToolRenderResultOptions } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
 
