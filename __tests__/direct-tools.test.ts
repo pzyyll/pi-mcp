@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { buildProxyDescription, resolveDirectTools } from "../direct-tools.ts";
-import { computeServerHash, isServerCacheValid, type MetadataCache } from "../metadata-cache.ts";
-import { buildToolMetadata } from "../tool-metadata.ts";
-import type { McpConfig } from "../types.ts";
-import { reconstructToolMetadata } from "../metadata-cache.ts";
+import { buildProxyDescription, resolveDirectTools } from "../src/direct-tools.ts";
+import { computeServerHash, isServerCacheValid, type MetadataCache } from "../src/metadata-cache.ts";
+import { buildToolMetadata } from "../src/tool-metadata.ts";
+import type { McpConfig } from "../src/types.ts";
+import { reconstructToolMetadata } from "../src/metadata-cache.ts";
 
 const originalHashEnv = {
   MCP_HASH_CWD: process.env.MCP_HASH_CWD,

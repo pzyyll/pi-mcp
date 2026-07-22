@@ -70,7 +70,7 @@ vi.mock("http", () => ({
   createServer: mocks.createServer,
 }));
 
-vi.mock("../mcp-oauth-provider.ts", () => ({
+vi.mock("../src/mcp-oauth-provider.ts", () => ({
   DEFAULT_OAUTH_CALLBACK_PATH: "/callback",
   getConfiguredOAuthCallbackPort: mocks.getConfiguredOAuthCallbackPort,
   getOAuthCallbackPath: mocks.getOAuthCallbackPath,
@@ -99,7 +99,7 @@ describe("mcp-callback-server", () => {
   });
 
   it("binds localhost on an OS-assigned port and unrefs after a successful non-strict bind", async () => {
-    const { ensureCallbackServer } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer();
 
@@ -109,7 +109,7 @@ describe("mcp-callback-server", () => {
   });
 
   it("binds the configured localhost port exactly in strict mode", async () => {
-    const { ensureCallbackServer } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer({ strictPort: true });
 
@@ -119,7 +119,7 @@ describe("mcp-callback-server", () => {
   });
 
   it("binds an explicit loopback host and port exactly in strict mode", async () => {
-    const { ensureCallbackServer } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer({ strictPort: true, port: 3118, callbackHost: "127.0.0.1", callbackPath: "/custom/callback" });
 
@@ -136,7 +136,7 @@ describe("mcp-callback-server", () => {
       });
     };
 
-    const { ensureCallbackServer } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer } = await import("../src/mcp-callback-server.ts");
 
     await expect(ensureCallbackServer({ strictPort: true })).rejects.toThrow(/already in use/);
     expect(mocks.runtime.servers[0]?.unref).not.toHaveBeenCalled();
@@ -148,7 +148,7 @@ describe("mcp-callback-server", () => {
       resolveListen = onListen;
     };
 
-    const { ensureCallbackServer } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer } = await import("../src/mcp-callback-server.ts");
 
     const first = ensureCallbackServer();
     const second = ensureCallbackServer();
@@ -163,7 +163,7 @@ describe("mcp-callback-server", () => {
   });
 
   it("rebinds to the configured port when strict mode is requested", async () => {
-    const { ensureCallbackServer } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer();
     expect(mocks.state.activePort).toBe(4338);
@@ -176,7 +176,7 @@ describe("mcp-callback-server", () => {
   });
 
   it("keeps the existing callback server when strict rebind fails", async () => {
-    const { ensureCallbackServer, isCallbackServerRunning } = await import("../mcp-callback-server.ts");
+    const { ensureCallbackServer, isCallbackServerRunning } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer();
     expect(mocks.state.activePort).toBe(4338);
@@ -204,7 +204,7 @@ describe("mcp-callback-server", () => {
       ensureCallbackServer,
       reserveCallbackServer,
       releaseCallbackServer,
-    } = await import("../mcp-callback-server.ts");
+    } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer();
     reserveCallbackServer("reserved-state");
@@ -219,7 +219,7 @@ describe("mcp-callback-server", () => {
     const {
       ensureCallbackServer,
       releaseCallbackServer,
-    } = await import("../mcp-callback-server.ts");
+    } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer({ oauthState: "atomic-reserved-state", reserveState: true });
 
@@ -233,7 +233,7 @@ describe("mcp-callback-server", () => {
     const {
       ensureCallbackServer,
       releaseCallbackServer,
-    } = await import("../mcp-callback-server.ts");
+    } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer({ callbackPath: "/first/callback", oauthState: "reserved-endpoint-state", reserveState: true });
 
@@ -250,7 +250,7 @@ describe("mcp-callback-server", () => {
       ensureCallbackServer,
       waitForCallback,
       cancelPendingCallback,
-    } = await import("../mcp-callback-server.ts");
+    } = await import("../src/mcp-callback-server.ts");
 
     await ensureCallbackServer();
     const pending = waitForCallback("pending-state");

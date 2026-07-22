@@ -40,7 +40,7 @@ vi.mock("@modelcontextprotocol/sdk/client/sse.js", () => ({
   SSEClientTransport: vi.fn(),
 }));
 
-vi.mock("../npx-resolver.ts", () => ({
+vi.mock("../src/npx-resolver.ts", () => ({
   resolveNpxBinary: vi.fn(async () => null),
 }));
 
@@ -62,7 +62,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("advertises sampling and registers the handler before connecting", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setSamplingConfig({
       autoApprove: true,
@@ -82,7 +82,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("advertises elicitation capabilities and registers the handler before connecting", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setElicitationConfig({
       allowUrl: true,
@@ -107,7 +107,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("advertises form-only elicitation when URL navigation is unavailable", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setElicitationConfig({ allowUrl: false, ui: {} as any });
 
@@ -119,7 +119,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("notifies only when a known URL elicitation completes", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const ui = {
       select: vi.fn().mockResolvedValue("Open"),
       input: vi.fn(),
@@ -155,7 +155,7 @@ describe("McpServerManager sampling", () => {
 
   it("handles every URL in a URL-required error", async () => {
     const { UrlElicitationRequiredError } = await import("@modelcontextprotocol/sdk/types.js");
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const ui = {
       select: vi.fn().mockResolvedValue("Open"),
       input: vi.fn(),
@@ -174,7 +174,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("advertises sampling and elicitation together", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setSamplingConfig({
       autoApprove: true,
@@ -202,7 +202,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("does not advertise sampling when no sampling config is set", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
 
     await manager.connect("demo", { command: "node", args: ["server.js"] });
@@ -213,7 +213,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("expands environment variables and tilde in stdio cwd", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     process.env.MCP_TEST_CWD = "/tmp/pi-mcp-cwd";
 
     const envManager = new McpServerManager();
@@ -235,7 +235,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("uses the session cwd for stdio servers without an explicit cwd", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager("/tmp/pi-session-cwd");
 
     await manager.connect("session-cwd", { command: "node", args: ["server.js"] });
@@ -244,7 +244,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("prefers an explicit stdio cwd over the session cwd", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager("/tmp/pi-session-cwd");
 
     await manager.connect("explicit-cwd", {
@@ -257,7 +257,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("applies the global timeout to connect and discovery requests", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setDefaultRequestTimeoutMs(2500);
 
@@ -270,7 +270,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("prefers the per-server timeout for connect and discovery requests", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setDefaultRequestTimeoutMs(2500);
 
@@ -283,7 +283,7 @@ describe("McpServerManager sampling", () => {
   });
 
   it("builds request options from global and per-server timeouts", async () => {
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const manager = new McpServerManager();
     manager.setDefaultRequestTimeoutMs(2500);
 

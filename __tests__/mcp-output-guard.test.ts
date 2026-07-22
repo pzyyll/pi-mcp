@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { guardMcpOutput, resolveMcpOutputGuardOptions, type McpResultSummary } from "../mcp-output-guard.ts";
+import { guardMcpOutput, resolveMcpOutputGuardOptions, type McpResultSummary } from "../src/mcp-output-guard.ts";
 
 describe("guardMcpOutput", () => {
   it("leaves small MCP output unchanged and keeps the raw result in details", async () => {

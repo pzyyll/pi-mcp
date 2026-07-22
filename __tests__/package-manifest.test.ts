@@ -33,18 +33,17 @@ describe("package.json publish surface", () => {
     expect(publishedTsSources).toEqual([]);
   });
 
-  it("builds every root runtime TypeScript module into dist when dist exists", () => {
+  it("builds every src runtime TypeScript module into dist when dist exists", () => {
     const distDir = join(repoRoot, "dist");
     if (!existsSync(distDir)) {
       // Local checkouts may not have run `npm run build` yet.
       return;
     }
 
-    const runtimeModules = readdirSync(repoRoot)
+    const srcDir = join(repoRoot, "src");
+    const runtimeModules = readdirSync(srcDir)
       .filter((entry) => entry.endsWith(".ts"))
-      .filter((entry) => !entry.endsWith(".test.ts"))
-      .filter((entry) => entry !== "vitest.config.ts")
-      .filter((entry) => entry !== "tsdown.config.ts");
+      .filter((entry) => !entry.endsWith(".test.ts"));
 
     expect(runtimeModules.length).toBeGreaterThan(0);
 

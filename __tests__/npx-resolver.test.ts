@@ -37,7 +37,7 @@ describe("npx-resolver", () => {
 
     writeCachedPackage(npmCache, "demo-pkg");
 
-    const { resolveNpxBinary } = await import("../npx-resolver.ts");
+    const { resolveNpxBinary } = await import("../src/npx-resolver.ts");
     const result = await resolveNpxBinary("npx", ["-y", "demo-pkg"]);
 
     expect(result).not.toBeNull();
@@ -56,7 +56,7 @@ describe("npx-resolver", () => {
 
     writeCachedPackage(npmCache, "dotenv-cli");
 
-    const { resolveNpxBinary } = await import("../npx-resolver.ts");
+    const { resolveNpxBinary } = await import("../src/npx-resolver.ts");
     const result = await resolveNpxBinary("npx", [
       "--yes",
       "dotenv-cli",
@@ -80,7 +80,7 @@ describe("npx-resolver", () => {
 
     writeCachedPackage(npmCache, "dotenv-cli");
 
-    const { resolveNpxBinary } = await import("../npx-resolver.ts");
+    const { resolveNpxBinary } = await import("../src/npx-resolver.ts");
     const result = await resolveNpxBinary("npx", [
       "--yes",
       "dotenv-cli",

@@ -10,7 +10,7 @@ import {
   McpServerError,
   wrapError,
   isErrorCode,
-} from "../errors.ts";
+} from "../src/errors.ts";
 
 describe("McpUiError", () => {
   it("creates error with required fields", () => {

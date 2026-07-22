@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Api, Model } from "@earendil-works/pi-ai";
 import type { CreateMessageRequest, ModelPreferences } from "@modelcontextprotocol/sdk/types.js";
-import type { SamplingHandlerOptions } from "../sampling-handler.ts";
+import type { SamplingHandlerOptions } from "../src/sampling-handler.ts";
 
 const mocks = vi.hoisted(() => ({
   complete: vi.fn(),
@@ -77,7 +77,7 @@ async function runBasicSampling(
   overrides: Partial<SamplingTestOptions>,
   modelPreferences?: ModelPreferences,
 ): Promise<void> {
-  const { handleSamplingRequest } = await import("../sampling-handler.ts");
+  const { handleSamplingRequest } = await import("../src/sampling-handler.ts");
   await handleSamplingRequest(createOptions(overrides), createSamplingRequest({
     ...(modelPreferences ? { modelPreferences } : {}),
     messages: [{ role: "user", content: { type: "text", text: "Hello" } }],
@@ -104,7 +104,7 @@ describe("sampling handler", () => {
   });
 
   it("converts approved MCP sampling requests into pi-ai completions", async () => {
-    const { handleSamplingRequest } = await import("../sampling-handler.ts");
+    const { handleSamplingRequest } = await import("../src/sampling-handler.ts");
     const result = await handleSamplingRequest(createOptions(), createSamplingRequest({
       systemPrompt: "Translate tersely.",
       messages: [{ role: "user", content: { type: "text", text: "Hello" } }],
@@ -143,7 +143,7 @@ describe("sampling handler", () => {
   });
 
   it("requires UI approval unless auto-approve is enabled", async () => {
-    const { handleSamplingRequest } = await import("../sampling-handler.ts");
+    const { handleSamplingRequest } = await import("../src/sampling-handler.ts");
 
     await expect(handleSamplingRequest(
       createOptions({ autoApprove: false, ui: undefined }),
@@ -153,7 +153,7 @@ describe("sampling handler", () => {
   });
 
   it("asks for approval with inspectable request and response content", async () => {
-    const { handleSamplingRequest } = await import("../sampling-handler.ts");
+    const { handleSamplingRequest } = await import("../src/sampling-handler.ts");
     const ui = { confirm: vi.fn(async () => true) };
 
     await handleSamplingRequest(createOptions({ autoApprove: false, ui }), createSamplingRequest({
@@ -262,7 +262,7 @@ describe("sampling handler", () => {
   });
 
   it("rejects unsupported sampling features loudly", async () => {
-    const { handleSamplingRequest } = await import("../sampling-handler.ts");
+    const { handleSamplingRequest } = await import("../src/sampling-handler.ts");
 
     await expect(handleSamplingRequest(createOptions(), createSamplingRequest({
       messages: [{ role: "user", content: { type: "image", data: "abc", mimeType: "image/png" } }],

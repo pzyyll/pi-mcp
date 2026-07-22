@@ -33,12 +33,12 @@ describe("oauth-handler path resolution", () => {
     process.env.PI_CODING_AGENT_DIR = agentDir;
     delete process.env.MCP_OAUTH_DIR;
 
-    const { getAuthEntryFilePath } = await import("../mcp-auth.ts");
+    const { getAuthEntryFilePath } = await import("../src/mcp-auth.ts");
     const tokensPath = getAuthEntryFilePath("demo");
     mkdirSync(dirname(tokensPath), { recursive: true });
     writeFileSync(tokensPath, JSON.stringify({ access_token: "abc", token_type: "bearer" }), "utf-8");
 
-    const { getStoredTokens } = await import("../oauth-handler.ts");
+    const { getStoredTokens } = await import("../src/oauth-handler.ts");
     expect(getStoredTokens("demo")).toEqual({
       access_token: "abc",
       token_type: "bearer",
@@ -55,7 +55,7 @@ describe("oauth-handler path resolution", () => {
     process.env.PI_CODING_AGENT_DIR = agentDir;
     process.env.MCP_OAUTH_DIR = oauthDir;
 
-    const { getAuthEntryFilePath } = await import("../mcp-auth.ts");
+    const { getAuthEntryFilePath } = await import("../src/mcp-auth.ts");
 
     delete process.env.MCP_OAUTH_DIR;
     const agentTokensPath = getAuthEntryFilePath("demo");
@@ -71,7 +71,7 @@ describe("oauth-handler path resolution", () => {
       "utf-8",
     );
 
-    const { getStoredTokens } = await import("../oauth-handler.ts");
+    const { getStoredTokens } = await import("../src/oauth-handler.ts");
     expect(getStoredTokens("demo")?.access_token).toBe("from-override");
   });
 });

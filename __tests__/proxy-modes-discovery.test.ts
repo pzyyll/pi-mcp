@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { executeCall, executeSearch } from "../proxy-modes.ts";
-import type { McpExtensionState } from "../state.ts";
+import { executeCall, executeSearch } from "../src/proxy-modes.ts";
+import type { McpExtensionState } from "../src/state.ts";
 
 function createState(): McpExtensionState {
   return {

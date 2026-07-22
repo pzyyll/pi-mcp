@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { createMcpPanel } from "../mcp-panel.ts";
-import { computeServerHash, type MetadataCache } from "../metadata-cache.ts";
-import type { McpConfig, McpPanelCallbacks, McpPanelResult } from "../types.ts";
+import { createMcpPanel } from "../src/mcp-panel.ts";
+import { computeServerHash, type MetadataCache } from "../src/metadata-cache.ts";
+import type { McpConfig, McpPanelCallbacks, McpPanelResult } from "../src/types.ts";
 
 function stripAnsi(input: string): string {
   return input.replace(/\x1b\[[0-9;]*m/g, "");

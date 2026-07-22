@@ -1,3 +1,5 @@
+// ABOUTME: Vitest config for adapter unit and integration tests.
+// ABOUTME: Covers __tests__ only; root package scripts cover node:test OAuth suites.
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -7,8 +9,8 @@ export default defineConfig({
     include: ["__tests__/**/*.test.ts"],
     coverage: {
       provider: "v8",
-      include: ["*.ts"],
-      exclude: ["__tests__/**", "vitest.config.ts", "cli.js"],
+      include: ["src/**/*.ts"],
+      exclude: ["src/**/*.test.ts", "__tests__/**", "vitest.config.ts", "cli.js"],
     },
   },
 });

@@ -60,7 +60,7 @@ describe("config discovery", () => {
       },
     });
 
-    const { loadMcpConfig } = await import("../config.ts");
+    const { loadMcpConfig } = await import("../src/config.ts");
     const config = loadMcpConfig();
 
     expect(config.mcpServers.shared).toMatchObject({ command: "project-pi" });
@@ -88,7 +88,7 @@ describe("config discovery", () => {
     writeJson(join(home, ".claude.json"), { mcpServers: { old: { command: "old" } } });
     writeJson(join(project, ".vscode", "mcp.json"), { mcpServers: { editor: { command: "code" } } });
 
-    const { findAvailableImportConfigs } = await import("../config.ts");
+    const { findAvailableImportConfigs } = await import("../src/config.ts");
     const imports = findAvailableImportConfigs();
 
     expect(imports).toEqual(
@@ -131,7 +131,7 @@ describe("config discovery", () => {
       },
     });
 
-    const { loadMcpConfig } = await import("../config.ts");
+    const { loadMcpConfig } = await import("../src/config.ts");
     const config = loadMcpConfig();
 
     expect(config.mcpServers.sharedServer).toEqual({
@@ -192,7 +192,7 @@ describe("config discovery", () => {
       },
     });
 
-    const { getServerProvenance, getPiGlobalConfigPath } = await import("../config.ts");
+    const { getServerProvenance, getPiGlobalConfigPath } = await import("../src/config.ts");
     const provenance = getServerProvenance();
     const piConfigPath = getPiGlobalConfigPath();
 
@@ -244,7 +244,7 @@ describe("config discovery", () => {
       },
     });
 
-    const { getMcpDiscoverySummary } = await import("../config.ts");
+    const { getMcpDiscoverySummary } = await import("../src/config.ts");
     const summary = getMcpDiscoverySummary();
 
     expect(summary.hasSharedServers).toBe(true);
@@ -284,7 +284,7 @@ describe("config discovery", () => {
       },
     });
 
-    const { getServerProvenance, loadMcpConfig, writeDirectToolsConfig, getPiGlobalConfigPath } = await import("../config.ts");
+    const { getServerProvenance, loadMcpConfig, writeDirectToolsConfig, getPiGlobalConfigPath } = await import("../src/config.ts");
     const fullConfig = loadMcpConfig();
     const provenance = getServerProvenance();
 
@@ -321,7 +321,7 @@ describe("config discovery", () => {
       previewCompatibilityImports,
       previewSharedServerEntry,
       getGenericGlobalConfigPath,
-    } = await import("../config.ts");
+    } = await import("../src/config.ts");
 
     const importsPreview = previewCompatibilityImports(["cursor", "codex"]);
     expect(importsPreview.path).toContain(".pi/agent/mcp.json");
@@ -345,7 +345,7 @@ describe("config discovery", () => {
     process.env.HOME = home;
     process.chdir(project);
 
-    const { ensureCompatibilityImports, getPiGlobalConfigPath, writeStarterProjectConfig } = await import("../config.ts");
+    const { ensureCompatibilityImports, getPiGlobalConfigPath, writeStarterProjectConfig } = await import("../src/config.ts");
     const importResult = ensureCompatibilityImports(["cursor", "codex"]);
     expect(importResult.added).toEqual(["cursor", "codex"]);
 

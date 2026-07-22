@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseUiPromptHandoff, type UiSessionMessages } from "../types.ts";
+import { parseUiPromptHandoff, type UiSessionMessages } from "../src/types.ts";
 
 describe("UiSessionMessages", () => {
   describe("type structure", () => {

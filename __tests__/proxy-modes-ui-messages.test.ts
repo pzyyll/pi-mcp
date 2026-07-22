@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { executeUiMessages } from "../proxy-modes.ts";
-import type { McpExtensionState } from "../state.ts";
+import { executeUiMessages } from "../src/proxy-modes.ts";
+import type { McpExtensionState } from "../src/state.ts";
 
 function createState(prompts: string[]): McpExtensionState {
   return {

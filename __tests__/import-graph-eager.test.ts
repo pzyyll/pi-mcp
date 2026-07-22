@@ -6,7 +6,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const indexSource = readFileSync(join(repoRoot, "index.ts"), "utf-8");
+const srcDir = join(repoRoot, "src");
+const indexSource = readFileSync(join(srcDir, "index.ts"), "utf-8");
 
 /** Static import/export-from specifiers at module top level (no dynamic import()). */
 function listStaticImportSpecifiers(source: string): string[] {
@@ -50,9 +51,9 @@ describe("factory eager import graph", () => {
   });
 
   it("keeps resolve helpers on a light path without heavy runtime packages", () => {
-    const resolveSource = readFileSync(join(repoRoot, "direct-tools-resolve.ts"), "utf-8");
-    const schemaSource = readFileSync(join(repoRoot, "schema-format.ts"), "utf-8");
-    const registerSource = readFileSync(join(repoRoot, "direct-tool-register.ts"), "utf-8");
+    const resolveSource = readFileSync(join(srcDir, "direct-tools-resolve.ts"), "utf-8");
+    const schemaSource = readFileSync(join(srcDir, "schema-format.ts"), "utf-8");
+    const registerSource = readFileSync(join(srcDir, "direct-tool-register.ts"), "utf-8");
 
     for (const [label, source] of [
       ["direct-tools-resolve.ts", resolveSource],

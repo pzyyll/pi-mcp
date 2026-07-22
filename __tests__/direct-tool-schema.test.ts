@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDirectToolInputSchema } from "../utils.ts";
+import { normalizeDirectToolInputSchema } from "../src/utils.ts";
 
 describe("normalizeDirectToolInputSchema", () => {
   it("removes top-level draft metadata and strict additional properties", () => {

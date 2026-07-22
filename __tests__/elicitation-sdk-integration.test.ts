@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fileURLToPath } from "node:url";
 import type { ExtensionMode, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
-import { createDirectToolExecutor } from "../direct-tools.ts";
-import { isTuiMode } from "../init.ts";
-import { executeCall } from "../proxy-modes.ts";
-import { McpServerManager } from "../server-manager.ts";
-import type { McpExtensionState } from "../state.ts";
-import type { DirectToolSpec, ToolMetadata } from "../types.ts";
-import { UiResourceHandler } from "../ui-resource-handler.ts";
+import { createDirectToolExecutor } from "../src/direct-tools.ts";
+import { isTuiMode } from "../src/init.ts";
+import { executeCall } from "../src/proxy-modes.ts";
+import { McpServerManager } from "../src/server-manager.ts";
+import type { McpExtensionState } from "../src/state.ts";
+import type { DirectToolSpec, ToolMetadata } from "../src/types.ts";
+import { UiResourceHandler } from "../src/ui-resource-handler.ts";
 
 const mocks = vi.hoisted(() => ({ open: vi.fn(async () => undefined) }));
 vi.mock("open", () => ({ default: mocks.open }));

@@ -13,11 +13,11 @@ const mocks = {
   createMcpSetupPanel: vi.fn(),
 };
 
-vi.mock("../mcp-panel.ts", () => ({
+vi.mock("../src/mcp-panel.ts", () => ({
   createMcpPanel: mocks.createMcpPanel,
 }));
 
-vi.mock("../mcp-setup-panel.ts", () => ({
+vi.mock("../src/mcp-setup-panel.ts", () => ({
   createMcpSetupPanel: mocks.createMcpSetupPanel,
 }));
 
@@ -59,7 +59,7 @@ describe("commands onboarding", () => {
   it("opens setup mode when no MCP servers are configured", async () => {
     process.env.HOME = mkdtempSync(join(tmpdir(), "pi-mcp-commands-home-"));
     const ui = createUi();
-    const { openMcpPanel } = await import("../commands.ts");
+    const { openMcpPanel } = await import("../src/commands.ts");
 
     await openMcpPanel({
       config: { mcpServers: {} },
@@ -85,9 +85,9 @@ describe("commands onboarding", () => {
     });
 
     const ui = createUi();
-    const { loadMcpConfig } = await import("../config.ts");
-    const { openMcpPanel } = await import("../commands.ts");
-    const { loadOnboardingState } = await import("../onboarding-state.ts");
+    const { loadMcpConfig } = await import("../src/config.ts");
+    const { openMcpPanel } = await import("../src/commands.ts");
+    const { loadOnboardingState } = await import("../src/onboarding-state.ts");
 
     await openMcpPanel({
       config: loadMcpConfig(),
@@ -106,9 +106,9 @@ describe("commands onboarding", () => {
     process.env.MCP_OAUTH_DIR = mkdtempSync(join(tmpdir(), "pi-mcp-commands-logout-"));
     const ui = createUi();
     const close = vi.fn();
-    const { getAuthEntry, updateOAuthState, updateTokens } = await import("../mcp-auth.ts");
-    const { waitForCallback } = await import("../mcp-callback-server.ts");
-    const { logoutServer } = await import("../commands.ts");
+    const { getAuthEntry, updateOAuthState, updateTokens } = await import("../src/mcp-auth.ts");
+    const { waitForCallback } = await import("../src/mcp-callback-server.ts");
+    const { logoutServer } = await import("../src/commands.ts");
 
     updateTokens("oauth-server", { accessToken: "token", refreshToken: "refresh" }, "https://example.com/mcp");
     updateOAuthState("oauth-server", "pending-state", "https://example.com/mcp");
@@ -132,8 +132,8 @@ describe("commands onboarding", () => {
   it("marks explicit OAuth servers as needs-auth when only stale URL tokens exist", async () => {
     process.env.MCP_OAUTH_DIR = mkdtempSync(join(tmpdir(), "pi-mcp-commands-oauth-"));
     const ui = createUi();
-    const { updateTokens } = await import("../mcp-auth.ts");
-    const { openMcpPanel } = await import("../commands.ts");
+    const { updateTokens } = await import("../src/mcp-auth.ts");
+    const { openMcpPanel } = await import("../src/commands.ts");
 
     updateTokens("legacy", { accessToken: "legacy-token" });
     updateTokens("stale", { accessToken: "stale-token" }, "https://old.example.com/mcp");

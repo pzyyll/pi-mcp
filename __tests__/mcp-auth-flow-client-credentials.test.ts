@@ -34,7 +34,7 @@ vi.mock("@modelcontextprotocol/sdk/client/streamableHttp.js", () => ({
   StreamableHTTPClientTransport: MockStreamableHTTPClientTransport,
 }));
 
-vi.mock("../mcp-callback-server.ts", () => ({
+vi.mock("../src/mcp-callback-server.ts", () => ({
   ensureCallbackServer: mocks.ensureCallbackServer,
   waitForCallback: mocks.waitForCallback,
   cancelPendingCallback: mocks.cancelPendingCallback,
@@ -77,7 +77,7 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("parses manual OAuth redirect URL and code input", async () => {
-    const { parseAuthorizationCodeInput } = await import("../mcp-auth-flow.ts");
+    const { parseAuthorizationCodeInput } = await import("../src/mcp-auth-flow.ts");
 
     expect(parseAuthorizationCodeInput(
       "http://localhost:19876/callback?code=abc123&state=state123",
@@ -92,7 +92,7 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("rejects invalid manual OAuth redirect input", async () => {
-    const { parseAuthorizationCodeInput } = await import("../mcp-auth-flow.ts");
+    const { parseAuthorizationCodeInput } = await import("../src/mcp-auth-flow.ts");
 
     expect(() => parseAuthorizationCodeInput(
       "http://localhost:19876/callback?error=access_denied&error_description=Denied&state=state123",
@@ -109,7 +109,7 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("does not start the callback server during OAuth initialization", async () => {
-    const { initializeOAuth } = await import("../mcp-auth-flow.ts");
+    const { initializeOAuth } = await import("../src/mcp-auth-flow.ts");
 
     await initializeOAuth();
 
@@ -117,7 +117,7 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("authenticates client_credentials non-interactively without callback server or browser", async () => {
-    const { authenticate } = await import("../mcp-auth-flow.ts");
+    const { authenticate } = await import("../src/mcp-auth-flow.ts");
 
     const status = await authenticate("svc", "https://api.example.com/mcp", {
       url: "https://api.example.com/mcp",
@@ -151,8 +151,8 @@ describe("mcp-auth-flow explicit auth", () => {
       });
       return "AUTHORIZED";
     });
-    const { authenticate } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo, updateCodeVerifier, updateOAuthState } = await import("../mcp-auth.ts");
+    const { authenticate } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo, updateCodeVerifier, updateOAuthState } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("stale-client-credentials", { clientId: "stale-client" }, "https://api.example.com/mcp");
     updateCodeVerifier("stale-client-credentials", "stale-verifier");
@@ -175,7 +175,7 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("deduplicates concurrent authentication attempts for the same server", async () => {
-    const { authenticate } = await import("../mcp-auth-flow.ts");
+    const { authenticate } = await import("../src/mcp-auth-flow.ts");
 
     const [first, second] = await Promise.all([
       authenticate("svc", "https://api.example.com/mcp", {
@@ -204,8 +204,8 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("runs SDK auth before reporting expired tokens as re-authenticated", async () => {
-    const { authenticate } = await import("../mcp-auth-flow.ts");
-    const { getOAuthState, updateClientInfo, updateTokens } = await import("../mcp-auth.ts");
+    const { authenticate } = await import("../src/mcp-auth-flow.ts");
+    const { getOAuthState, updateClientInfo, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("expired", { clientId: "client", redirectUris: ["http://localhost:19876/callback"] }, "https://api.example.com/mcp");
     updateTokens("expired", {
@@ -239,8 +239,8 @@ describe("mcp-auth-flow explicit auth", () => {
       });
       return "AUTHORIZED";
     });
-    const { getValidToken } = await import("../mcp-auth-flow.ts");
-    const { updateClientInfo, updateTokens } = await import("../mcp-auth.ts");
+    const { getValidToken } = await import("../src/mcp-auth-flow.ts");
+    const { updateClientInfo, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("refresh", { clientId: "client", redirectUris: ["http://localhost:19876/callback"] }, "https://api.example.com/mcp");
     updateTokens("refresh", {
@@ -265,8 +265,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, getOAuthState, updateClientInfo, updateCodeVerifier, updateOAuthState } = await import("../mcp-auth.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, getOAuthState, updateClientInfo, updateCodeVerifier, updateOAuthState } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("stale", { clientId: "stale-client" }, "https://api.example.com/mcp");
     updateCodeVerifier("stale", "old-verifier");
@@ -290,8 +290,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../mcp-auth.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("tokened", {
       clientId: "stored-client",
@@ -309,8 +309,8 @@ describe("mcp-auth-flow explicit auth", () => {
   });
 
   it("does not return tokens from the previous URL after dynamic client info is saved for a new URL", async () => {
-    const { getValidToken } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../mcp-auth.ts");
+    const { getValidToken } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("url-change", { clientId: "old-client" }, "https://old.example.com/mcp");
     updateTokens("url-change", { accessToken: "old-access", refreshToken: "old-refresh" }, "https://old.example.com/mcp");
@@ -331,8 +331,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo, updateCodeVerifier, updateOAuthState, updateTokens } = await import("../mcp-auth.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo, updateCodeVerifier, updateOAuthState, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("stale-redirect", {
       clientId: "stale-client",
@@ -376,8 +376,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../mcp-auth.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("missing-redirect-metadata", {
       clientId: "legacy-client",
@@ -407,8 +407,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, saveAuthEntry } = await import("../mcp-auth.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, saveAuthEntry } = await import("../src/mcp-auth.ts");
 
     saveAuthEntry("malformed-redirect-metadata", {
       clientInfo: {
@@ -442,8 +442,8 @@ describe("mcp-auth-flow explicit auth", () => {
       });
       return "AUTHORIZED";
     });
-    const { getValidToken } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../mcp-auth.ts");
+    const { getValidToken } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo, updateTokens } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("refresh-stale-redirect", {
       clientId: "refresh-client",
@@ -469,8 +469,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
-    const { getAuthForUrl, updateClientInfo } = await import("../mcp-auth.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getAuthForUrl, updateClientInfo } = await import("../src/mcp-auth.ts");
 
     updateClientInfo("registered", { clientId: "stored-dynamic-client" }, "https://api.example.com/mcp");
 
@@ -495,8 +495,8 @@ describe("mcp-auth-flow explicit auth", () => {
     });
     mocks.open.mockRejectedValueOnce(new Error("no browser"));
     mocks.waitForCallback.mockResolvedValueOnce("manual-code");
-    const { authenticate } = await import("../mcp-auth-flow.ts");
-    const { getOAuthState } = await import("../mcp-auth.ts");
+    const { authenticate } = await import("../src/mcp-auth-flow.ts");
+    const { getOAuthState } = await import("../src/mcp-auth.ts");
 
     await expect(authenticate("browser-fail", "https://api.example.com/mcp", {
       url: "https://api.example.com/mcp",
@@ -518,7 +518,7 @@ describe("mcp-auth-flow explicit auth", () => {
     mocks.waitForCallback.mockResolvedValueOnce("manual-code");
     const onAuthorizationUrl = vi.fn();
     const consoleLog = vi.spyOn(console, "log").mockImplementation(() => undefined);
-    const { authenticate } = await import("../mcp-auth-flow.ts");
+    const { authenticate } = await import("../src/mcp-auth-flow.ts");
 
     try {
       await expect(authenticate("ui-auth", "https://api.example.com/mcp", {
@@ -539,8 +539,8 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { completeAuth, startAuth } = await import("../mcp-auth-flow.ts");
-    const { getOAuthState } = await import("../mcp-auth.ts");
+    const { completeAuth, startAuth } = await import("../src/mcp-auth-flow.ts");
+    const { getOAuthState } = await import("../src/mcp-auth.ts");
 
     await startAuth("direct-complete", "https://api.example.com/mcp", {
       url: "https://api.example.com/mcp",
@@ -565,7 +565,7 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
 
     const result = await startAuth("explicit-redirect", "https://api.example.com/mcp", {
       url: "https://api.example.com/mcp",
@@ -594,7 +594,7 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
 
     const result = await startAuth("svc", "https://api.example.com/mcp", {
       url: "https://api.example.com/mcp",
@@ -618,7 +618,7 @@ describe("mcp-auth-flow explicit auth", () => {
       await provider.redirectToAuthorization(new URL("https://auth.example.com/authorize"));
       return "REDIRECT";
     });
-    const { startAuth } = await import("../mcp-auth-flow.ts");
+    const { startAuth } = await import("../src/mcp-auth-flow.ts");
 
     const result = await startAuth("svc", "https://api.example.com/mcp", {
       url: "https://api.example.com/mcp",

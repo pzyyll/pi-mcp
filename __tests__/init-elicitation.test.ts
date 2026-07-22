@@ -11,12 +11,12 @@ const mocks = vi.hoisted(() => ({
   managers: [] as any[],
 }));
 
-vi.mock("../config.ts", async importOriginal => ({
-  ...(await importOriginal<typeof import("../config.ts")>()),
+vi.mock("../src/config.ts", async importOriginal => ({
+  ...(await importOriginal<typeof import("../src/config.ts")>()),
   loadMcpConfig: mocks.loadMcpConfig,
 }));
 
-vi.mock("../server-manager.ts", () => ({
+vi.mock("../src/server-manager.ts", () => ({
   McpServerManager: vi.fn().mockImplementation(function (this: any) {
     this.setDefaultRequestTimeoutMs = vi.fn();
     this.setSamplingConfig = vi.fn();
@@ -51,8 +51,8 @@ describe("initializeMcp elicitation config", () => {
   });
 
   it("enables form and URL elicitation in TUI mode", async () => {
-    const { initializeMcp } = await import("../init.ts");
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { initializeMcp } = await import("../src/init.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
     const ctx = context();
 
     await initializeMcp(extensionApi(), ctx);
@@ -65,7 +65,7 @@ describe("initializeMcp elicitation config", () => {
   });
 
   it("keeps RPC elicitation form-only so the backend never opens a browser", async () => {
-    const { initializeMcp } = await import("../init.ts");
+    const { initializeMcp } = await import("../src/init.ts");
     const ctx = context({ mode: "rpc" });
 
     await initializeMcp(extensionApi(), ctx);
@@ -77,7 +77,7 @@ describe("initializeMcp elicitation config", () => {
   });
 
   it("does not enable elicitation without UI or when disabled", async () => {
-    const { initializeMcp } = await import("../init.ts");
+    const { initializeMcp } = await import("../src/init.ts");
 
     await initializeMcp(extensionApi(), context({ hasUI: false }));
     expect(mocks.managers[0].setElicitationConfig).not.toHaveBeenCalled();

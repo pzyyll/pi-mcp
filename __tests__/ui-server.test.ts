@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import http from "node:http";
-import { startUiServer, type UiServerOptions, type UiServerHandle } from "../ui-server.ts";
-import type { McpServerManager } from "../server-manager.ts";
-import type { ConsentManager } from "../consent-manager.ts";
-import type { UiResourceContent } from "../types.ts";
+import { startUiServer, type UiServerOptions, type UiServerHandle } from "../src/ui-server.ts";
+import type { McpServerManager } from "../src/server-manager.ts";
+import type { ConsentManager } from "../src/consent-manager.ts";
+import type { UiResourceContent } from "../src/types.ts";
 
 // Helper to make HTTP requests to the server
 async function request(

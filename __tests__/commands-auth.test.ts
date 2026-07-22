@@ -5,13 +5,13 @@ const mocks = vi.hoisted(() => ({
   removeAuth: vi.fn(),
 }));
 
-vi.mock("../mcp-auth-flow.ts", () => ({
+vi.mock("../src/mcp-auth-flow.ts", () => ({
   authenticate: mocks.authenticate,
   removeAuth: mocks.removeAuth,
   supportsOAuth: (definition: { url?: string; auth?: string }) => Boolean(definition.url) && definition.auth !== "bearer",
 }));
 
-vi.mock("../init.ts", () => ({
+vi.mock("../src/init.ts", () => ({
   getFailureAgeSeconds: vi.fn(() => null),
   lazyConnect: vi.fn(),
   updateMetadataCache: vi.fn(),
@@ -26,7 +26,7 @@ describe("authenticateServer", () => {
       return "authenticated";
     });
     const ui = { notify: vi.fn(), setStatus: vi.fn() };
-    const { authenticateServer } = await import("../commands.ts");
+    const { authenticateServer } = await import("../src/commands.ts");
 
     const result = await authenticateServer("sentry", {
       mcpServers: {

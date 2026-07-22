@@ -1,10 +1,10 @@
 import { KeybindingsManager, TUI_KEYBINDINGS } from "@earendil-works/pi-tui";
 import { describe, expect, it, vi } from "vitest";
-import { createMcpPanel } from "../mcp-panel.ts";
-import { createMcpSetupPanel, type SetupPanelCallbacks } from "../mcp-setup-panel.ts";
-import { createPanelKeys } from "../panel-keys.ts";
-import type { McpDiscoverySummary } from "../config.ts";
-import type { McpConfig, McpPanelCallbacks } from "../types.ts";
+import { createMcpPanel } from "../src/mcp-panel.ts";
+import { createMcpSetupPanel, type SetupPanelCallbacks } from "../src/mcp-setup-panel.ts";
+import { createPanelKeys } from "../src/panel-keys.ts";
+import type { McpDiscoverySummary } from "../src/config.ts";
+import type { McpConfig, McpPanelCallbacks } from "../src/types.ts";
 
 const CTRL_P = "\x10";
 const CTRL_N = "\x0e";

@@ -7,12 +7,12 @@ const mocks = vi.hoisted(() => ({
   supportsOAuth: vi.fn(),
 }));
 
-vi.mock("../init.ts", () => ({
+vi.mock("../src/init.ts", () => ({
   lazyConnect: mocks.lazyConnect,
   getFailureAgeSeconds: mocks.getFailureAgeSeconds,
 }));
 
-vi.mock("../mcp-auth-flow.ts", () => ({
+vi.mock("../src/mcp-auth-flow.ts", () => ({
   authenticate: mocks.authenticate,
   supportsOAuth: mocks.supportsOAuth,
 }));
@@ -27,7 +27,7 @@ describe("direct tools auto auth", () => {
   });
 
   it("auto-authenticates and retries direct tool execution once", async () => {
-    const { createDirectToolExecutor } = await import("../direct-tools.ts");
+    const { createDirectToolExecutor } = await import("../src/direct-tools.ts");
 
     let connection: any = { status: "needs-auth" };
     const connected = {
@@ -103,7 +103,7 @@ describe("direct tools auto auth", () => {
   });
 
   it("surfaces aborted direct tool calls via the forwarded AbortSignal", async () => {
-    const { createDirectToolExecutor } = await import("../direct-tools.ts");
+    const { createDirectToolExecutor } = await import("../src/direct-tools.ts");
     const controller = new AbortController();
 
     const requestOptions = { signal: controller.signal, timeout: 4321 };
@@ -151,7 +151,7 @@ describe("direct tools auto auth", () => {
   });
 
   it("fails fast in non-ui context for browser-based OAuth", async () => {
-    const { createDirectToolExecutor } = await import("../direct-tools.ts");
+    const { createDirectToolExecutor } = await import("../src/direct-tools.ts");
 
     const state = {
       config: {
@@ -194,7 +194,7 @@ describe("direct tools auto auth", () => {
 
   it("runs URL elicitations returned by a URL-required tool error", async () => {
     const { UrlElicitationRequiredError } = await import("@modelcontextprotocol/sdk/types.js");
-    const { createDirectToolExecutor } = await import("../direct-tools.ts");
+    const { createDirectToolExecutor } = await import("../src/direct-tools.ts");
     const error = new UrlElicitationRequiredError([{
       mode: "url",
       message: "Connect your account",
@@ -233,7 +233,7 @@ describe("direct tools auto auth", () => {
   });
 
   it("uses custom authRequiredMessage in non-ui direct tool auth failures", async () => {
-    const { createDirectToolExecutor } = await import("../direct-tools.ts");
+    const { createDirectToolExecutor } = await import("../src/direct-tools.ts");
 
     const state = {
       config: {

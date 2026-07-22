@@ -3,8 +3,8 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
-import { McpOAuthProvider } from "../mcp-oauth-provider.ts";
-import { saveAuthEntry, updateOAuthState } from "../mcp-auth.ts";
+import { McpOAuthProvider } from "../src/mcp-oauth-provider.ts";
+import { saveAuthEntry, updateOAuthState } from "../src/mcp-auth.ts";
 
 describe("McpOAuthProvider clientMetadata scope", () => {
   it("includes configured scope in authorization_code client metadata", () => {

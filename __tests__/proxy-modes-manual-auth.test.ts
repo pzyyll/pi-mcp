@@ -11,14 +11,14 @@ const mocks = vi.hoisted(() => ({
   updateStatusBar: vi.fn(),
 }));
 
-vi.mock("../mcp-auth-flow.ts", () => ({
+vi.mock("../src/mcp-auth-flow.ts", () => ({
   authenticate: vi.fn(),
   completeAuthFromInput: mocks.completeAuthFromInput,
   startAuth: mocks.startAuth,
   supportsOAuth: mocks.supportsOAuth,
 }));
 
-vi.mock("../init.ts", () => ({
+vi.mock("../src/init.ts", () => ({
   lazyConnect: mocks.lazyConnect,
   updateServerMetadata: mocks.updateServerMetadata,
   updateMetadataCache: mocks.updateMetadataCache,
@@ -54,7 +54,7 @@ describe("manual OAuth proxy actions", () => {
   });
 
   it("returns copyable instructions and authorization URL", async () => {
-    const { executeAuthStart } = await import("../proxy-modes.ts");
+    const { executeAuthStart } = await import("../src/proxy-modes.ts");
     const state = createState();
 
     const result = await executeAuthStart(state, "demo");
@@ -67,7 +67,7 @@ describe("manual OAuth proxy actions", () => {
   });
 
   it("rejects auth-start for non-OAuth servers", async () => {
-    const { executeAuthStart } = await import("../proxy-modes.ts");
+    const { executeAuthStart } = await import("../src/proxy-modes.ts");
 
     const result = await executeAuthStart(createState(), "bearer");
 
@@ -77,7 +77,7 @@ describe("manual OAuth proxy actions", () => {
   });
 
   it("completes auth from a copied redirect URL and resets connection state", async () => {
-    const { executeAuthComplete } = await import("../proxy-modes.ts");
+    const { executeAuthComplete } = await import("../src/proxy-modes.ts");
     const state = createState();
 
     const result = await executeAuthComplete(state, "demo", "http://localhost:19876/callback?code=abc&state=state");

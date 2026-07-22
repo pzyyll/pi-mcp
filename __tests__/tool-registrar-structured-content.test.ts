@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveMcpResultContent } from "../tool-registrar.ts";
+import { resolveMcpResultContent } from "../src/tool-registrar.ts";
 
 describe("resolveMcpResultContent", () => {
   it("returns transformed content blocks when content is present", () => {

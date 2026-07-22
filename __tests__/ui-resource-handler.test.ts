@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { UiResourceHandler } from "../ui-resource-handler.ts";
+import { UiResourceHandler } from "../src/ui-resource-handler.ts";
 import { UrlElicitationRequiredError } from "@modelcontextprotocol/sdk/types.js";
-import type { McpServerManager } from "../server-manager.ts";
+import type { McpServerManager } from "../src/server-manager.ts";
 
 // Mock the manager
 function createMockManager(overrides: Partial<McpServerManager> = {}): McpServerManager {

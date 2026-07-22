@@ -5,9 +5,9 @@ import {
   buildProxyDescription,
   getMissingConfiguredDirectToolServers,
   resolveDirectTools,
-} from "../direct-tools-resolve.ts";
-import { computeServerHash, type MetadataCache } from "../metadata-cache.ts";
-import type { McpConfig } from "../types.ts";
+} from "../src/direct-tools-resolve.ts";
+import { computeServerHash, type MetadataCache } from "../src/metadata-cache.ts";
+import type { McpConfig } from "../src/types.ts";
 
 describe("direct-tools-resolve", () => {
   it("exports resolve helpers used by the factory path", () => {

@@ -4,15 +4,13 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
   entry: [
-    "./*.ts",
-    "!./*.test.ts",
-    "!./vitest.config.ts",
-    "!./tsdown.config.ts",
+    "src/*.ts",
+    "!src/*.test.ts",
   ],
   outDir: "dist",
   format: "esm",
   platform: "node",
-  target: "node20",
+  target: "node26",
   // Prefer .js under "type": "module" so pi.extensions can load dist/index.js.
   fixedExtension: false,
   unbundle: true,
@@ -20,7 +18,7 @@ export default defineConfig({
   clean: true,
   sourcemap: false,
   hash: false,
-  copy: ["app-bridge.bundle.js"],
+  copy: ["src/app-bridge.bundle.js"],
   deps: {
     // Keep runtime deps external; Pi/host resolves them from the installed package.
     neverBundle: true,

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { isAbsolute, join, relative } from "node:path";
 import { tmpdir } from "node:os";
-import { getAuthEntry, getAuthEntryFilePath, saveAuthEntry } from "../mcp-auth.ts";
+import { getAuthEntry, getAuthEntryFilePath, saveAuthEntry } from "../src/mcp-auth.ts";
 
 describe("mcp-auth storage paths", () => {
   const originalOAuthDir = process.env.MCP_OAUTH_DIR;

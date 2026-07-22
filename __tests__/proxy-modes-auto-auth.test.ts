@@ -16,12 +16,12 @@ const mocks = vi.hoisted(() => ({
   callToolImpl: vi.fn(),
 }));
 
-vi.mock("../mcp-auth-flow.ts", () => ({
+vi.mock("../src/mcp-auth-flow.ts", () => ({
   authenticate: mocks.authenticate,
   supportsOAuth: mocks.supportsOAuth,
 }));
 
-vi.mock("../init.ts", () => ({
+vi.mock("../src/init.ts", () => ({
   lazyConnect: mocks.lazyConnect,
   updateServerMetadata: mocks.updateServerMetadata,
   updateMetadataCache: mocks.updateMetadataCache,
@@ -68,7 +68,7 @@ vi.mock("@modelcontextprotocol/sdk/client/sse.js", () => ({
   SSEClientTransport: vi.fn(),
 }));
 
-vi.mock("../npx-resolver.ts", () => ({
+vi.mock("../src/npx-resolver.ts", () => ({
   resolveNpxBinary: vi.fn(async () => null),
 }));
 
@@ -94,7 +94,7 @@ describe("proxy auto auth", () => {
   });
 
   it("auto-authenticates and retries executeConnect once", async () => {
-    const { executeConnect } = await import("../proxy-modes.ts");
+    const { executeConnect } = await import("../src/proxy-modes.ts");
 
     let current: any;
     const connected = {
@@ -146,7 +146,7 @@ describe("proxy auto auth", () => {
   });
 
   it("fails fast for non-ui browser auth when autoAuth is enabled", async () => {
-    const { executeConnect } = await import("../proxy-modes.ts");
+    const { executeConnect } = await import("../src/proxy-modes.ts");
 
     const manager = {
       connect: vi.fn(async () => ({ status: "needs-auth" })),
@@ -175,7 +175,7 @@ describe("proxy auto auth", () => {
   });
 
   it("uses custom authRequiredMessage for non-ui autoAuth failures", async () => {
-    const { executeConnect } = await import("../proxy-modes.ts");
+    const { executeConnect } = await import("../src/proxy-modes.ts");
 
     const state = {
       config: {
@@ -205,7 +205,7 @@ describe("proxy auto auth", () => {
 
   it("runs URL elicitations returned by proxy tool calls", async () => {
     const { UrlElicitationRequiredError } = await import("@modelcontextprotocol/sdk/types.js");
-    const { executeCall } = await import("../proxy-modes.ts");
+    const { executeCall } = await import("../src/proxy-modes.ts");
     const error = new UrlElicitationRequiredError([{
       mode: "url",
       message: "Connect your account",
@@ -243,7 +243,7 @@ describe("proxy auto auth", () => {
   });
 
   it("auto-authenticates and retries executeCall once", async () => {
-    const { executeCall } = await import("../proxy-modes.ts");
+    const { executeCall } = await import("../src/proxy-modes.ts");
 
     let current: any = { status: "needs-auth" };
     const connected = {
@@ -322,7 +322,7 @@ describe("proxy auto auth", () => {
   });
 
   it("surfaces aborted proxy tool calls via the forwarded AbortSignal", async () => {
-    const { executeCall } = await import("../proxy-modes.ts");
+    const { executeCall } = await import("../src/proxy-modes.ts");
     const controller = new AbortController();
 
     const requestOptions = { signal: controller.signal, timeout: 1234 };
@@ -369,8 +369,8 @@ describe("proxy auto auth", () => {
   });
 
   it("shares one cold connect across concurrent proxy calls and applies timeout during bootstrap", async () => {
-    const { executeCall } = await import("../proxy-modes.ts");
-    const { McpServerManager } = await import("../server-manager.ts");
+    const { executeCall } = await import("../src/proxy-modes.ts");
+    const { McpServerManager } = await import("../src/server-manager.ts");
 
     const pause = () => new Promise((resolve) => setTimeout(resolve, 10));
     mocks.connectImpl.mockImplementation(async () => {

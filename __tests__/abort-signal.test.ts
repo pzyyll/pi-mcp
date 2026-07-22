@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { abortable } from "../abort.ts";
-import { createDirectToolExecutor } from "../direct-tools.ts";
-import { executeCall, executeConnect } from "../proxy-modes.ts";
-import { lazyConnect } from "../init.ts";
-import { McpServerManager } from "../server-manager.ts";
+import { abortable } from "../src/abort.ts";
+import { createDirectToolExecutor } from "../src/direct-tools.ts";
+import { executeCall, executeConnect } from "../src/proxy-modes.ts";
+import { lazyConnect } from "../src/init.ts";
+import { McpServerManager } from "../src/server-manager.ts";
 
 function connectedState(client: Record<string, unknown>) {
   return {

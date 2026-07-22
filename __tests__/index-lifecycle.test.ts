@@ -49,44 +49,44 @@ const mocks = vi.hoisted(() => ({
   truncateAtWord: vi.fn((text: string) => text),
 }));
 
-vi.mock("../init.ts", () => ({
+vi.mock("../src/init.ts", () => ({
   initializeMcp: mocks.initializeMcp,
   updateStatusBar: mocks.updateStatusBar,
   flushMetadataCache: mocks.flushMetadataCache,
 }));
 
-vi.mock("../mcp-auth-flow.ts", () => ({
+vi.mock("../src/mcp-auth-flow.ts", () => ({
   initializeOAuth: mocks.initializeOAuth,
   shutdownOAuth: mocks.shutdownOAuth,
 }));
 
-vi.mock("../config.ts", () => ({
+vi.mock("../src/config.ts", () => ({
   loadMcpConfig: mocks.loadMcpConfig,
 }));
 
-vi.mock("../metadata-cache.ts", () => ({
+vi.mock("../src/metadata-cache.ts", () => ({
   loadMetadataCache: mocks.loadMetadataCache,
 }));
 
-vi.mock("../direct-tools-resolve.ts", () => ({
+vi.mock("../src/direct-tools-resolve.ts", () => ({
   buildProxyDescription: mocks.buildProxyDescription,
   getMissingConfiguredDirectToolServers: mocks.getMissingConfiguredDirectToolServers,
   resolveDirectTools: mocks.resolveDirectTools,
 }));
 
-vi.mock("../direct-tool-register.ts", () => ({
+vi.mock("../src/direct-tool-register.ts", () => ({
   buildDirectToolParameters: mocks.buildDirectToolParameters,
   buildProxyToolParameters: mocks.buildProxyToolParameters,
 }));
 
-vi.mock("../direct-tools.ts", () => ({
+vi.mock("../src/direct-tools.ts", () => ({
   buildProxyDescription: mocks.buildProxyDescription,
   createDirectToolExecutor: mocks.createDirectToolExecutor,
   getMissingConfiguredDirectToolServers: mocks.getMissingConfiguredDirectToolServers,
   resolveDirectTools: mocks.resolveDirectTools,
 }));
 
-vi.mock("../commands.ts", () => ({
+vi.mock("../src/commands.ts", () => ({
   showStatus: mocks.showStatus,
   showTools: mocks.showTools,
   reconnectServers: mocks.reconnectServers,
@@ -97,7 +97,7 @@ vi.mock("../commands.ts", () => ({
   openMcpSetup: mocks.openMcpSetup,
 }));
 
-vi.mock("../proxy-modes.ts", () => ({
+vi.mock("../src/proxy-modes.ts", () => ({
   executeAuthComplete: mocks.executeAuthComplete,
   executeAuthStart: mocks.executeAuthStart,
   executeCall: mocks.executeCall,
@@ -109,7 +109,7 @@ vi.mock("../proxy-modes.ts", () => ({
   executeUiMessages: mocks.executeUiMessages,
 }));
 
-vi.mock("../utils.ts", () => ({
+vi.mock("../src/utils.ts", () => ({
   getConfigPathFromArgv: mocks.getConfigPathFromArgv,
   normalizeDirectToolInputSchema: mocks.normalizeDirectToolInputSchema,
   truncateAtWord: mocks.truncateAtWord,
@@ -210,7 +210,7 @@ describe("mcpAdapter session lifecycle", () => {
     ]);
     mocks.getMissingConfiguredDirectToolServers.mockReturnValue(["demo"]);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api } = createPi();
     mcpAdapter(api);
 
@@ -248,7 +248,7 @@ describe("mcpAdapter session lifecycle", () => {
       },
     ]);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api } = createPi();
     mcpAdapter(api);
 
@@ -285,7 +285,7 @@ describe("mcpAdapter session lifecycle", () => {
       },
     ]);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api } = createPi();
     mcpAdapter(api);
 
@@ -302,7 +302,7 @@ describe("mcpAdapter session lifecycle", () => {
     mocks.executeAuthStart.mockResolvedValue({ content: [{ type: "text", text: "auth url" }] });
     mocks.executeAuthComplete.mockResolvedValue({ content: [{ type: "text", text: "ok" }] });
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -334,7 +334,7 @@ describe("mcpAdapter session lifecycle", () => {
     mocks.initializeMcp.mockResolvedValue(state);
     mocks.executeCall.mockResolvedValue({ content: [{ type: "text", text: "ok" }] });
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -370,7 +370,7 @@ describe("mcpAdapter session lifecycle", () => {
       .mockReturnValueOnce(first.promise)
       .mockReturnValueOnce(second.promise);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -406,7 +406,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -428,7 +428,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -449,7 +449,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -469,7 +469,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -491,7 +491,7 @@ describe("mcpAdapter session lifecycle", () => {
     mocks.initializeMcp.mockResolvedValue(initialState);
     mocks.openMcpSetup.mockResolvedValue({ configChanged: true });
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -514,7 +514,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -535,7 +535,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 
@@ -556,7 +556,7 @@ describe("mcpAdapter session lifecycle", () => {
     const state = createState();
     mocks.initializeMcp.mockResolvedValue(state);
 
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api } = createPi();
     mcpAdapter(api);
 
@@ -577,7 +577,7 @@ describe("mcpAdapter session lifecycle", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
     try {
-      const { default: mcpAdapter } = await import("../index.ts");
+      const { default: mcpAdapter } = await import("../src/index.ts");
       const { api, handlers } = createPi();
       mcpAdapter(api);
 
@@ -596,7 +596,7 @@ describe("mcpAdapter session lifecycle", () => {
   });
 
   it("registers a tool_result handler that re-flags returned MCP tool failures (and leaves other results alone)", async () => {
-    const { default: mcpAdapter } = await import("../index.ts");
+    const { default: mcpAdapter } = await import("../src/index.ts");
     const { api, handlers } = createPi();
     mcpAdapter(api);
 

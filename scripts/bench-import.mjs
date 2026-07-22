@@ -1,5 +1,5 @@
 // ABOUTME: Cold-process import timer for the extension factory entrypoint.
-// ABOUTME: Prefers prebuilt dist/index.js (native import); falls back to jiti on index.ts.
+// ABOUTME: Prefers prebuilt dist/index.js (native import); falls back to jiti on src/index.ts.
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
@@ -9,7 +9,7 @@ import { performance } from "node:perf_hooks";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const DIST_ENTRY = "./dist/index.js";
-const SOURCE_ENTRY = "./index.ts";
+const SOURCE_ENTRY = "./src/index.ts";
 
 function resolveJitiEntry() {
   const candidates = [
