@@ -6,12 +6,21 @@ const mocks = vi.hoisted(() => ({
   flushMetadataCache: vi.fn(),
   initializeOAuth: vi.fn().mockResolvedValue(undefined),
   shutdownOAuth: vi.fn().mockResolvedValue(undefined),
-  loadMcpConfig: vi.fn(() => ({ mcpServers: {} })),
+  loadMcpConfig: vi.fn((): {
+    mcpServers: Record<string, Record<string, unknown>>;
+    settings?: Record<string, unknown>;
+  } => ({ mcpServers: {} })),
   loadMetadataCache: vi.fn(() => null),
   buildProxyDescription: vi.fn(() => "MCP gateway"),
   createDirectToolExecutor: vi.fn(() => vi.fn()),
-  getMissingConfiguredDirectToolServers: vi.fn(() => []),
-  resolveDirectTools: vi.fn(() => []),
+  getMissingConfiguredDirectToolServers: vi.fn((): string[] => []),
+  resolveDirectTools: vi.fn((): Array<{
+    serverName: string;
+    originalName: string;
+    prefixedName: string;
+    description: string;
+    inputSchema?: unknown;
+  }> => []),
   buildDirectToolParameters: vi.fn((schema: unknown) => schema && typeof schema === "object" && !Array.isArray(schema)
     ? Object.fromEntries(Object.entries(schema as Record<string, unknown>).filter(([key]) => key !== "$schema" && key !== "additionalProperties"))
     : { type: "object", properties: {} }),

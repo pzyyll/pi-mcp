@@ -381,7 +381,8 @@ export async function executeSearch(
       }
 
       pattern = new RegExp(query, "i");
-      let safety;
+      // recheck Diagnostics is loaded with the package; keep a minimal local shape here.
+      let safety: { status: string };
       try {
         const { checkSync } = await import("recheck");
         safety = checkSync(query, "i", REGEX_SAFETY_CHECK_PARAMS);

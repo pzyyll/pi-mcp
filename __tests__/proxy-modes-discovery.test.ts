@@ -33,7 +33,7 @@ describe("proxy discovery", () => {
   it("searches MCP tools only", async () => {
     const result = await executeSearch(createState(), "read");
 
-    expect(result.content[0].text).toBe('No tools matching "read"');
+    expect(result.content[0]).toMatchObject({ type: "text", text: 'No tools matching "read"' });
     expect(result.details).toMatchObject({ count: 0, matches: [] });
   });
 
@@ -76,9 +76,10 @@ describe("proxy discovery", () => {
       () => [{ name: "read", description: "Read a file" } as any],
     );
 
-    expect(result.content[0].text).toBe(
-      '"read" is a native Pi tool. Call read directly instead of using mcp({ tool: "read" }).',
-    );
+    expect(result.content[0]).toMatchObject({
+      type: "text",
+      text: '"read" is a native Pi tool. Call read directly instead of using mcp({ tool: "read" }).',
+    });
     expect(result.details).toMatchObject({ error: "native_tool", requestedTool: "read" });
   });
 });

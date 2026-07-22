@@ -1,6 +1,11 @@
 // ABOUTME: Pi extension factory for the MCP adapter (thin cold-start entry).
 // ABOUTME: Heavy runtime modules load on first use via dynamic import trampolines.
-import type { ExtensionAPI, ToolInfo } from "@earendil-works/pi-coding-agent";
+import type {
+  AgentToolUpdateCallback,
+  ExtensionAPI,
+  ExtensionContext,
+  ToolInfo,
+} from "@earendil-works/pi-coding-agent";
 import type { McpExtensionState } from "./state.ts";
 import type { DirectToolSpec } from "./types.ts";
 import { loadMcpConfig } from "./config.ts";
@@ -19,8 +24,8 @@ type DirectToolExecutor = (
   toolCallId: string,
   params: Record<string, unknown>,
   signal: AbortSignal | undefined,
-  onUpdate: unknown,
-  ctx: unknown,
+  onUpdate: AgentToolUpdateCallback<Record<string, unknown>> | undefined,
+  ctx: ExtensionContext,
 ) => Promise<unknown>;
 
 function createDirectToolTrampoline(
@@ -304,17 +309,23 @@ export default function mcpAdapter(pi: ExtensionAPI) {
       renderCall: renderMcpProxyToolCall,
       parameters: buildProxyToolParameters(),
       renderResult: renderMcpToolResult,
-      async execute(_toolCallId, params: {
-        tool?: string;
-        args?: string;
-        connect?: string;
-        describe?: string;
-        search?: string;
-        regex?: boolean;
-        includeSchemas?: boolean;
-        server?: string;
-        action?: string;
-      }, signal, _onUpdate, _ctx) {
+      async execute(
+        _toolCallId: string,
+        params: {
+          tool?: string;
+          args?: string;
+          connect?: string;
+          describe?: string;
+          search?: string;
+          regex?: boolean;
+          includeSchemas?: boolean;
+          server?: string;
+          action?: string;
+        },
+        signal: AbortSignal | undefined,
+        _onUpdate: AgentToolUpdateCallback<Record<string, unknown>> | undefined,
+        _ctx: ExtensionContext,
+      ) {
         let parsedArgs: Record<string, unknown> | undefined;
         if (params.args) {
           try {
