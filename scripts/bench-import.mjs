@@ -25,7 +25,7 @@ function resolveJitiEntry() {
     // fall through
   }
   throw new Error(
-    "Unable to resolve jiti. Install dependencies (npm install) so jiti is available via pi-coding-agent or as a direct dependency.",
+    "Unable to resolve jiti. Install dependencies (pnpm install) so jiti is available via pi-coding-agent or as a direct dependency.",
   );
 }
 

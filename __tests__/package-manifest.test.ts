@@ -36,7 +36,7 @@ describe("package.json publish surface", () => {
   it("builds every src runtime TypeScript module into dist when dist exists", () => {
     const distDir = join(repoRoot, "dist");
     if (!existsSync(distDir)) {
-      // Local checkouts may not have run `npm run build` yet.
+      // Local checkouts may not have run `pnpm run build` yet.
       return;
     }
 

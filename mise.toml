@@ -3,31 +3,32 @@
 
 [tools]
 node = "26"
+pnpm = "11.16.0"
 
 [tasks.install]
-description = "Install npm dependencies"
-run = "npm install"
+description = "Install pnpm dependencies"
+run = "pnpm install"
 
 [tasks.build]
 description = "Prebuild extension sources to dist/ with tsdown"
-run = "npm run build"
+run = "pnpm run build"
 
 [tasks.test]
 description = "Run the Vitest suite"
-run = "npm test"
+run = "pnpm test"
 
 [tasks."test:watch"]
 description = "Run Vitest in watch mode"
-run = "npm run test:watch"
+run = "pnpm run test:watch"
 
 [tasks."test:coverage"]
 description = "Run tests with coverage"
-run = "npm run test:coverage"
+run = "pnpm run test:coverage"
 
 [tasks."test:oauth-provider"]
 description = "Run OAuth provider node:test suite"
-run = "npm run test:oauth-provider"
+run = "pnpm run test:oauth-provider"
 
 [tasks."bench:import"]
 description = "Benchmark cold-start import cost"
-run = "npm run bench:import"
+run = "pnpm run bench:import"

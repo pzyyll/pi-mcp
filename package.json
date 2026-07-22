@@ -5,15 +5,17 @@
   "type": "module",
   "license": "MIT",
   "author": "Nico Bailon",
+  "packageManager": "pnpm@11.16.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "bin": {
     "pi-mcp-adapter": "cli.js"
   },
   "scripts": {
     "build": "tsdown",
-    "prepublishOnly": "npm run build",
+    "postinstall": "npm run build",
+    "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

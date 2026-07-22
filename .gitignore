@@ -3,6 +3,9 @@ node_modules/
 *.log
 .DS_Store
 
+# npm lockfile — this repo uses pnpm
+package-lock.json
+
 # mise local overrides (personal env/tools)
 mise.local.toml
 
