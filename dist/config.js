@@ -168,7 +168,7 @@ function mergeConfigs(base, next) {
 function mergeServerMaps(base, next) {
 	const merged = { ...base };
 	for (const [name, definition] of Object.entries(next)) merged[name] = {
-		...merged[name] ?? {},
+		...merged[name],
 		...definition
 	};
 	return merged;

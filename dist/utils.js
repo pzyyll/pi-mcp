@@ -75,7 +75,7 @@ function truncateAtWord(text, target) {
 	return truncated + "...";
 }
 function normalizeDirectToolInputSchema(schema) {
-	const { $schema, additionalProperties, ...normalized } = schema && typeof schema === "object" && !Array.isArray(schema) ? schema : {
+	const { $schema: _$schema, additionalProperties: _additionalProperties, ...normalized } = schema && typeof schema === "object" && !Array.isArray(schema) ? schema : {
 		type: "object",
 		properties: {}
 	};

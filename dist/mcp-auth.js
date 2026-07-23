@@ -5,10 +5,10 @@ import { join } from "path";
 //#region src/mcp-auth.ts
 /**
 * MCP Auth Storage Module
-* 
+*
 * Handles secure storage of OAuth credentials, tokens, client information,
 * and PKCE state for MCP servers.
-* 
+*
 * Token storage location: $MCP_OAUTH_DIR/sha256-<server-hash>/tokens.json when set,
 * otherwise <Pi agent dir>/mcp-oauth/sha256-<server-hash>/tokens.json
 */

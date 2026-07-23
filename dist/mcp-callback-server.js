@@ -3,7 +3,7 @@ import { createServer } from "http";
 //#region src/mcp-callback-server.ts
 /**
 * MCP OAuth Callback Server
-* 
+*
 * HTTP server that handles OAuth callbacks from the authorization server.
 * Uses Node.js http module for compatibility.
 */

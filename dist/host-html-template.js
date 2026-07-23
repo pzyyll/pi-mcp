@@ -1,12 +1,9 @@
 //#region src/host-html-template.ts
 const DEFAULT_APP_BRIDGE_MODULE_URL = "/app-bridge.bundle.js";
 function buildHostHtmlTemplate(input) {
-	const cspContent = buildCspMetaContent(input.resource.meta.csp);
-	const resourceHtml = applyCspMeta(input.resource.html, cspContent);
 	const hostContext = input.hostContext ?? {};
 	const sessionToken = safeInlineJSON(input.sessionToken);
 	const toolArgs = safeInlineJSON(input.toolArgs);
-	safeInlineJSON(resourceHtml);
 	const serverName = safeInlineJSON(input.serverName);
 	const toolName = safeInlineJSON(input.toolName);
 	const hostContextJson = safeInlineJSON(hostContext);

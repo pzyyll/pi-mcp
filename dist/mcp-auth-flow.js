@@ -7,7 +7,7 @@ import open from "open";
 //#region src/mcp-auth-flow.ts
 /**
 * MCP Auth Flow
-* 
+*
 * High-level OAuth flow management using the MCP SDK's built-in auth functions.
 */
 const pendingTransports = /* @__PURE__ */ new Map();
@@ -230,9 +230,9 @@ async function completeAuth(serverName, authorizationCode) {
 }
 /**
 * Perform the complete OAuth authentication flow for a server.
-* 
+*
 * @param serverName - The name of the MCP server
-* @param serverUrl - The URL of the MCP server  
+* @param serverUrl - The URL of the MCP server
 * @param definition - The server definition (optional)
 * @returns The final auth status
 */
@@ -275,7 +275,7 @@ async function authenticate(serverName, serverUrl, definition, options = {}) {
 }
 /**
 * Get a valid access token for a server, refreshing if necessary.
-* 
+*
 * @param serverName - The name of the MCP server
 * @param serverUrl - The URL of the MCP server
 * @returns The valid tokens or null if not authenticated
@@ -304,7 +304,7 @@ async function getValidToken(serverName, serverUrl) {
 }
 /**
 * Check the authentication status for a server.
-* 
+*
 * @param serverName - The name of the MCP server
 * @returns The current auth status
 */
@@ -314,7 +314,7 @@ async function getAuthStatus(serverName) {
 }
 /**
 * Remove all OAuth credentials for a server.
-* 
+*
 * @param serverName - The name of the MCP server
 */
 async function removeAuth(serverName) {
@@ -328,7 +328,7 @@ async function removeAuth(serverName) {
 /**
 * Check if OAuth is supported for a server configuration.
 * OAuth is supported for HTTP servers unless explicitly disabled.
-* 
+*
 * @param definition - The server definition
 * @returns True if OAuth is supported
 */
