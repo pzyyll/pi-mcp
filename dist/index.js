@@ -4,6 +4,7 @@ import { loadMetadataCache } from "./metadata-cache.js";
 import { buildProxyDescription, getMissingConfiguredDirectToolServers, resolveDirectTools } from "./direct-tools-resolve.js";
 import { buildDirectToolParameters, buildProxyToolParameters } from "./direct-tool-register.js";
 import { toolErrorOverride } from "./error-signal.js";
+import "./seed-host-pi-tui.js";
 import { createMcpDirectToolCallRenderer, renderMcpProxyToolCall, renderMcpToolResult } from "./tool-result-renderer.js";
 //#region src/index.ts
 function createDirectToolTrampoline(getState, getInitPromise, spec) {

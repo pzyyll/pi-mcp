@@ -7,7 +7,8 @@ const mocks = vi.hoisted(() => ({
   complete: vi.fn(),
 }));
 
-vi.mock("@earendil-works/pi-ai", () => ({
+// complete() is resolved via the compat entry (same surface pi jiti aliases to).
+vi.mock("@earendil-works/pi-ai/compat", () => ({
   complete: mocks.complete,
 }));
 

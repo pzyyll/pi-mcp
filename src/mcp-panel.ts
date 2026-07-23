@@ -1,9 +1,25 @@
-import { matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import { getHostPiTui } from "./host-peers.ts";
 import { createPanelKeys, type PanelKeybindings, type PanelKeys } from "./panel-keys.ts";
 import { isToolExcluded } from "./types.ts";
 import type { McpConfig, McpPanelCallbacks, McpPanelResult, ServerProvenance } from "./types.ts";
 import { resourceNameToToolName } from "./resource-tools.ts";
 import type { MetadataCache, ServerCacheEntry, CachedTool } from "./metadata-cache.ts";
+
+/** Local aliases so call sites stay stable; peers come from the process bridge. */
+function matchesKey(data: string, key: string): boolean {
+  return getHostPiTui().matchesKey(data, key);
+}
+function truncateToWidth(
+  text: string,
+  width: number,
+  ellipsis?: string,
+  pad?: boolean,
+): string {
+  return getHostPiTui().truncateToWidth(text, width, ellipsis, pad);
+}
+function visibleWidth(text: string): number {
+  return getHostPiTui().visibleWidth(text);
+}
 
 interface PanelTheme {
   border: string;

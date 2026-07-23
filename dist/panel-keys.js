@@ -1,4 +1,4 @@
-import { matchesKey } from "@earendil-works/pi-tui";
+import { getHostPiTui } from "./host-peers.js";
 //#region src/panel-keys.ts
 function createPanelKeys(keybindings) {
 	if (keybindings) return {
@@ -6,6 +6,7 @@ function createPanelKeys(keybindings) {
 		selectDown: (data) => keybindings.matches(data, "tui.select.down"),
 		selectConfirm: (data) => keybindings.matches(data, "tui.select.confirm")
 	};
+	const { matchesKey } = getHostPiTui();
 	return {
 		selectUp: (data) => matchesKey(data, "up"),
 		selectDown: (data) => matchesKey(data, "down"),

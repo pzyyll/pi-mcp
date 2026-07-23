@@ -1,8 +1,18 @@
+import { getHostPiTui } from "./host-peers.js";
 import { isToolExcluded } from "./types.js";
 import { resourceNameToToolName } from "./resource-tools.js";
 import { createPanelKeys } from "./panel-keys.js";
-import { matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 //#region src/mcp-panel.ts
+/** Local aliases so call sites stay stable; peers come from the process bridge. */
+function matchesKey(data, key) {
+	return getHostPiTui().matchesKey(data, key);
+}
+function truncateToWidth(text, width, ellipsis, pad) {
+	return getHostPiTui().truncateToWidth(text, width, ellipsis, pad);
+}
+function visibleWidth(text) {
+	return getHostPiTui().visibleWidth(text);
+}
 const DEFAULT_THEME = {
 	border: "2",
 	title: "2",

@@ -1,5 +1,9 @@
-import { Text } from "@earendil-works/pi-tui";
+import { getHostPiTui } from "./host-peers.js";
 //#region src/tool-result-renderer.ts
+function Text(text, x, y) {
+	const { Text: HostText } = getHostPiTui();
+	return new HostText(text, x, y);
+}
 const DEFAULT_MAX_CALL_INPUT_CHARS = 1500;
 function truncateText(value, maxChars) {
 	if (value.length <= maxChars) return value;
@@ -46,7 +50,7 @@ function formatMcpDirectToolCallLines(displayName, args, maxInputChars = DEFAULT
 }
 function renderToolCallLines(lines, theme) {
 	const [title = "mcp", ...rest] = lines;
-	return new Text([theme.fg("toolTitle", theme.bold ? theme.bold(title) : title), ...rest.map((line) => theme.fg("muted", line))].join("\n"), 0, 0);
+	return Text([theme.fg("toolTitle", theme.bold ? theme.bold(title) : title), ...rest.map((line) => theme.fg("muted", line))].join("\n"), 0, 0);
 }
 function renderMcpProxyToolCall(args, theme) {
 	return renderToolCallLines(formatMcpProxyToolCallLines(args), theme);
@@ -73,10 +77,10 @@ function formatMcpToolResultLines(result, expanded, maxCollapsedLines = 3) {
 	};
 }
 function renderMcpToolResult(result, options, theme, context) {
-	if (options.isPartial) return new Text(theme.fg("warning", "Running MCP tool..."), 0, 0);
+	if (options.isPartial) return Text(theme.fg("warning", "Running MCP tool..."), 0, 0);
 	const hasErrorDetails = Boolean(result.details.error);
 	const display = formatMcpToolResultLines(result, options.expanded || context?.isError === true || hasErrorDetails);
-	return new Text(`${display.lines.map((line) => line === "…" ? theme.fg("muted", line) : theme.fg("toolOutput", line)).join("\n")}${display.truncated && !options.expanded ? `\n${theme.fg("muted", "(Ctrl+O to expand)")}` : ""}`, 0, 0);
+	return Text(`${display.lines.map((line) => line === "…" ? theme.fg("muted", line) : theme.fg("toolOutput", line)).join("\n")}${display.truncated && !options.expanded ? `\n${theme.fg("muted", "(Ctrl+O to expand)")}` : ""}`, 0, 0);
 }
 //#endregion
 export { createMcpDirectToolCallRenderer, formatMcpDirectToolCallLines, formatMcpProxyToolCallLines, formatMcpToolResultLines, renderMcpProxyToolCall, renderMcpToolResult };

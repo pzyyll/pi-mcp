@@ -1,3 +1,4 @@
+import { ensureHostPiTui } from "./host-peers.js";
 import { ensureCompatibilityImports, getMcpDiscoverySummary, getServerProvenance, previewCompatibilityImports, previewSharedServerEntry, previewStarterProjectConfig, writeDirectToolsConfig, writeSharedServerEntry, writeStarterProjectConfig } from "./config.js";
 import { openPath } from "./utils.js";
 import { loadMetadataCache } from "./metadata-cache.js";
@@ -177,6 +178,7 @@ async function openMcpSetup(_state, pi, ctx, configOverridePath, mode = "setup")
 	if (!ctx.hasUI) return { configChanged: false };
 	const discovery = getMcpDiscoverySummary(configOverridePath, ctx.cwd);
 	const onboardingState = loadOnboardingState();
+	await ensureHostPiTui();
 	const { createMcpSetupPanel } = await import("./mcp-setup-panel.js");
 	let configChanged = false;
 	const callbacks = {
@@ -263,6 +265,7 @@ async function openMcpPanel(state, pi, ctx, configOverridePath) {
 	const provenanceMap = getServerProvenance(configPath, ctx.cwd);
 	const { lines: noticeLines, fingerprint } = buildSharedConfigNoticeLines(configPath, ctx.cwd);
 	const callbacks = buildMcpPanelCallbacks(state, config, ctx);
+	await ensureHostPiTui();
 	const { createMcpPanel } = await import("./mcp-panel.js");
 	let configChanged = false;
 	await new Promise((resolve) => {
@@ -300,6 +303,7 @@ async function openMcpAuthPanel(state, pi, ctx, configOverridePath) {
 	const cache = loadMetadataCache();
 	const provenanceMap = getServerProvenance(pi.getFlag("mcp-config") ?? configOverridePath, ctx.cwd);
 	const callbacks = buildMcpPanelCallbacks(state, config, ctx);
+	await ensureHostPiTui();
 	const { createMcpPanel } = await import("./mcp-panel.js");
 	await new Promise((resolve) => {
 		ctx.ui.custom((tui, _theme, keybindings, done) => {

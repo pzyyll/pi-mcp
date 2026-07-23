@@ -1,6 +1,6 @@
+import { ensureHostPiAi } from "./host-peers.js";
 import { truncateAtWord } from "./utils.js";
 import { CreateMessageRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { complete } from "@earendil-works/pi-ai";
 //#region src/sampling-handler.ts
 function registerSamplingHandler(client, options) {
 	client.setRequestHandler(CreateMessageRequestSchema, (request) => {
@@ -17,6 +17,7 @@ async function handleSamplingRequest(options, request) {
 	const messages = params.messages.map(convertSamplingMessage);
 	const { model, apiKey, headers } = await resolveSamplingModel(options, params.modelPreferences);
 	await confirmSampling(options, "Approve MCP sampling request", formatRequestApproval(options.serverName, `${model.provider}/${model.id}`, params.systemPrompt, messages));
+	const { complete } = await ensureHostPiAi();
 	const converted = convertAssistantResult(await complete(model, {
 		systemPrompt: params.systemPrompt,
 		messages
@@ -42,9 +43,10 @@ function formatResponseApproval(serverName, response) {
 	return `${serverName} will receive this response from ${response.model}:\n\n${truncateAtWord(text, 1e3)}`;
 }
 function messageText(message) {
-	if (typeof message.content === "string") return message.content;
-	return message.content.map((block) => {
-		if (block.type === "text") return block.text;
+	const { content } = message;
+	if (typeof content === "string") return content;
+	return content.map((block) => {
+		if (block.type === "text") return block.text ?? "";
 		if (block.type === "image") return `[image: ${block.mimeType}]`;
 		if (block.type === "thinking") return "[thinking]";
 		if (block.type === "toolCall") return `[tool call: ${block.name}]`;

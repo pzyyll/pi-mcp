@@ -37,6 +37,9 @@ const BANNED_STATIC_IMPORTS = [
   "./mcp-auth-flow.ts",
   "./commands.ts",
   "./direct-tools.ts",
+  // Panel modules stay lazy; peers reach them via host-peers, not static entry imports.
+  "./mcp-panel.ts",
+  "./mcp-setup-panel.ts",
 ] as const;
 
 describe("factory eager import graph", () => {
@@ -51,6 +54,21 @@ describe("factory eager import graph", () => {
       ),
     );
     expect(bannedHits).toEqual([]);
+  });
+
+  it("seeds host pi-tui peers from the entry graph for lazy panel chunks", () => {
+    const staticImports = listStaticImportSpecifiers(indexSource);
+    expect(staticImports).toContain("./seed-host-pi-tui.ts");
+
+    // Lazy panel modules must not re-import the peer package (native dynamic import breaks).
+    for (const relative of ["./panel-keys.ts", "./mcp-panel.ts", "./mcp-setup-panel.ts"] as const) {
+      const source = readFileSync(join(srcDir, relative.replace("./", "")), "utf-8");
+      const imports = listStaticImportSpecifiers(source);
+      expect(
+        imports.some((s) => s === "@earendil-works/pi-tui" || s.startsWith("@earendil-works/pi-tui/")),
+        `${relative} must not import @earendil-works/pi-tui`,
+      ).toBe(false);
+    }
   });
 
   it("keeps resolve helpers on a light path without heavy runtime packages", () => {

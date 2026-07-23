@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    setupFiles: ["__tests__/setup-host-peers.ts"],
     include: ["__tests__/**/*.test.ts"],
     coverage: {
       provider: "v8",

@@ -1,4 +1,4 @@
-import { matchesKey } from "@earendil-works/pi-tui";
+import { getHostPiTui } from "./host-peers.ts";
 
 /** The `tui.select.*` keybinding ids the adapter panels resolve. */
 export type PanelSelectKeybinding = "tui.select.up" | "tui.select.down" | "tui.select.confirm";
@@ -26,6 +26,7 @@ export function createPanelKeys(keybindings?: PanelKeybindings): PanelKeys {
       selectConfirm: (data) => keybindings.matches(data, "tui.select.confirm"),
     };
   }
+  const { matchesKey } = getHostPiTui();
   return {
     selectUp: (data) => matchesKey(data, "up"),
     selectDown: (data) => matchesKey(data, "down"),

@@ -1,11 +1,11 @@
-import {
-  complete,
-  type Api,
-  type AssistantMessage,
-  type Message,
-  type Model,
-  type TextContent,
+import type {
+  Api,
+  AssistantMessage,
+  Message,
+  Model,
+  TextContent,
 } from "@earendil-works/pi-ai";
+import { ensureHostPiAi } from "./host-peers.ts";
 import { truncateAtWord } from "./utils.ts";
 import type { ExtensionUIContext, ModelRegistry } from "@earendil-works/pi-coding-agent";
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -70,6 +70,7 @@ export async function handleSamplingRequest(
     ),
   );
 
+  const { complete } = await ensureHostPiAi();
   const result = await complete(
     model,
     {
@@ -120,10 +121,12 @@ function formatResponseApproval(serverName: string, response: CreateMessageResul
 }
 
 function messageText(message: Message): string {
-  if (typeof message.content === "string") return message.content;
-  return message.content
-    .map((block) => {
-      if (block.type === "text") return block.text;
+  const { content } = message;
+  if (typeof content === "string") return content;
+  // Message is a role union; after excluding string content, blocks share a type discriminant.
+  return content
+    .map((block: { type: string; text?: string; mimeType?: string; name?: string }) => {
+      if (block.type === "text") return block.text ?? "";
       if (block.type === "image") return `[image: ${block.mimeType}]`;
       if (block.type === "thinking") return "[thinking]";
       if (block.type === "toolCall") return `[tool call: ${block.name}]`;

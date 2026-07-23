@@ -1,5 +1,6 @@
 // ABOUTME: Pi extension factory for the MCP adapter (thin cold-start entry).
 // ABOUTME: Heavy runtime modules load on first use via dynamic import trampolines.
+import "./seed-host-pi-tui.ts";
 import type {
   AgentToolUpdateCallback,
   ExtensionAPI,

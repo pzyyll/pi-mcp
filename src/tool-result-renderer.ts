@@ -1,7 +1,12 @@
 // ABOUTME: Sync TUI renderers for MCP proxy/direct tool calls and results.
-// ABOUTME: Stays light (pi-tui primitives only) so the factory can import it eagerly.
+// ABOUTME: Stays light (host-peer Text only) so the factory can import it eagerly.
 import type { AgentToolResult, ToolRenderResultOptions } from "@earendil-works/pi-coding-agent";
-import { Text } from "@earendil-works/pi-tui";
+import { getHostPiTui } from "./host-peers.ts";
+
+function Text(text: string, x: number, y: number): unknown {
+  const { Text: HostText } = getHostPiTui();
+  return new HostText(text, x, y);
+}
 
 type McpToolResultDetails = Record<string, unknown> & { error?: unknown };
 type McpToolContentBlock = AgentToolResult<McpToolResultDetails>["content"][number];
@@ -107,7 +112,7 @@ function renderToolCallLines(lines: string[], theme: RenderTheme) {
   const [title = "mcp", ...rest] = lines;
   const styledTitle = theme.fg("toolTitle", theme.bold ? theme.bold(title) : title);
   const styledRest = rest.map((line) => theme.fg("muted", line));
-  return new Text([styledTitle, ...styledRest].join("\n"), 0, 0);
+  return Text([styledTitle, ...styledRest].join("\n"), 0, 0);
 }
 
 export function renderMcpProxyToolCall(args: McpProxyToolCallInput, theme: RenderTheme) {
@@ -152,7 +157,7 @@ export function renderMcpToolResult(
   context?: McpToolRenderContext,
 ) {
   if (options.isPartial) {
-    return new Text(theme.fg("warning", "Running MCP tool..."), 0, 0);
+    return Text(theme.fg("warning", "Running MCP tool..."), 0, 0);
   }
 
   const hasErrorDetails = Boolean(result.details.error);
@@ -166,5 +171,5 @@ export function renderMcpToolResult(
   const hint =
     display.truncated && !options.expanded ? `\n${theme.fg("muted", "(Ctrl+O to expand)")}` : "";
 
-  return new Text(`${output}${hint}`, 0, 0);
+  return Text(`${output}${hint}`, 0, 0);
 }

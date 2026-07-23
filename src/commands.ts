@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { ensureHostPiTui } from "./host-peers.ts";
 import type { McpExtensionState } from "./state.ts";
 import type {
   McpAuthResult,
@@ -279,6 +280,8 @@ export async function openMcpSetup(
 
   const discovery = getMcpDiscoverySummary(configOverridePath, ctx.cwd);
   const onboardingState = loadOnboardingState();
+  // Ensure peers before native dynamic import of panel modules (jiti aliases do not apply).
+  await ensureHostPiTui();
   const { createMcpSetupPanel } = await import("./mcp-setup-panel.ts");
   let configChanged = false;
 
@@ -401,6 +404,7 @@ export async function openMcpPanel(
 
   const callbacks = buildMcpPanelCallbacks(state, config, ctx);
 
+  await ensureHostPiTui();
   const { createMcpPanel } = await import("./mcp-panel.ts");
   let configChanged = false;
 
@@ -460,6 +464,7 @@ export async function openMcpAuthPanel(
   const configPath = (pi.getFlag("mcp-config") as string | undefined) ?? configOverridePath;
   const provenanceMap = getServerProvenance(configPath, ctx.cwd);
   const callbacks = buildMcpPanelCallbacks(state, config, ctx);
+  await ensureHostPiTui();
   const { createMcpPanel } = await import("./mcp-panel.ts");
 
   await new Promise<void>((resolve) => {
