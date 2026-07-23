@@ -196,24 +196,33 @@ describe("UI Streaming", () => {
   });
 
   describe("McpServerManager stream listeners", () => {
+    type StreamNotification = {
+      method: string;
+      params: {
+        streamToken: string;
+        result: { content?: unknown[]; structuredContent?: Record<string, unknown> };
+      };
+    };
+
+    type NotificationClientStub = {
+      setNotificationHandler: ReturnType<typeof vi.fn>;
+    };
+
     function attachNotificationHandler(manager: McpServerManager, serverName = "test-server") {
-      const client = { setNotificationHandler: vi.fn() };
+      // Avoid `typeof client.setNotificationHandler` — it circularly references `client`.
+      const client: NotificationClientStub = { setNotificationHandler: vi.fn() };
       (
         manager as unknown as {
           attachAdapterNotificationHandlers: (
             serverName: string,
-            client: { setNotificationHandler: typeof client.setNotificationHandler },
+            client: NotificationClientStub,
           ) => void;
         }
       ).attachAdapterNotificationHandlers(serverName, client);
       expect(client.setNotificationHandler).toHaveBeenCalledOnce();
-      return client.setNotificationHandler.mock.calls[0][1] as (notification: {
-        method: string;
-        params: {
-          streamToken: string;
-          result: { content?: unknown[]; structuredContent?: Record<string, unknown> };
-        };
-      }) => void;
+      return client.setNotificationHandler.mock.calls[0][1] as (
+        notification: StreamNotification,
+      ) => void;
     }
 
     it("routes notifications to the matching listener", () => {

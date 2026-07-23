@@ -3,7 +3,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { createLegacySseClientTransport } from "./legacy-sse-transport.ts";
 import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
 import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import {
@@ -349,8 +349,8 @@ export class McpServerManager {
         throw error;
       }
 
-      // SSE is the legacy transport
-      return new SSEClientTransport(url, { requestInit, authProvider });
+      // SSE remains a documented migration-period fallback for pre-StreamableHTTP servers.
+      return createLegacySseClientTransport(url, { requestInit, authProvider });
     }
   }
 

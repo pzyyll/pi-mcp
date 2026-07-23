@@ -1,13 +1,12 @@
 // ABOUTME: Core MCP adapter type definitions and light UI/prompt helpers.
 // ABOUTME: Stream runtime schemas live in ui-stream-types; tool names in tool-names.
-import type { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
-import type { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import type { Transport as McpTransport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import type { TextContent, ImageContent } from "@earendil-works/pi-ai";
 import type { UiStreamMode } from "./ui-stream-types.ts";
 
-// Transport type (stdio + HTTP)
-export type Transport = StdioClientTransport | SSEClientTransport | StreamableHTTPClientTransport;
+// MCP client transport contract (stdio / Streamable HTTP / legacy SSE fallback).
+// Use the SDK shared interface so we do not reference deprecated concrete SSE types.
+export type Transport = McpTransport;
 
 // Import sources for config
 export type ImportKind =

@@ -11,7 +11,6 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
 import { ElicitationCompleteNotificationSchema, UrlElicitationRequiredError } from "@modelcontextprotocol/sdk/types.js";
 import { execFileSync, spawn, spawnSync } from "node:child_process";
@@ -370,6 +369,21 @@ var McpLifecycleManager = class {
 		await this.manager.closeAll();
 	}
 };
+//#endregion
+//#region src/legacy-sse-transport.ts
+/**
+* Build a legacy SSE transport after Streamable HTTP probing fails.
+*
+* MCP TypeScript SDK deprecates `SSEClientTransport` in favor of
+* `StreamableHTTPClientTransport`, but still documents dual-transport support
+* during migration because some servers only speak SSE.
+*
+* The module is loaded dynamically and cast to a local constructor type so our
+* compile surface does not reference the deprecated class symbol directly.
+*/
+async function createLegacySseClientTransport(url, options) {
+	return new (await (import("@modelcontextprotocol/sdk/client/sse.js"))).SSEClientTransport(url, options);
+}
 //#endregion
 //#region node_modules/.pnpm/zod@4.4.3/node_modules/zod/v4/core/core.js
 var _a$1;
@@ -5222,7 +5236,7 @@ var McpServerManager = class {
 			await streamableTransport.close().catch(() => {});
 			if (signal?.aborted) throwIfAborted(signal);
 			if (error instanceof UnauthorizedError) throw error;
-			return new SSEClientTransport(url, {
+			return createLegacySseClientTransport(url, {
 				requestInit,
 				authProvider
 			});
