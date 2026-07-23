@@ -33,7 +33,6 @@
   "type": "module",
   "scripts": {
     "build": "tsdown",
-    "postinstall": "npm run build",
     "prepublishOnly": "pnpm run build",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
