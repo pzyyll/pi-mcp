@@ -7,7 +7,12 @@ import { createHash } from "node:crypto";
 import type { McpTool, McpResource, ServerEntry, ToolMetadata } from "./types.ts";
 import { formatToolName, isToolExcluded } from "./types.ts";
 import { resourceNameToToolName } from "./resource-tools.ts";
-import { extractToolUiStreamMode, interpolateEnvRecord, resolveBearerToken, resolveConfigPath } from "./utils.ts";
+import {
+  extractToolUiStreamMode,
+  interpolateEnvRecord,
+  resolveBearerToken,
+  resolveConfigPath,
+} from "./utils.ts";
 import { getToolUiResourceUri } from "./tool-ui-uri.ts";
 
 const CACHE_VERSION = 1;
@@ -106,7 +111,7 @@ export function computeServerHash(definition: ServerEntry): string {
 export function isServerCacheValid(
   entry: ServerCacheEntry,
   definition: ServerEntry,
-  maxAgeMs: number = CACHE_MAX_AGE_MS
+  maxAgeMs: number = CACHE_MAX_AGE_MS,
 ): boolean {
   if (!entry || entry.configHash !== computeServerHash(definition)) return false;
   if (!entry.cachedAt || typeof entry.cachedAt !== "number") return false;
@@ -118,7 +123,7 @@ export function reconstructToolMetadata(
   serverName: string,
   entry: ServerCacheEntry,
   prefix: "server" | "none" | "short",
-  definition: Pick<ServerEntry, "exposeResources" | "excludeTools">
+  definition: Pick<ServerEntry, "exposeResources" | "excludeTools">,
 ): ToolMetadata[] {
   const metadata: ToolMetadata[] = [];
 
@@ -160,8 +165,8 @@ export function reconstructToolMetadata(
 
 export function serializeTools(tools: McpTool[]): CachedTool[] {
   return tools
-    .filter(t => t?.name)
-    .map(t => ({
+    .filter((t) => t?.name)
+    .map((t) => ({
       name: t.name,
       description: t.description,
       inputSchema: t.inputSchema,
@@ -172,8 +177,8 @@ export function serializeTools(tools: McpTool[]): CachedTool[] {
 
 export function serializeResources(resources: McpResource[]): CachedResource[] {
   return resources
-    .filter(r => r?.name && r?.uri)
-    .map(r => ({
+    .filter((r) => r?.name && r?.uri)
+    .map((r) => ({
       uri: r.uri,
       name: r.name,
       description: r.description,
@@ -186,11 +191,11 @@ function stableStringify(value: unknown): string {
     return serialized === undefined ? "undefined" : serialized;
   }
   if (Array.isArray(value)) {
-    return `[${value.map(v => stableStringify(v)).join(",")}]`;
+    return `[${value.map((v) => stableStringify(v)).join(",")}]`;
   }
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  return `{${keys.map(k => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",")}}`;
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",")}}`;
 }
 
 function tryGetToolUiResourceUri(tool: McpTool): string | undefined {

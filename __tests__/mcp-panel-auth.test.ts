@@ -71,7 +71,14 @@ describe("mcp-panel auth actions", () => {
       },
     };
     const callbacks = createCallbacks("idle");
-    const panel = createMcpPanel(config, createCache(config), new Map(), callbacks, { requestRender: () => {} }, () => {});
+    const panel = createMcpPanel(
+      config,
+      createCache(config),
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+    );
 
     panel.handleInput("\x01");
     await Promise.resolve();
@@ -88,7 +95,14 @@ describe("mcp-panel auth actions", () => {
     };
     const callbacks = createCallbacks("needs-auth");
     callbacks.authenticate = vi.fn(async () => ({ ok: false, message: "browser launch failed" }));
-    const panel = createMcpPanel(config, createCache(config), new Map(), callbacks, { requestRender: () => {} }, () => {});
+    const panel = createMcpPanel(
+      config,
+      createCache(config),
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+    );
 
     panel.handleInput("\r");
     await Promise.resolve();
@@ -112,7 +126,14 @@ describe("mcp-panel auth actions", () => {
       message: "browser \x9d8;;https://example.invalid/error\x1b\\launch\x9d8;;\x1b\\ failed",
     }));
     callbacks.getConnectionStatus = () => "needs-auth";
-    const panel = createMcpPanel(config, null, new Map(), callbacks, { requestRender: () => {} }, () => {});
+    const panel = createMcpPanel(
+      config,
+      null,
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+    );
 
     panel.handleInput("\r");
     await Promise.resolve();
@@ -135,7 +156,14 @@ describe("mcp-panel auth actions", () => {
     const callbacks = createCallbacks("needs-auth");
     const auth = deferred<{ ok: boolean }>();
     callbacks.authenticate = vi.fn(() => auth.promise);
-    const panel = createMcpPanel(config, createCache(config), new Map(), callbacks, { requestRender: () => {} }, () => {});
+    const panel = createMcpPanel(
+      config,
+      createCache(config),
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+    );
 
     panel.handleInput("\r");
     panel.handleInput("\r");
@@ -155,10 +183,18 @@ describe("mcp-panel auth actions", () => {
       },
     };
     const callbacks = createCallbacks("needs-auth");
-    const panel = createMcpPanel(config, null, new Map(), callbacks, { requestRender: () => {} }, () => {}, {
-      authOnly: true,
-      noticeLines: ["Select an OAuth MCP server"],
-    });
+    const panel = createMcpPanel(
+      config,
+      null,
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+      {
+        authOnly: true,
+        noticeLines: ["Select an OAuth MCP server"],
+      },
+    );
 
     const output = stripAnsi(panel.render(100).join("\n"));
     expect(output).toContain("MCP OAuth");
@@ -174,9 +210,17 @@ describe("mcp-panel auth actions", () => {
       },
     };
     const callbacks = createCallbacks("needs-auth");
-    const panel = createMcpPanel(config, null, new Map(), callbacks, { requestRender: () => {} }, () => {}, {
-      authOnly: true,
-    });
+    const panel = createMcpPanel(
+      config,
+      null,
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+      {
+        authOnly: true,
+      },
+    );
 
     panel.handleInput(" ");
 
@@ -193,9 +237,17 @@ describe("mcp-panel auth actions", () => {
     };
     const callbacks = createCallbacks("needs-auth");
     callbacks.canAuthenticate = () => true;
-    const panel = createMcpPanel(config, null, new Map(), callbacks, { requestRender: () => {} }, () => {}, {
-      authOnly: true,
-    });
+    const panel = createMcpPanel(
+      config,
+      null,
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+      {
+        authOnly: true,
+      },
+    );
 
     panel.handleInput("l");
     panel.handleInput("a");
@@ -216,9 +268,17 @@ describe("mcp-panel auth actions", () => {
     };
     const callbacks = createCallbacks("needs-auth");
     callbacks.canAuthenticate = () => true;
-    const panel = createMcpPanel(config, null, new Map(), callbacks, { requestRender: () => {} }, () => {}, {
-      authOnly: true,
-    });
+    const panel = createMcpPanel(
+      config,
+      null,
+      new Map(),
+      callbacks,
+      { requestRender: () => {} },
+      () => {},
+      {
+        authOnly: true,
+      },
+    );
 
     panel.handleInput("?");
     panel.handleInput("l");

@@ -2,7 +2,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { buildProxyDescription, resolveDirectTools } from "../src/direct-tools.ts";
-import { computeServerHash, isServerCacheValid, type MetadataCache } from "../src/metadata-cache.ts";
+import {
+  computeServerHash,
+  isServerCacheValid,
+  type MetadataCache,
+} from "../src/metadata-cache.ts";
 import { buildToolMetadata } from "../src/tool-metadata.ts";
 import type { McpConfig } from "../src/types.ts";
 import { reconstructToolMetadata } from "../src/metadata-cache.ts";
@@ -84,9 +88,7 @@ describe("buildProxyDescription", () => {
             { name: "get_screenshot", description: "Take screenshot" },
             { name: "get_nodes", description: "Get nodes" },
           ],
-          resources: [
-            { name: "figjam", uri: "ui://figjam", description: "FigJam" },
-          ],
+          resources: [{ name: "figjam", uri: "ui://figjam", description: "FigJam" }],
         },
       },
     };
@@ -127,13 +129,24 @@ describe("metadata cache hashing", () => {
 
   it("hashes interpolated header values", () => {
     process.env.MCP_HASH_HEADER = "header-one";
-    const first = computeServerHash({ url: "https://example.test/mcp", headers: { "x-root": "$env:MCP_HASH_HEADER" } });
+    const first = computeServerHash({
+      url: "https://example.test/mcp",
+      headers: { "x-root": "$env:MCP_HASH_HEADER" },
+    });
 
     process.env.MCP_HASH_HEADER = "header-two";
-    const second = computeServerHash({ url: "https://example.test/mcp", headers: { "x-root": "$env:MCP_HASH_HEADER" } });
+    const second = computeServerHash({
+      url: "https://example.test/mcp",
+      headers: { "x-root": "$env:MCP_HASH_HEADER" },
+    });
 
     expect(first).not.toBe(second);
-    expect(computeServerHash({ url: "https://example.test/mcp", headers: { "x-root": "$env:MCP_HASH_HEADER" } })).toBe(
+    expect(
+      computeServerHash({
+        url: "https://example.test/mcp",
+        headers: { "x-root": "$env:MCP_HASH_HEADER" },
+      }),
+    ).toBe(
       computeServerHash({ url: "https://example.test/mcp", headers: { "x-root": "header-two" } }),
     );
   });
@@ -146,32 +159,73 @@ describe("metadata cache hashing", () => {
 
   it("hashes the effective bearerTokenEnv value", () => {
     process.env.MCP_HASH_TOKEN = "token-one";
-    const first = computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerTokenEnv: "MCP_HASH_TOKEN" });
+    const first = computeServerHash({
+      url: "https://example.test/mcp",
+      auth: "bearer",
+      bearerTokenEnv: "MCP_HASH_TOKEN",
+    });
 
     process.env.MCP_HASH_TOKEN = "token-two";
-    const second = computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerTokenEnv: "MCP_HASH_TOKEN" });
+    const second = computeServerHash({
+      url: "https://example.test/mcp",
+      auth: "bearer",
+      bearerTokenEnv: "MCP_HASH_TOKEN",
+    });
 
     expect(first).not.toBe(second);
-    expect(computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerTokenEnv: "MCP_HASH_TOKEN" })).toBe(
-      computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerToken: "token-two", bearerTokenEnv: "MCP_HASH_TOKEN" }),
+    expect(
+      computeServerHash({
+        url: "https://example.test/mcp",
+        auth: "bearer",
+        bearerTokenEnv: "MCP_HASH_TOKEN",
+      }),
+    ).toBe(
+      computeServerHash({
+        url: "https://example.test/mcp",
+        auth: "bearer",
+        bearerToken: "token-two",
+        bearerTokenEnv: "MCP_HASH_TOKEN",
+      }),
     );
   });
 
   it("hashes interpolated bearerToken values", () => {
     process.env.MCP_HASH_TOKEN = "token-one";
-    const first = computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerToken: "${MCP_HASH_TOKEN}" });
+    const first = computeServerHash({
+      url: "https://example.test/mcp",
+      auth: "bearer",
+      bearerToken: "${MCP_HASH_TOKEN}",
+    });
 
     process.env.MCP_HASH_TOKEN = "token-two";
-    const second = computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerToken: "${MCP_HASH_TOKEN}" });
+    const second = computeServerHash({
+      url: "https://example.test/mcp",
+      auth: "bearer",
+      bearerToken: "${MCP_HASH_TOKEN}",
+    });
 
     expect(first).not.toBe(second);
-    expect(computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerToken: "$env:MCP_HASH_TOKEN" })).toBe(
-      computeServerHash({ url: "https://example.test/mcp", auth: "bearer", bearerToken: "token-two" }),
+    expect(
+      computeServerHash({
+        url: "https://example.test/mcp",
+        auth: "bearer",
+        bearerToken: "$env:MCP_HASH_TOKEN",
+      }),
+    ).toBe(
+      computeServerHash({
+        url: "https://example.test/mcp",
+        auth: "bearer",
+        bearerToken: "token-two",
+      }),
     );
   });
 
   it("invalidates cached metadata when an interpolated bearerToken env value changes", () => {
-    const definition = { url: "https://example.test/mcp", auth: "bearer" as const, bearerToken: "${MCP_HASH_TOKEN}" };
+    const definition = {
+      url: "https://example.test/mcp",
+      auth: "bearer" as const,
+      bearerToken: "${MCP_HASH_TOKEN}",
+    };
     process.env.MCP_HASH_TOKEN = "token-one";
     const entry = {
       configHash: computeServerHash(definition),
@@ -201,9 +255,7 @@ describe("excludeTools filtering", () => {
         { name: "get_screenshot", description: "Screenshot" },
         { name: "get_nodes", description: "Nodes" },
       ] as any,
-      [
-        { name: "figjam", uri: "ui://figjam", description: "FigJam" },
-      ] as any,
+      [{ name: "figjam", uri: "ui://figjam", description: "FigJam" }] as any,
       definition,
       "figma",
       "server",
@@ -252,9 +304,7 @@ describe("excludeTools filtering", () => {
             { name: "get_screenshot", description: "Screenshot" },
             { name: "get_nodes", description: "Nodes" },
           ],
-          resources: [
-            { name: "figjam", uri: "ui://figjam", description: "FigJam" },
-          ],
+          resources: [{ name: "figjam", uri: "ui://figjam", description: "FigJam" }],
         },
       },
     };

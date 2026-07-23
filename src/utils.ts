@@ -34,7 +34,7 @@ export async function openPath(pi: ExtensionAPI, targetPath: string): Promise<vo
 export async function parallelLimit<T, R>(
   items: T[],
   limit: number,
-  fn: (item: T) => Promise<R>
+  fn: (item: T) => Promise<R>,
 ): Promise<R[]> {
   const results: R[] = [];
   let index = 0;
@@ -46,7 +46,9 @@ export async function parallelLimit<T, R>(
     }
   }
 
-  const workers = Array(Math.min(limit, items.length)).fill(null).map(() => worker());
+  const workers = Array(Math.min(limit, items.length))
+    .fill(null)
+    .map(() => worker());
   await Promise.all(workers);
   return results;
 }
@@ -65,7 +67,9 @@ export function interpolateEnvVars(value: string): string {
     .replace(/\$env:(\w+)/g, (_, name) => process.env[name] ?? "");
 }
 
-export function interpolateEnvRecord(values: Record<string, string> | undefined): Record<string, string> | undefined {
+export function interpolateEnvRecord(
+  values: Record<string, string> | undefined,
+): Record<string, string> | undefined {
   if (!values) return undefined;
 
   const resolved: Record<string, string> = {};
@@ -86,7 +90,9 @@ export function resolveConfigPath(value: string | undefined): string | undefined
   return resolved;
 }
 
-export function resolveBearerToken(definition: Pick<ServerEntry, "bearerToken" | "bearerTokenEnv">): string | undefined {
+export function resolveBearerToken(
+  definition: Pick<ServerEntry, "bearerToken" | "bearerTokenEnv">,
+): string | undefined {
   if (definition.bearerToken !== undefined) {
     return interpolateEnvVars(definition.bearerToken);
   }
@@ -107,10 +113,15 @@ export function truncateAtWord(text: string, target: number): string {
 }
 
 export function normalizeDirectToolInputSchema(schema: unknown): Record<string, unknown> {
-  const inputSchema = schema && typeof schema === "object" && !Array.isArray(schema)
-    ? schema as Record<string, unknown>
-    : { type: "object", properties: {} };
-  const { $schema, additionalProperties, ...normalized } = inputSchema;
+  const inputSchema =
+    schema && typeof schema === "object" && !Array.isArray(schema)
+      ? (schema as Record<string, unknown>)
+      : { type: "object", properties: {} };
+  const {
+    $schema: _$schema,
+    additionalProperties: _additionalProperties,
+    ...normalized
+  } = inputSchema;
   return normalized;
 }
 
@@ -126,7 +137,9 @@ export function formatAuthRequiredMessage(
 /**
  * Extract the adapter-owned UI stream mode from tool metadata.
  */
-export function extractToolUiStreamMode(toolMeta: Record<string, unknown> | undefined): "eager" | "stream-first" | undefined {
+export function extractToolUiStreamMode(
+  toolMeta: Record<string, unknown> | undefined,
+): "eager" | "stream-first" | undefined {
   const uiMeta = toolMeta?.ui;
   if (!uiMeta || typeof uiMeta !== "object") return undefined;
   const streamMode = (uiMeta as Record<string, unknown>)["pi-mcp-adapter.streamMode"];

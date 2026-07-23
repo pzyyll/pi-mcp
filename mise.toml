@@ -32,3 +32,19 @@ run = "pnpm run test:oauth-provider"
 [tasks."bench:import"]
 description = "Benchmark cold-start import cost"
 run = "pnpm run bench:import"
+
+[tasks.lint]
+description = "Lint with oxlint"
+run = "pnpm run lint"
+
+[tasks."lint:fix"]
+description = "Lint with oxlint and apply safe fixes"
+run = "pnpm run lint:fix"
+
+[tasks.fmt]
+description = "Format with oxfmt"
+run = "pnpm run fmt"
+
+[tasks."fmt:check"]
+description = "Check formatting with oxfmt"
+run = "pnpm run fmt:check"

@@ -14,7 +14,7 @@ export function buildToolMetadata(
   resources: McpResource[],
   definition: ServerEntry,
   serverName: string,
-  prefix: "server" | "none" | "short"
+  prefix: "server" | "none" | "short",
 ): { metadata: ToolMetadata[]; failedTools: string[] } {
   const metadata: ToolMetadata[] = [];
   const failedTools: string[] = [];
@@ -64,7 +64,7 @@ export function buildToolMetadata(
 }
 
 export function getToolNames(state: McpExtensionState, serverName: string): string[] {
-  return state.toolMetadata.get(serverName)?.map(m => m.name) ?? [];
+  return state.toolMetadata.get(serverName)?.map((m) => m.name) ?? [];
 }
 
 export function totalToolCount(state: McpExtensionState): number {
@@ -75,10 +75,13 @@ export function totalToolCount(state: McpExtensionState): number {
   return count;
 }
 
-export function findToolByName(metadata: ToolMetadata[] | undefined, toolName: string): ToolMetadata | undefined {
+export function findToolByName(
+  metadata: ToolMetadata[] | undefined,
+  toolName: string,
+): ToolMetadata | undefined {
   if (!metadata) return undefined;
-  const exact = metadata.find(m => m.name === toolName);
+  const exact = metadata.find((m) => m.name === toolName);
   if (exact) return exact;
   const normalized = toolName.replace(/-/g, "_");
-  return metadata.find(m => m.name.replace(/-/g, "_") === normalized);
+  return metadata.find((m) => m.name.replace(/-/g, "_") === normalized);
 }

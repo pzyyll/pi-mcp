@@ -1,7 +1,13 @@
-* { box-sizing: border-box; margin: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   background: #f8f9fa;
   color: #1a1a1a;
   padding: 24px;

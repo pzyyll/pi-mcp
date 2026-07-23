@@ -36,16 +36,16 @@ vi.mock("@modelcontextprotocol/sdk/client/index.js", () => ({
     this.setRequestHandler = vi.fn();
     this.setNotificationHandler = vi.fn();
     this.connect = vi.fn((transport: unknown, requestOptions: unknown) =>
-      mocks.connectImpl(transport, requestOptions)
+      mocks.connectImpl(transport, requestOptions),
     );
     this.listTools = vi.fn((params: unknown, requestOptions: unknown) =>
-      mocks.listToolsImpl(params, requestOptions)
+      mocks.listToolsImpl(params, requestOptions),
     );
     this.listResources = vi.fn((params: unknown, requestOptions: unknown) =>
-      mocks.listResourcesImpl(params, requestOptions)
+      mocks.listResourcesImpl(params, requestOptions),
     );
     this.callTool = vi.fn((params: unknown, schema: unknown, requestOptions: unknown) =>
-      mocks.callToolImpl(params, schema, requestOptions)
+      mocks.callToolImpl(params, schema, requestOptions),
     );
     this.close = vi.fn(async () => undefined);
     mocks.clients.push(this);
@@ -206,12 +206,14 @@ describe("proxy auto auth", () => {
   it("runs URL elicitations returned by proxy tool calls", async () => {
     const { UrlElicitationRequiredError } = await import("@modelcontextprotocol/sdk/types.js");
     const { executeCall } = await import("../src/proxy-modes.ts");
-    const error = new UrlElicitationRequiredError([{
-      mode: "url",
-      message: "Connect your account",
-      elicitationId: "connect-1",
-      url: "https://example.com/connect",
-    }]);
+    const error = new UrlElicitationRequiredError([
+      {
+        mode: "url",
+        message: "Connect your account",
+        elicitationId: "connect-1",
+        url: "https://example.com/connect",
+      },
+    ]);
     const connection = {
       status: "connected",
       client: { callTool: vi.fn().mockRejectedValue(error) },
@@ -226,12 +228,19 @@ describe("proxy auto auth", () => {
     const state = {
       config: { settings: {}, mcpServers: { demo: { command: "demo" } } },
       manager,
-      toolMetadata: new Map([["demo", [{
-        name: "demo_search",
-        originalName: "search",
-        description: "Search",
-        inputSchema: { type: "object", properties: {} },
-      }]]]),
+      toolMetadata: new Map([
+        [
+          "demo",
+          [
+            {
+              name: "demo_search",
+              originalName: "search",
+              description: "Search",
+              inputSchema: { type: "object", properties: {} },
+            },
+          ],
+        ],
+      ]),
       failureTracker: new Map(),
       completedUiSessions: [],
     } as any;
@@ -300,7 +309,14 @@ describe("proxy auto auth", () => {
     } as any;
 
     const controller = new AbortController();
-    const result = await executeCall(state, "demo_search", { q: "hello" }, "demo", undefined, controller.signal);
+    const result = await executeCall(
+      state,
+      "demo_search",
+      { q: "hello" },
+      "demo",
+      undefined,
+      controller.signal,
+    );
 
     expect(mocks.authenticate).toHaveBeenCalledWith(
       "demo",
@@ -342,12 +358,19 @@ describe("proxy auto auth", () => {
     const state = {
       config: { settings: { toolPrefix: "server" }, mcpServers: { demo: { command: "demo" } } },
       manager,
-      toolMetadata: new Map([["demo", [{
-        name: "demo_search",
-        originalName: "search",
-        description: "Search",
-        inputSchema: { type: "object", properties: {} },
-      }]]]),
+      toolMetadata: new Map([
+        [
+          "demo",
+          [
+            {
+              name: "demo_search",
+              originalName: "search",
+              description: "Search",
+              inputSchema: { type: "object", properties: {} },
+            },
+          ],
+        ],
+      ]),
       failureTracker: new Map(),
       completedUiSessions: [],
     } as any;
@@ -379,11 +402,13 @@ describe("proxy auto auth", () => {
     mocks.listToolsImpl.mockImplementation(async () => {
       await pause();
       return {
-        tools: [{
-          name: "search",
-          description: "Search",
-          inputSchema: { type: "object", properties: {} },
-        }],
+        tools: [
+          {
+            name: "search",
+            description: "Search",
+            inputSchema: { type: "object", properties: {} },
+          },
+        ],
       };
     });
     mocks.listResourcesImpl.mockImplementation(async () => {
@@ -391,16 +416,21 @@ describe("proxy auto auth", () => {
       return { resources: [] };
     });
     mocks.lazyConnect.mockImplementation(async (state: any, serverName: string) => {
-      const connection = await state.manager.connect(serverName, state.config.mcpServers[serverName]);
+      const connection = await state.manager.connect(
+        serverName,
+        state.config.mcpServers[serverName],
+      );
       if (connection.status !== "connected") {
         return false;
       }
-      state.toolMetadata.set(serverName, [{
-        name: "demo_search",
-        originalName: "search",
-        description: "Search",
-        inputSchema: { type: "object", properties: {} },
-      }]);
+      state.toolMetadata.set(serverName, [
+        {
+          name: "demo_search",
+          originalName: "search",
+          description: "Search",
+          inputSchema: { type: "object", properties: {} },
+        },
+      ]);
       return true;
     });
 

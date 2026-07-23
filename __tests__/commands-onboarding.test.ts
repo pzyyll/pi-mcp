@@ -28,14 +28,18 @@ describe("commands onboarding", () => {
 
   beforeEach(() => {
     vi.resetModules();
-    mocks.createMcpPanel.mockReset().mockImplementation((_config, _cache, _prov, _callbacks, _tui, done) => {
-      done({ cancelled: true, changes: new Map() });
-      return { dispose() {} };
-    });
-    mocks.createMcpSetupPanel.mockReset().mockImplementation((_discovery, _callbacks, _options, _tui, done) => {
-      done();
-      return { dispose() {} };
-    });
+    mocks.createMcpPanel
+      .mockReset()
+      .mockImplementation((_config, _cache, _prov, _callbacks, _tui, done) => {
+        done({ cancelled: true, changes: new Map() });
+        return { dispose() {} };
+      });
+    mocks.createMcpSetupPanel
+      .mockReset()
+      .mockImplementation((_discovery, _callbacks, _options, _tui, done) => {
+        done();
+        return { dispose() {} };
+      });
   });
 
   afterEach(() => {
@@ -61,12 +65,16 @@ describe("commands onboarding", () => {
     const ui = createUi();
     const { openMcpPanel } = await import("../src/commands.ts");
 
-    await openMcpPanel({
-      config: { mcpServers: {} },
-      manager: { getConnection: () => null },
-      toolMetadata: new Map(),
-      failureTracker: new Map(),
-    } as any, { getFlag: () => undefined } as any, { hasUI: true, ui } as any);
+    await openMcpPanel(
+      {
+        config: { mcpServers: {} },
+        manager: { getConnection: () => null },
+        toolMetadata: new Map(),
+        failureTracker: new Map(),
+      } as any,
+      { getFlag: () => undefined } as any,
+      { hasUI: true, ui } as any,
+    );
 
     expect(mocks.createMcpSetupPanel).toHaveBeenCalled();
     expect(mocks.createMcpPanel).not.toHaveBeenCalled();
@@ -89,12 +97,16 @@ describe("commands onboarding", () => {
     const { openMcpPanel } = await import("../src/commands.ts");
     const { loadOnboardingState } = await import("../src/onboarding-state.ts");
 
-    await openMcpPanel({
-      config: loadMcpConfig(),
-      manager: { getConnection: () => null },
-      toolMetadata: new Map(),
-      failureTracker: new Map(),
-    } as any, { getFlag: () => undefined } as any, { hasUI: true, ui } as any);
+    await openMcpPanel(
+      {
+        config: loadMcpConfig(),
+        manager: { getConnection: () => null },
+        toolMetadata: new Map(),
+        failureTracker: new Map(),
+      } as any,
+      { getFlag: () => undefined } as any,
+      { hasUI: true, ui } as any,
+    );
 
     expect(mocks.createMcpPanel).toHaveBeenCalled();
     const options = mocks.createMcpPanel.mock.calls[0]?.[6];
@@ -110,23 +122,37 @@ describe("commands onboarding", () => {
     const { waitForCallback } = await import("../src/mcp-callback-server.ts");
     const { logoutServer } = await import("../src/commands.ts");
 
-    updateTokens("oauth-server", { accessToken: "token", refreshToken: "refresh" }, "https://example.com/mcp");
+    updateTokens(
+      "oauth-server",
+      { accessToken: "token", refreshToken: "refresh" },
+      "https://example.com/mcp",
+    );
     updateOAuthState("oauth-server", "pending-state", "https://example.com/mcp");
     const pendingCallback = waitForCallback("pending-state");
-    const pendingCallbackRejection = expect(pendingCallback).rejects.toThrow("Authorization cancelled");
+    const pendingCallbackRejection =
+      expect(pendingCallback).rejects.toThrow("Authorization cancelled");
 
-    const result = await logoutServer("oauth-server", {
-      config: { mcpServers: { "oauth-server": { url: "https://example.com/mcp", auth: "oauth" } } },
-      manager: { close },
-      toolMetadata: new Map(),
-      failureTracker: new Map(),
-    } as any, { hasUI: true, ui } as any);
+    const result = await logoutServer(
+      "oauth-server",
+      {
+        config: {
+          mcpServers: { "oauth-server": { url: "https://example.com/mcp", auth: "oauth" } },
+        },
+        manager: { close },
+        toolMetadata: new Map(),
+        failureTracker: new Map(),
+      } as any,
+      { hasUI: true, ui } as any,
+    );
 
     await pendingCallbackRejection;
     expect(result.ok).toBe(true);
     expect(getAuthEntry("oauth-server")).toBeUndefined();
     expect(close).toHaveBeenCalledWith("oauth-server");
-    expect(ui.notify).toHaveBeenCalledWith(expect.stringContaining("OAuth credentials cleared"), "info");
+    expect(ui.notify).toHaveBeenCalledWith(
+      expect.stringContaining("OAuth credentials cleared"),
+      "info",
+    );
   });
 
   it("marks explicit OAuth servers as needs-auth when only stale URL tokens exist", async () => {
@@ -138,17 +164,21 @@ describe("commands onboarding", () => {
     updateTokens("legacy", { accessToken: "legacy-token" });
     updateTokens("stale", { accessToken: "stale-token" }, "https://old.example.com/mcp");
 
-    await openMcpPanel({
-      config: {
-        mcpServers: {
-          legacy: { url: "https://new.example.com/mcp", auth: "oauth" },
-          stale: { url: "https://new.example.com/mcp", auth: "oauth" },
+    await openMcpPanel(
+      {
+        config: {
+          mcpServers: {
+            legacy: { url: "https://new.example.com/mcp", auth: "oauth" },
+            stale: { url: "https://new.example.com/mcp", auth: "oauth" },
+          },
         },
-      },
-      manager: { getConnection: () => null },
-      toolMetadata: new Map(),
-      failureTracker: new Map(),
-    } as any, { getFlag: () => undefined } as any, { hasUI: true, ui } as any);
+        manager: { getConnection: () => null },
+        toolMetadata: new Map(),
+        failureTracker: new Map(),
+      } as any,
+      { getFlag: () => undefined } as any,
+      { hasUI: true, ui } as any,
+    );
 
     const callbacks = mocks.createMcpPanel.mock.calls[0]?.[3];
     expect(callbacks.getConnectionStatus("legacy")).toBe("needs-auth");

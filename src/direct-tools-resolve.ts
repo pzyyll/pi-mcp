@@ -94,11 +94,15 @@ export function resolveDirectTools(
         if (isToolExcluded(baseName, serverName, prefix, definition.excludeTools)) continue;
         const prefixedName = formatToolName(baseName, serverName, prefix);
         if (BUILTIN_NAMES.has(prefixedName)) {
-          console.warn(`MCP: skipping direct resource tool "${prefixedName}" (collides with builtin)`);
+          console.warn(
+            `MCP: skipping direct resource tool "${prefixedName}" (collides with builtin)`,
+          );
           continue;
         }
         if (seenNames.has(prefixedName)) {
-          console.warn(`MCP: skipping duplicate direct resource tool "${prefixedName}" from "${serverName}"`);
+          console.warn(
+            `MCP: skipping duplicate direct resource tool "${prefixedName}" from "${serverName}"`,
+          );
           continue;
         }
         seenNames.add(prefixedName);
@@ -124,9 +128,8 @@ export function getMissingConfiguredDirectToolServers(
   const globalDirect = config.settings?.directTools;
 
   for (const [serverName, definition] of Object.entries(config.mcpServers)) {
-    const hasDirectTools = definition.directTools !== undefined
-      ? !!definition.directTools
-      : !!globalDirect;
+    const hasDirectTools =
+      definition.directTools !== undefined ? !!definition.directTools : !!globalDirect;
 
     if (!hasDirectTools) continue;
 
@@ -152,9 +155,7 @@ export function buildProxyDescription(
     directByServer.set(spec.serverName, (directByServer.get(spec.serverName) ?? 0) + 1);
   }
   if (directByServer.size > 0) {
-    const parts = [...directByServer.entries()].map(
-      ([server, count]) => `${server} (${count})`,
-    );
+    const parts = [...directByServer.entries()].map(([server, count]) => `${server} (${count})`);
     desc += `\nDirect tools available (call as normal tools): ${parts.join(", ")}\n`;
   }
 
@@ -165,12 +166,13 @@ export function buildProxyDescription(
     const toolCount = (entry?.tools ?? []).filter(
       (tool) => !isToolExcluded(tool.name, serverName, prefix, definition.excludeTools),
     ).length;
-    const resourceCount = definition?.exposeResources !== false
-      ? (entry?.resources ?? []).filter((resource) => {
-          const baseName = `get_${resourceNameToToolName(resource.name)}`;
-          return !isToolExcluded(baseName, serverName, prefix, definition.excludeTools);
-        }).length
-      : 0;
+    const resourceCount =
+      definition?.exposeResources !== false
+        ? (entry?.resources ?? []).filter((resource) => {
+            const baseName = `get_${resourceNameToToolName(resource.name)}`;
+            return !isToolExcluded(baseName, serverName, prefix, definition.excludeTools);
+          }).length
+        : 0;
     const totalItems = toolCount + resourceCount;
     if (totalItems === 0) continue;
     const directCount = directByServer.get(serverName) ?? 0;

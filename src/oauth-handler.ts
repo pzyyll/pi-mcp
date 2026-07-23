@@ -11,10 +11,10 @@ function getTokensPath(serverName: string): string {
 /**
  * Get stored OAuth tokens for a server (if any).
  * Returns undefined if no tokens or tokens are expired.
- * 
+ *
  * Token file location: $MCP_OAUTH_DIR/sha256-<server-hash>/tokens.json when set,
  * otherwise <Pi agent dir>/mcp-oauth/sha256-<server-hash>/tokens.json
- * 
+ *
  * Expected format:
  * {
  *   "access_token": "...",
@@ -26,17 +26,17 @@ function getTokensPath(serverName: string): string {
  */
 export function getStoredTokens(serverName: string): OAuthTokens | undefined {
   const tokensPath = getTokensPath(serverName);
-  
+
   if (!existsSync(tokensPath)) return undefined;
-  
+
   try {
     const stored = JSON.parse(readFileSync(tokensPath, "utf-8"));
-    
+
     // Validate required field
     if (!stored.access_token || typeof stored.access_token !== "string") {
       return undefined;
     }
-    
+
     // Check expiration if expiresAt is set
     if (stored.expiresAt && typeof stored.expiresAt === "number") {
       if (Date.now() > stored.expiresAt) {
@@ -44,7 +44,7 @@ export function getStoredTokens(serverName: string): OAuthTokens | undefined {
         return undefined;
       }
     }
-    
+
     return {
       access_token: stored.access_token,
       token_type: stored.token_type ?? "bearer",

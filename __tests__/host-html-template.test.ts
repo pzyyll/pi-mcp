@@ -26,13 +26,13 @@ describe("buildHostHtmlTemplate", () => {
       const html = buildHostHtmlTemplate(createMinimalInput());
 
       expect(html).toContain("<!doctype html>");
-      expect(html).toContain("<html lang=\"en\">");
+      expect(html).toContain('<html lang="en">');
       expect(html).toContain("</html>");
     });
 
     it("includes title with server and tool name", () => {
       const html = buildHostHtmlTemplate(
-        createMinimalInput({ serverName: "my-server", toolName: "my-tool" })
+        createMinimalInput({ serverName: "my-server", toolName: "my-tool" }),
       );
 
       expect(html).toContain("<title>MCP UI - my-server / my-tool</title>");
@@ -40,7 +40,7 @@ describe("buildHostHtmlTemplate", () => {
 
     it("includes header with server and tool info", () => {
       const html = buildHostHtmlTemplate(
-        createMinimalInput({ serverName: "demo-server", toolName: "widget-tool" })
+        createMinimalInput({ serverName: "demo-server", toolName: "widget-tool" }),
       );
 
       expect(html).toContain('id="server-name"');
@@ -65,16 +65,14 @@ describe("buildHostHtmlTemplate", () => {
 
   describe("data injection", () => {
     it("injects session token", () => {
-      const html = buildHostHtmlTemplate(
-        createMinimalInput({ sessionToken: "secret-token-xyz" })
-      );
+      const html = buildHostHtmlTemplate(createMinimalInput({ sessionToken: "secret-token-xyz" }));
 
       expect(html).toContain('"secret-token-xyz"');
     });
 
     it("injects tool arguments", () => {
       const html = buildHostHtmlTemplate(
-        createMinimalInput({ toolArgs: { location: "NYC", units: "metric" } })
+        createMinimalInput({ toolArgs: { location: "NYC", units: "metric" } }),
       );
 
       expect(html).toContain('"location"');
@@ -90,7 +88,7 @@ describe("buildHostHtmlTemplate", () => {
             displayMode: "fullscreen",
             theme: "dark",
           },
-        })
+        }),
       );
 
       expect(html).toContain('"displayMode"');
@@ -103,7 +101,7 @@ describe("buildHostHtmlTemplate", () => {
       const html = buildHostHtmlTemplate(
         createMinimalInput({
           toolArgs: { script: "<script>alert('xss')</script>" },
-        })
+        }),
       );
 
       // Should be escaped
@@ -114,35 +112,29 @@ describe("buildHostHtmlTemplate", () => {
 
   describe("consent handling", () => {
     it("injects requireToolConsent=false", () => {
-      const html = buildHostHtmlTemplate(
-        createMinimalInput({ requireToolConsent: false })
-      );
+      const html = buildHostHtmlTemplate(createMinimalInput({ requireToolConsent: false }));
 
       expect(html).toContain("const REQUIRE_TOOL_CONSENT = false");
     });
 
     it("injects requireToolConsent=true", () => {
-      const html = buildHostHtmlTemplate(
-        createMinimalInput({ requireToolConsent: true })
-      );
+      const html = buildHostHtmlTemplate(createMinimalInput({ requireToolConsent: true }));
 
       expect(html).toContain("const REQUIRE_TOOL_CONSENT = true");
     });
 
     it("injects cacheToolConsent", () => {
-      const html = buildHostHtmlTemplate(
-        createMinimalInput({ cacheToolConsent: false })
-      );
+      const html = buildHostHtmlTemplate(createMinimalInput({ cacheToolConsent: false }));
 
       expect(html).toContain("const CACHE_TOOL_CONSENT = false");
     });
 
     it("records explicit consent denials", () => {
-      const html = buildHostHtmlTemplate(
-        createMinimalInput({ requireToolConsent: true })
-      );
+      const html = buildHostHtmlTemplate(createMinimalInput({ requireToolConsent: true }));
 
-      expect(html).toContain('await post("/proxy/ui/consent", { approved: false }).catch(() => {});');
+      expect(html).toContain(
+        'await post("/proxy/ui/consent", { approved: false }).catch(() => {});',
+      );
       expect(html).toContain("Tool call denied by user.");
     });
   });
@@ -150,7 +142,7 @@ describe("buildHostHtmlTemplate", () => {
   describe("iframe permissions", () => {
     it("sets allow attribute when provided", () => {
       const html = buildHostHtmlTemplate(
-        createMinimalInput({ allowAttribute: "camera; microphone" })
+        createMinimalInput({ allowAttribute: "camera; microphone" }),
       );
 
       expect(html).toContain('const ALLOW_ATTRIBUTE = "camera; microphone"');
@@ -174,7 +166,7 @@ describe("buildHostHtmlTemplate", () => {
       const { applyCspMeta } = await import("../src/host-html-template.ts");
       const html = applyCspMeta(
         "<html><head></head><body>Content</body></html>",
-        "default-src 'none'; script-src 'self'"
+        "default-src 'none'; script-src 'self'",
       );
 
       expect(html).toContain("Content-Security-Policy");
@@ -209,7 +201,7 @@ describe("buildHostHtmlTemplate", () => {
       const html = buildHostHtmlTemplate(
         createMinimalInput({
           appBridgeModuleUrl: "https://cdn.example.com/app-bridge.js",
-        })
+        }),
       );
 
       expect(html).toContain("https://cdn.example.com/app-bridge.js");
@@ -220,7 +212,9 @@ describe("buildHostHtmlTemplate", () => {
     it("registers the stream patch notification method", () => {
       const html = buildHostHtmlTemplate(createMinimalInput());
 
-      expect(html).toContain('const STREAM_PATCH_METHOD = "notifications/pi-mcp-adapter/ui-result-patch"');
+      expect(html).toContain(
+        'const STREAM_PATCH_METHOD = "notifications/pi-mcp-adapter/ui-result-patch"',
+      );
       expect(html).toContain('eventSource.addEventListener("result-patch"');
       expect(html).toContain("bridge.notification({");
     });
@@ -239,16 +233,18 @@ describe("buildHostHtmlTemplate", () => {
         }),
       );
 
-      expect(html).toContain('const streamMode = initialStreamContext?.mode === "stream-first" ? "stream-first" : "eager";');
+      expect(html).toContain(
+        'const streamMode = initialStreamContext?.mode === "stream-first" ? "stream-first" : "eager";',
+      );
       expect(html).toContain('if (streamMode !== "stream-first") {');
-      expect(html).toContain('bridge.sendToolInput({ arguments: TOOL_ARGS });');
+      expect(html).toContain("bridge.sendToolInput({ arguments: TOOL_ARGS });");
     });
   });
 
   describe("XSS prevention", () => {
     it("escapes server name in title", () => {
       const html = buildHostHtmlTemplate(
-        createMinimalInput({ serverName: "<script>evil</script>" })
+        createMinimalInput({ serverName: "<script>evil</script>" }),
       );
 
       expect(html).toContain("&lt;script&gt;evil&lt;/script&gt;");
@@ -257,7 +253,7 @@ describe("buildHostHtmlTemplate", () => {
 
     it("escapes tool name in title", () => {
       const html = buildHostHtmlTemplate(
-        createMinimalInput({ toolName: '<img onerror="alert(1)">' })
+        createMinimalInput({ toolName: '<img onerror="alert(1)">' }),
       );
 
       expect(html).toContain("&lt;img onerror=");
@@ -267,7 +263,7 @@ describe("buildHostHtmlTemplate", () => {
       const html = buildHostHtmlTemplate(
         createMinimalInput({
           toolArgs: { text: "line\u2028separator\u2029here" },
-        })
+        }),
       );
 
       // Should be escaped to prevent JS parsing issues

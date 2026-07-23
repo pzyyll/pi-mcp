@@ -53,7 +53,14 @@ function createEmptyDiscovery(): McpDiscoverySummary {
 }
 
 function createSetupCallbacks(): SetupPanelCallbacks {
-  const preview = { path: "/tmp/x", existed: false, changed: true, beforeText: "", afterText: "", diffText: "" };
+  const preview = {
+    path: "/tmp/x",
+    existed: false,
+    changed: true,
+    beforeText: "",
+    afterText: "",
+    diffText: "",
+  };
   return {
     previewImports: () => preview,
     previewStarterProject: () => preview,

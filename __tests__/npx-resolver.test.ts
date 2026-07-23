@@ -100,5 +100,9 @@ function writeCachedPackage(npmCache: string, packageName: string): void {
     JSON.stringify({ name: packageName, version: "1.0.0", bin: "bin/cli.js" }),
     "utf-8",
   );
-  writeFileSync(join(packageDir, "bin", "cli.js"), "#!/usr/bin/env node\nconsole.log('ok')\n", "utf-8");
+  writeFileSync(
+    join(packageDir, "bin", "cli.js"),
+    "#!/usr/bin/env node\nconsole.log('ok')\n",
+    "utf-8",
+  );
 }

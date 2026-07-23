@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { UiResourceHandler } from "../src/ui-resource-handler.ts";
 import { UrlElicitationRequiredError } from "@modelcontextprotocol/sdk/types.js";
 import type { McpServerManager } from "../src/server-manager.ts";
@@ -19,17 +19,19 @@ describe("UiResourceHandler", () => {
       const handler = new UiResourceHandler(manager);
 
       await expect(handler.readUiResource("server", "https://example.com")).rejects.toThrow(
-        /URI must start with ui:\/\//
+        /URI must start with ui:\/\//,
       );
     });
 
     it("preserves URL-required errors for the outer tool adapter", async () => {
-      const error = new UrlElicitationRequiredError([{
-        mode: "url",
-        message: "Connect",
-        elicitationId: "connect-1",
-        url: "https://example.com/connect",
-      }]);
+      const error = new UrlElicitationRequiredError([
+        {
+          mode: "url",
+          message: "Connect",
+          elicitationId: "connect-1",
+          url: "https://example.com/connect",
+        },
+      ]);
       const manager = createMockManager({ readResource: vi.fn().mockRejectedValue(error) });
       const handler = new UiResourceHandler(manager);
 
@@ -94,7 +96,7 @@ describe("UiResourceHandler", () => {
       const handler = new UiResourceHandler(manager);
 
       await expect(handler.readUiResource("server", "ui://test/widget")).rejects.toThrow(
-        /content is empty/
+        /content is empty/,
       );
     });
 
@@ -113,7 +115,7 @@ describe("UiResourceHandler", () => {
       const handler = new UiResourceHandler(manager);
 
       await expect(handler.readUiResource("server", "ui://test/widget")).rejects.toThrow(
-        /unsupported MIME type/
+        /unsupported MIME type/,
       );
     });
 
@@ -145,7 +147,7 @@ describe("UiResourceHandler", () => {
       const handler = new UiResourceHandler(manager);
 
       await expect(handler.readUiResource("server", "ui://test/widget")).rejects.toThrow(
-        "No contents returned for UI resource: ui://test/widget"
+        "No contents returned for UI resource: ui://test/widget",
       );
     });
 
@@ -296,7 +298,7 @@ describe("UiResourceHandler", () => {
       const handler = new UiResourceHandler(manager);
 
       await expect(handler.readUiResource("server", "ui://test/widget")).rejects.toThrow(
-        "did not include text or blob content"
+        "did not include text or blob content",
       );
     });
   });

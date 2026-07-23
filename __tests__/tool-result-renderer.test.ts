@@ -32,16 +32,20 @@ describe("MCP tool call renderer", () => {
   });
 
   it("shows proxy discovery operations", () => {
-    expect(formatMcpProxyToolCallLines({ search: "tail events", server: "cf-portal", regex: true })).toEqual([
-      "mcp search tail events @ cf-portal (regex)",
+    expect(
+      formatMcpProxyToolCallLines({ search: "tail events", server: "cf-portal", regex: true }),
+    ).toEqual(["mcp search tail events @ cf-portal (regex)"]);
+    expect(formatMcpProxyToolCallLines({ connect: "cf-portal" })).toEqual([
+      "mcp connect cf-portal",
     ]);
-    expect(formatMcpProxyToolCallLines({ connect: "cf-portal" })).toEqual(["mcp connect cf-portal"]);
     expect(formatMcpProxyToolCallLines({ server: "cf-portal" })).toEqual(["mcp list cf-portal"]);
     expect(formatMcpProxyToolCallLines({})).toEqual(["mcp status"]);
   });
 
   it("renders ui-messages with execution precedence", () => {
-    expect(formatMcpProxyToolCallLines({ action: "ui-messages", server: "cf-portal" })).toEqual(["mcp ui-messages"]);
+    expect(formatMcpProxyToolCallLines({ action: "ui-messages", server: "cf-portal" })).toEqual([
+      "mcp ui-messages",
+    ]);
   });
 
   it("shows direct tool calls with JSON arguments", () => {
@@ -63,9 +67,10 @@ describe("MCP tool call renderer", () => {
 
 describe("MCP tool result renderer", () => {
   it("shows the first three lines and an ellipsis for collapsed long text", () => {
-    const display = formatMcpToolResultLines(result([
-      { type: "text", text: "one\ntwo\nthree\nfour" },
-    ]), false);
+    const display = formatMcpToolResultLines(
+      result([{ type: "text", text: "one\ntwo\nthree\nfour" }]),
+      false,
+    );
 
     expect(display).toEqual({
       lines: ["one", "two", "three", "…"],
@@ -74,9 +79,10 @@ describe("MCP tool result renderer", () => {
   });
 
   it("does not add an ellipsis when collapsed text is three lines or fewer", () => {
-    const display = formatMcpToolResultLines(result([
-      { type: "text", text: "one\ntwo\nthree" },
-    ]), false);
+    const display = formatMcpToolResultLines(
+      result([{ type: "text", text: "one\ntwo\nthree" }]),
+      false,
+    );
 
     expect(display).toEqual({
       lines: ["one", "two", "three"],
@@ -85,9 +91,10 @@ describe("MCP tool result renderer", () => {
   });
 
   it("shows full text when expanded", () => {
-    const display = formatMcpToolResultLines(result([
-      { type: "text", text: "one\ntwo\nthree\nfour" },
-    ]), true);
+    const display = formatMcpToolResultLines(
+      result([{ type: "text", text: "one\ntwo\nthree\nfour" }]),
+      true,
+    );
 
     expect(display).toEqual({
       lines: ["one", "two", "three", "four"],
@@ -96,10 +103,13 @@ describe("MCP tool result renderer", () => {
   });
 
   it("uses placeholders for images", () => {
-    const display = formatMcpToolResultLines(result([
-      { type: "text", text: "before" },
-      { type: "image", mimeType: "image/png", data: "abc" },
-    ]), true);
+    const display = formatMcpToolResultLines(
+      result([
+        { type: "text", text: "before" },
+        { type: "image", mimeType: "image/png", data: "abc" },
+      ]),
+      true,
+    );
 
     expect(display.lines).toEqual(["before", "[image: image/png]"]);
   });
@@ -111,9 +121,10 @@ describe("MCP tool result renderer", () => {
   });
 
   it("keeps error text visible", () => {
-    const display = formatMcpToolResultLines(result([
-      { type: "text", text: "Error: upstream failed\nExpected parameters:\n{}" },
-    ]), false);
+    const display = formatMcpToolResultLines(
+      result([{ type: "text", text: "Error: upstream failed\nExpected parameters:\n{}" }]),
+      false,
+    );
 
     expect(display.lines).toEqual(["Error: upstream failed", "Expected parameters:", "{}"]);
     expect(display.truncated).toBe(false);
@@ -125,7 +136,9 @@ describe("MCP tool result renderer", () => {
       collapsedOptions,
       plainTheme,
       { isError: true },
-    ).render(80).join("\n");
+    )
+      .render(80)
+      .join("\n");
 
     expect(output).toContain("line 4");
     expect(output).not.toContain("Ctrl+O to expand");
@@ -134,11 +147,15 @@ describe("MCP tool result renderer", () => {
 
   it("renders adapter error details expanded even when Pi context is not marked as an error", () => {
     const output = renderMcpToolResult(
-      result([{ type: "text", text: "Error: failed\nline 2\nline 3\nline 4" }], { error: "tool_error" }),
+      result([{ type: "text", text: "Error: failed\nline 2\nline 3\nline 4" }], {
+        error: "tool_error",
+      }),
       collapsedOptions,
       plainTheme,
       { isError: false },
-    ).render(80).join("\n");
+    )
+      .render(80)
+      .join("\n");
 
     expect(output).toContain("line 4");
     expect(output).not.toContain("Ctrl+O to expand");

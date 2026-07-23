@@ -36,7 +36,11 @@ describe("oauth-handler path resolution", () => {
     const { getAuthEntryFilePath } = await import("../src/mcp-auth.ts");
     const tokensPath = getAuthEntryFilePath("demo");
     mkdirSync(dirname(tokensPath), { recursive: true });
-    writeFileSync(tokensPath, JSON.stringify({ access_token: "abc", token_type: "bearer" }), "utf-8");
+    writeFileSync(
+      tokensPath,
+      JSON.stringify({ access_token: "abc", token_type: "bearer" }),
+      "utf-8",
+    );
 
     const { getStoredTokens } = await import("../src/oauth-handler.ts");
     expect(getStoredTokens("demo")).toEqual({

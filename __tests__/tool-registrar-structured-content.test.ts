@@ -18,18 +18,14 @@ describe("resolveMcpResultContent", () => {
       structuredContent: structured,
     });
 
-    expect(blocks).toEqual([
-      { type: "text", text: JSON.stringify(structured, null, 2) },
-    ]);
+    expect(blocks).toEqual([{ type: "text", text: JSON.stringify(structured, null, 2) }]);
   });
 
   it("falls back to structuredContent when content is omitted entirely", () => {
     const structured = { value: 42 };
     const blocks = resolveMcpResultContent({ structuredContent: structured });
 
-    expect(blocks).toEqual([
-      { type: "text", text: JSON.stringify(structured, null, 2) },
-    ]);
+    expect(blocks).toEqual([{ type: "text", text: JSON.stringify(structured, null, 2) }]);
   });
 
   it("returns empty array when both content and structuredContent are absent", () => {
@@ -38,16 +34,14 @@ describe("resolveMcpResultContent", () => {
   });
 
   it("does not treat null structuredContent as a fallback payload", () => {
-    expect(
-      resolveMcpResultContent({ content: [], structuredContent: null }),
-    ).toEqual([]);
+    expect(resolveMcpResultContent({ content: [], structuredContent: null })).toEqual([]);
   });
 
   it("treats an empty structuredContent object as a present payload", () => {
     // guards against a truthy check that would drop a legitimately empty object
-    expect(
-      resolveMcpResultContent({ content: [], structuredContent: {} }),
-    ).toEqual([{ type: "text", text: "{}" }]);
+    expect(resolveMcpResultContent({ content: [], structuredContent: {} })).toEqual([
+      { type: "text", text: "{}" },
+    ]);
   });
 
   it("does not fall back when content has a non-text block", () => {

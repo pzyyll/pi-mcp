@@ -1,6 +1,13 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { McpExtensionState } from "./state.ts";
-import type { McpAuthResult, McpConfig, ServerEntry, McpPanelCallbacks, McpPanelResult, ImportKind } from "./types.ts";
+import type {
+  McpAuthResult,
+  McpConfig,
+  ServerEntry,
+  McpPanelCallbacks,
+  McpPanelResult,
+  ImportKind,
+} from "./types.ts";
 import {
   ensureCompatibilityImports,
   getMcpDiscoverySummary,
@@ -17,7 +24,11 @@ import { loadMetadataCache } from "./metadata-cache.ts";
 import { buildToolMetadata } from "./tool-metadata.ts";
 import { supportsOAuth, authenticate, removeAuth } from "./mcp-auth-flow.ts";
 import { getAuthForUrl } from "./mcp-auth.ts";
-import { loadOnboardingState, markSetupCompleted as persistSetupCompleted, markSharedConfigHintShown } from "./onboarding-state.ts";
+import {
+  loadOnboardingState,
+  markSetupCompleted as persistSetupCompleted,
+  markSharedConfigHintShown,
+} from "./onboarding-state.ts";
 import { openPath } from "./utils.ts";
 
 export async function showStatus(state: McpExtensionState, ctx: ExtensionContext): Promise<void> {
@@ -48,7 +59,9 @@ export async function showStatus(state: McpExtensionState, ctx: ExtensionContext
       status = "cached";
     }
 
-    const toolSuffix = failed ? "" : ` (${toolCount} tools${status === "cached" ? ", cached" : ""})`;
+    const toolSuffix = failed
+      ? ""
+      : ` (${toolCount} tools${status === "cached" ? ", cached" : ""})`;
     lines.push(`${statusIcon} ${name}: ${status}${toolSuffix}`);
   }
 
@@ -63,7 +76,7 @@ export async function showStatus(state: McpExtensionState, ctx: ExtensionContext
 export async function showTools(state: McpExtensionState, ctx: ExtensionContext): Promise<void> {
   if (!ctx.hasUI) return;
 
-  const allTools = [...state.toolMetadata.values()].flat().map(m => m.name);
+  const allTools = [...state.toolMetadata.values()].flat().map((m) => m.name);
 
   if (allTools.length === 0) {
     ctx.ui.notify("No MCP tools available", "info");
@@ -73,7 +86,7 @@ export async function showTools(state: McpExtensionState, ctx: ExtensionContext)
   const lines = [
     "MCP Tools:",
     "",
-    ...allTools.map(t => `  ${t}`),
+    ...allTools.map((t) => `  ${t}`),
     "",
     `Total: ${allTools.length} tools`,
   ];
@@ -84,7 +97,7 @@ export async function showTools(state: McpExtensionState, ctx: ExtensionContext)
 export async function reconnectServers(
   state: McpExtensionState,
   ctx: ExtensionContext,
-  targetServer?: string
+  targetServer?: string,
 ): Promise<void> {
   if (targetServer && !state.config.mcpServers[targetServer]) {
     if (ctx.hasUI) {
@@ -110,7 +123,13 @@ export async function reconnectServers(
       }
       const prefix = state.config.settings?.toolPrefix ?? "server";
 
-      const { metadata, failedTools } = buildToolMetadata(connection.tools, connection.resources, definition, name, prefix);
+      const { metadata, failedTools } = buildToolMetadata(
+        connection.tools,
+        connection.resources,
+        definition,
+        name,
+        prefix,
+      );
       state.toolMetadata.set(name, metadata);
       updateMetadataCache(state, name);
       state.failureTracker.delete(name);
@@ -118,7 +137,7 @@ export async function reconnectServers(
       if (ctx.hasUI) {
         ctx.ui.notify(
           `MCP: Reconnected to ${name} (${connection.tools.length} tools, ${connection.resources.length} resources)`,
-          "info"
+          "info",
         );
         if (failedTools.length > 0) {
           ctx.ui.notify(`MCP: ${name} - ${failedTools.length} tools skipped`, "warning");
@@ -139,9 +158,10 @@ export async function reconnectServers(
 export async function authenticateServer(
   serverName: string,
   config: McpConfig,
-  ctx: ExtensionContext
+  ctx: ExtensionContext,
 ): Promise<McpAuthResult> {
-  if (!ctx.hasUI) return { ok: false, message: "OAuth authentication requires an interactive session." };
+  if (!ctx.hasUI)
+    return { ok: false, message: "OAuth authentication requires an interactive session." };
 
   const definition = config.mcpServers[serverName];
   if (!definition) {
@@ -154,8 +174,8 @@ export async function authenticateServer(
     const message = `Server "${serverName}" does not use OAuth authentication. Set "auth": "oauth" or omit auth for auto-detection.`;
     ctx.ui.notify(
       `Server "${serverName}" does not use OAuth authentication.\n` +
-      `Set "auth": "oauth" or omit auth for auto-detection.`,
-      "error"
+        `Set "auth": "oauth" or omit auth for auto-detection.`,
+      "error",
     );
     return { ok: false, message };
   }
@@ -172,8 +192,8 @@ export async function authenticateServer(
       onAuthorizationUrl: (authorizationUrl) => {
         ctx.ui.notify(
           `Open this URL to authenticate ${serverName}:\n\n${authorizationUrl}\n\n` +
-          "After approving, return to Pi; the local callback will complete automatically.",
-          "info"
+            "After approving, return to Pi; the local callback will complete automatically.",
+          "info",
         );
       },
     });
@@ -182,8 +202,8 @@ export async function authenticateServer(
       const message = `OAuth authentication successful for "${serverName}"! Run /mcp reconnect ${serverName} to connect with the new token.`;
       ctx.ui.notify(
         `OAuth authentication successful for "${serverName}"!\n` +
-        `Run /mcp reconnect ${serverName} to connect with the new token.`,
-        "info"
+          `Run /mcp reconnect ${serverName} to connect with the new token.`,
+        "info",
       );
       return { ok: true, message };
     }
@@ -203,7 +223,7 @@ export async function authenticateServer(
 export async function logoutServer(
   serverName: string,
   state: McpExtensionState,
-  ctx: ExtensionContext
+  ctx: ExtensionContext,
 ): Promise<{ ok: boolean; message: string }> {
   const definition = state.config.mcpServers[serverName];
   if (!definition) {
@@ -225,14 +245,19 @@ export interface PanelFlowResult {
   configChanged: boolean;
 }
 
-function buildSharedConfigNoticeLines(configOverridePath: string | undefined, cwd: string): { lines: string[]; fingerprint: string | null } {
+function buildSharedConfigNoticeLines(
+  configOverridePath: string | undefined,
+  cwd: string,
+): { lines: string[]; fingerprint: string | null } {
   const discovery = getMcpDiscoverySummary(configOverridePath, cwd);
   const onboardingState = loadOnboardingState();
   if (!discovery.hasSharedServers || onboardingState.sharedConfigHintShown) {
     return { lines: [], fingerprint: null };
   }
 
-  const sharedSources = discovery.sources.filter((source) => source.kind === "shared" && source.serverCount > 0);
+  const sharedSources = discovery.sources.filter(
+    (source) => source.kind === "shared" && source.serverCount > 0,
+  );
   const sourceList = sharedSources.map((source) => source.path).join(", ");
   return {
     lines: [
@@ -258,12 +283,17 @@ export async function openMcpSetup(
   let configChanged = false;
 
   const callbacks = {
-    previewImports: (imports: ImportKind[]) => previewCompatibilityImports(imports, configOverridePath),
+    previewImports: (imports: ImportKind[]) =>
+      previewCompatibilityImports(imports, configOverridePath),
     previewStarterProject: () => previewStarterProjectConfig(ctx.cwd),
     previewRepoPrompt: () => {
       const repoPrompt = getMcpDiscoverySummary(configOverridePath, ctx.cwd).repoPrompt;
       if (!repoPrompt.entry || !repoPrompt.targetPath || !repoPrompt.serverName) return null;
-      return previewSharedServerEntry(repoPrompt.targetPath, repoPrompt.serverName, repoPrompt.entry);
+      return previewSharedServerEntry(
+        repoPrompt.targetPath,
+        repoPrompt.serverName,
+        repoPrompt.entry,
+      );
     },
     adoptImports: async (imports: ImportKind[]) => {
       const result = ensureCompatibilityImports(imports, configOverridePath);
@@ -280,7 +310,11 @@ export async function openMcpSetup(
       if (!repoPrompt.entry || !repoPrompt.targetPath || !repoPrompt.serverName) {
         throw new Error("RepoPrompt is not available to add from this setup screen.");
       }
-      const path = writeSharedServerEntry(repoPrompt.targetPath, repoPrompt.serverName, repoPrompt.entry);
+      const path = writeSharedServerEntry(
+        repoPrompt.targetPath,
+        repoPrompt.serverName,
+        repoPrompt.entry,
+      );
       configChanged = true;
       return { path, serverName: repoPrompt.serverName };
     },
@@ -295,10 +329,16 @@ export async function openMcpSetup(
   return new Promise<PanelFlowResult>((resolve) => {
     ctx.ui.custom(
       (tui, _theme, keybindings, done) => {
-        return createMcpSetupPanel(discovery, callbacks, { mode, onboardingState, keybindings }, tui, () => {
-          done(undefined);
-          resolve({ configChanged });
-        });
+        return createMcpSetupPanel(
+          discovery,
+          callbacks,
+          { mode, onboardingState, keybindings },
+          tui,
+          () => {
+            done(undefined);
+            resolve({ configChanged });
+          },
+        );
       },
       { overlay: true, overlayOptions: { anchor: "center", width: 92 } },
     );
@@ -324,11 +364,11 @@ function buildMcpPanelCallbacks(
         return "needs-auth";
       }
       if (
-        definition?.auth === "oauth"
-        && definition.url
-        && definition.oauth !== false
-        && definition.oauth?.grantType !== "client_credentials"
-        && !getAuthForUrl(serverName, definition.url)?.tokens
+        definition?.auth === "oauth" &&
+        definition.url &&
+        definition.oauth !== false &&
+        definition.oauth?.grantType !== "client_credentials" &&
+        !getAuthForUrl(serverName, definition.url)?.tokens
       ) {
         return "needs-auth";
       }
@@ -355,7 +395,7 @@ export async function openMcpPanel(
 
   const config = state.config;
   const cache = loadMetadataCache();
-  const configPath = pi.getFlag("mcp-config") as string | undefined ?? configOverridePath;
+  const configPath = (pi.getFlag("mcp-config") as string | undefined) ?? configOverridePath;
   const provenanceMap = getServerProvenance(configPath, ctx.cwd);
   const { lines: noticeLines, fingerprint } = buildSharedConfigNoticeLines(configPath, ctx.cwd);
 
@@ -367,15 +407,26 @@ export async function openMcpPanel(
   await new Promise<void>((resolve) => {
     ctx.ui.custom(
       (tui, _theme, keybindings, done) => {
-        return createMcpPanel(config, cache, provenanceMap, callbacks, tui, (result: McpPanelResult) => {
-          if (!result.cancelled && result.changes.size > 0) {
-            writeDirectToolsConfig(result.changes, provenanceMap, config);
-            configChanged = true;
-            ctx.ui.notify("Direct tools updated. Pi will reload after this panel closes.", "info");
-          }
-          done(undefined);
-          resolve();
-        }, { noticeLines, keybindings });
+        return createMcpPanel(
+          config,
+          cache,
+          provenanceMap,
+          callbacks,
+          tui,
+          (result: McpPanelResult) => {
+            if (!result.cancelled && result.changes.size > 0) {
+              writeDirectToolsConfig(result.changes, provenanceMap, config);
+              configChanged = true;
+              ctx.ui.notify(
+                "Direct tools updated. Pi will reload after this panel closes.",
+                "info",
+              );
+            }
+            done(undefined);
+            resolve();
+          },
+          { noticeLines, keybindings },
+        );
       },
       { overlay: true, overlayOptions: { anchor: "center", width: 82 } },
     );
@@ -397,14 +448,16 @@ export async function openMcpAuthPanel(
   if (!ctx.hasUI) return { configChanged: false };
 
   const config = state.config;
-  const oauthServers = Object.entries(config.mcpServers).filter(([, definition]) => supportsOAuth(definition));
+  const oauthServers = Object.entries(config.mcpServers).filter(([, definition]) =>
+    supportsOAuth(definition),
+  );
   if (oauthServers.length === 0) {
     ctx.ui.notify("No OAuth-capable MCP servers are configured.", "warning");
     return { configChanged: false };
   }
 
   const cache = loadMetadataCache();
-  const configPath = pi.getFlag("mcp-config") as string | undefined ?? configOverridePath;
+  const configPath = (pi.getFlag("mcp-config") as string | undefined) ?? configOverridePath;
   const provenanceMap = getServerProvenance(configPath, ctx.cwd);
   const callbacks = buildMcpPanelCallbacks(state, config, ctx);
   const { createMcpPanel } = await import("./mcp-panel.ts");
@@ -412,14 +465,22 @@ export async function openMcpAuthPanel(
   await new Promise<void>((resolve) => {
     ctx.ui.custom(
       (tui, _theme, keybindings, done) => {
-        return createMcpPanel(config, cache, provenanceMap, callbacks, tui, () => {
-          done(undefined);
-          resolve();
-        }, {
-          authOnly: true,
-          keybindings,
-          noticeLines: ["Select an OAuth MCP server and press Enter or ctrl+a to authenticate."],
-        });
+        return createMcpPanel(
+          config,
+          cache,
+          provenanceMap,
+          callbacks,
+          tui,
+          () => {
+            done(undefined);
+            resolve();
+          },
+          {
+            authOnly: true,
+            keybindings,
+            noticeLines: ["Select an OAuth MCP server and press Enter or ctrl+a to authenticate."],
+          },
+        );
       },
       { overlay: true, overlayOptions: { anchor: "center", width: 82 } },
     );

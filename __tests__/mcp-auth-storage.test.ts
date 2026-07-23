@@ -42,6 +42,8 @@ describe("mcp-auth storage paths", () => {
   });
 
   it("rejects non-string names at the storage boundary", () => {
-    expect(() => getAuthEntryFilePath(undefined as unknown as string)).toThrow(/Invalid MCP server name/);
+    expect(() => getAuthEntryFilePath(undefined as unknown as string)).toThrow(
+      /Invalid MCP server name/,
+    );
   });
 });

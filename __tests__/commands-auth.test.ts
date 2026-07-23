@@ -8,7 +8,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../src/mcp-auth-flow.ts", () => ({
   authenticate: mocks.authenticate,
   removeAuth: mocks.removeAuth,
-  supportsOAuth: (definition: { url?: string; auth?: string }) => Boolean(definition.url) && definition.auth !== "bearer",
+  supportsOAuth: (definition: { url?: string; auth?: string }) =>
+    Boolean(definition.url) && definition.auth !== "bearer",
 }));
 
 vi.mock("../src/init.ts", () => ({
@@ -20,7 +21,8 @@ vi.mock("../src/init.ts", () => ({
 
 describe("authenticateServer", () => {
   it("surfaces the exact OAuth URL through UI notification", async () => {
-    const authorizationUrl = "https://auth.example.com/authorize?resource=https%3A%2F%2Fmcp.sentry.dev%2Fmcp";
+    const authorizationUrl =
+      "https://auth.example.com/authorize?resource=https%3A%2F%2Fmcp.sentry.dev%2Fmcp";
     mocks.authenticate.mockImplementationOnce(async (_name, _url, _definition, options) => {
       await options.onAuthorizationUrl(authorizationUrl);
       return "authenticated";
@@ -28,11 +30,15 @@ describe("authenticateServer", () => {
     const ui = { notify: vi.fn(), setStatus: vi.fn() };
     const { authenticateServer } = await import("../src/commands.ts");
 
-    const result = await authenticateServer("sentry", {
-      mcpServers: {
-        sentry: { url: "https://mcp.sentry.dev/mcp", auth: "oauth" },
+    const result = await authenticateServer(
+      "sentry",
+      {
+        mcpServers: {
+          sentry: { url: "https://mcp.sentry.dev/mcp", auth: "oauth" },
+        },
       },
-    }, { hasUI: true, ui } as any);
+      { hasUI: true, ui } as any,
+    );
 
     expect(result.ok).toBe(true);
     expect(mocks.authenticate).toHaveBeenCalledWith(
@@ -41,9 +47,6 @@ describe("authenticateServer", () => {
       { url: "https://mcp.sentry.dev/mcp", auth: "oauth" },
       { onAuthorizationUrl: expect.any(Function) },
     );
-    expect(ui.notify).toHaveBeenCalledWith(
-      expect.stringContaining(authorizationUrl),
-      "info",
-    );
+    expect(ui.notify).toHaveBeenCalledWith(expect.stringContaining(authorizationUrl), "info");
   });
 });

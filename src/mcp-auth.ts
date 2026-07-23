@@ -1,17 +1,17 @@
 /**
  * MCP Auth Storage Module
- * 
+ *
  * Handles secure storage of OAuth credentials, tokens, client information,
  * and PKCE state for MCP servers.
- * 
+ *
  * Token storage location: $MCP_OAUTH_DIR/sha256-<server-hash>/tokens.json when set,
  * otherwise <Pi agent dir>/mcp-oauth/sha256-<server-hash>/tokens.json
  */
 
-import { createHash } from 'crypto';
-import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'fs';
-import { join } from 'path';
-import { getAgentPath } from './agent-dir.ts';
+import { createHash } from "crypto";
+import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from "fs";
+import { join } from "path";
+import { getAgentPath } from "./agent-dir.ts";
 
 /** OAuth token storage format */
 export interface StoredTokens {
@@ -42,17 +42,17 @@ export interface AuthEntry {
 // Base directory for auth storage - can be overridden via env var for testing
 function getAuthBaseDir(): string {
   const override = process.env.MCP_OAUTH_DIR?.trim();
-  return override ? override : getAgentPath('mcp-oauth');
+  return override ? override : getAgentPath("mcp-oauth");
 }
 
 /**
  * Get the server-specific directory path.
  */
 function getServerDir(serverName: string): string {
-  if (typeof serverName !== 'string') {
+  if (typeof serverName !== "string") {
     throw new Error(`Invalid MCP server name: ${JSON.stringify(serverName)}`);
   }
-  const storageKey = createHash('sha256').update(serverName, 'utf8').digest('hex');
+  const storageKey = createHash("sha256").update(serverName, "utf8").digest("hex");
   return join(getAuthBaseDir(), `sha256-${storageKey}`);
 }
 
@@ -60,7 +60,7 @@ function getServerDir(serverName: string): string {
  * Get the tokens file path for a server.
  */
 export function getAuthEntryFilePath(serverName: string): string {
-  return join(getServerDir(serverName), 'tokens.json');
+  return join(getServerDir(serverName), "tokens.json");
 }
 
 /**
@@ -83,7 +83,7 @@ function readAuthEntry(serverName: string): AuthEntry | undefined {
     if (!existsSync(filePath)) {
       return undefined;
     }
-    const data = readFileSync(filePath, 'utf-8');
+    const data = readFileSync(filePath, "utf-8");
     return JSON.parse(data) as AuthEntry;
   } catch (error) {
     console.error(`Failed to read auth entry for ${serverName}:`, error);
@@ -143,7 +143,7 @@ export function removeAuthEntry(serverName: string): void {
   try {
     const filePath = getAuthEntryFilePath(serverName);
     if (existsSync(filePath)) {
-      writeFileSync(filePath, '{}', { mode: 0o600 });
+      writeFileSync(filePath, "{}", { mode: 0o600 });
     }
     // Try to remove the directory
     const dir = getServerDir(serverName);
@@ -162,11 +162,7 @@ export function removeAuthEntry(serverName: string): void {
 /**
  * Update tokens for a server.
  */
-export function updateTokens(
-  serverName: string, 
-  tokens: StoredTokens, 
-  serverUrl?: string
-): void {
+export function updateTokens(serverName: string, tokens: StoredTokens, serverUrl?: string): void {
   const entry = getAuthEntry(serverName) ?? {};
   if (serverUrl && entry.serverUrl !== serverUrl) {
     delete entry.clientInfo;
@@ -181,9 +177,9 @@ export function updateTokens(
  * Update client info for a server.
  */
 export function updateClientInfo(
-  serverName: string, 
-  clientInfo: StoredClientInfo, 
-  serverUrl?: string
+  serverName: string,
+  clientInfo: StoredClientInfo,
+  serverUrl?: string,
 ): void {
   const entry = getAuthEntry(serverName) ?? {};
   if (serverUrl && entry.serverUrl !== serverUrl) {
@@ -198,7 +194,11 @@ export function updateClientInfo(
 /**
  * Update code verifier for a server.
  */
-export function updateCodeVerifier(serverName: string, codeVerifier: string, serverUrl?: string): void {
+export function updateCodeVerifier(
+  serverName: string,
+  codeVerifier: string,
+  serverUrl?: string,
+): void {
   const entry = getAuthEntry(serverName) ?? {};
   if (serverUrl && entry.serverUrl !== serverUrl) {
     delete entry.tokens;

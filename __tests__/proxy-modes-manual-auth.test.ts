@@ -47,7 +47,8 @@ describe("manual OAuth proxy actions", () => {
     vi.resetModules();
     mocks.completeAuthFromInput.mockReset().mockResolvedValue("authenticated");
     mocks.startAuth.mockReset().mockResolvedValue({
-      authorizationUrl: "https://auth.example.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A19876%2Fcallback",
+      authorizationUrl:
+        "https://auth.example.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A19876%2Fcallback",
     });
     mocks.supportsOAuth.mockReset().mockImplementation((definition) => definition.auth === "oauth");
     mocks.updateStatusBar.mockReset();
@@ -59,7 +60,11 @@ describe("manual OAuth proxy actions", () => {
 
     const result = await executeAuthStart(state, "demo");
 
-    expect(mocks.startAuth).toHaveBeenCalledWith("demo", "https://api.example.com/mcp", state.config.mcpServers.demo);
+    expect(mocks.startAuth).toHaveBeenCalledWith(
+      "demo",
+      "https://api.example.com/mcp",
+      state.config.mcpServers.demo,
+    );
     expect(result.content[0].text).toContain("Open this URL in your local browser");
     expect(result.content[0].text).toContain("https://auth.example.com/authorize");
     expect(result.content[0].text).toContain("auth-complete");
@@ -80,9 +85,16 @@ describe("manual OAuth proxy actions", () => {
     const { executeAuthComplete } = await import("../src/proxy-modes.ts");
     const state = createState();
 
-    const result = await executeAuthComplete(state, "demo", "http://localhost:19876/callback?code=abc&state=state");
+    const result = await executeAuthComplete(
+      state,
+      "demo",
+      "http://localhost:19876/callback?code=abc&state=state",
+    );
 
-    expect(mocks.completeAuthFromInput).toHaveBeenCalledWith("demo", "http://localhost:19876/callback?code=abc&state=state");
+    expect(mocks.completeAuthFromInput).toHaveBeenCalledWith(
+      "demo",
+      "http://localhost:19876/callback?code=abc&state=state",
+    );
     expect(state.manager.close).toHaveBeenCalledWith("demo");
     expect(state.failureTracker.has("demo")).toBe(false);
     expect(mocks.updateStatusBar).toHaveBeenCalledWith(state);

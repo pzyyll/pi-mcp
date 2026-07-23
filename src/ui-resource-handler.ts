@@ -1,5 +1,8 @@
 import { RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/app-bridge";
-import { UrlElicitationRequiredError, type ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
+import {
+  UrlElicitationRequiredError,
+  type ReadResourceResult,
+} from "@modelcontextprotocol/sdk/types.js";
 import { ResourceFetchError, ResourceParseError } from "./errors.ts";
 import { logger } from "./logger.ts";
 import type { McpServerManager } from "./server-manager.ts";
@@ -48,7 +51,7 @@ export class UiResourceHandler {
       throw new ResourceParseError(
         uri,
         `unsupported MIME type "${mimeType}" (expected text/html or ${RESOURCE_MIME_TYPE})`,
-        { server: serverName, mimeType }
+        { server: serverName, mimeType },
       );
     }
 
@@ -61,7 +64,7 @@ export class UiResourceHandler {
     const contentMeta = extractUiMeta(content._meta);
     const listMeta = extractUiMeta(this.getListResourceMeta(serverName, uri));
 
-    log.debug("Resource loaded successfully", { 
+    log.debug("Resource loaded successfully", {
       contentLength: html.length,
       hasCsp: !!contentMeta.csp || !!listMeta.csp,
     });
@@ -79,7 +82,10 @@ export class UiResourceHandler {
     };
   }
 
-  private getListResourceMeta(serverName: string, uri: string): Record<string, unknown> | undefined {
+  private getListResourceMeta(
+    serverName: string,
+    uri: string,
+  ): Record<string, unknown> | undefined {
     const connection = this.manager.getConnection(serverName);
     if (!connection?.resources?.length) return undefined;
     const resource = connection.resources.find((entry) => entry.uri === uri);
@@ -98,7 +104,7 @@ function selectContent(result: ReadResourceResult, preferredUri: string): Resour
   if (byUri) return byUri;
 
   const byHtmlMime = contents.find(
-    (content) => content.mimeType && isHtmlMimeType(content.mimeType)
+    (content) => content.mimeType && isHtmlMimeType(content.mimeType),
   );
   if (byHtmlMime) return byHtmlMime;
 

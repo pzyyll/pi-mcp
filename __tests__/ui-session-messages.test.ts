@@ -56,7 +56,9 @@ describe("UiSessionMessages", () => {
   describe("named handoff envelopes", () => {
     it("parses canonical intent-newline-json payloads", () => {
       expect(
-        parseUiPromptHandoff('visualization_annotations_submitted\n{"visualizationId":"flow","annotations":[]}')
+        parseUiPromptHandoff(
+          'visualization_annotations_submitted\n{"visualizationId":"flow","annotations":[]}',
+        ),
       ).toEqual({
         intent: "visualization_annotations_submitted",
         params: { visualizationId: "flow", annotations: [] },

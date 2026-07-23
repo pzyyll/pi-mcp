@@ -39,6 +39,7 @@ For most MCP servers, you only need the URL:
 ```
 
 OAuth is automatically enabled for HTTP servers. The SDK will:
+
 - Auto-detect if the server requires OAuth
 - Discover OAuth endpoints from the server
 - Register a dynamic client (if supported by the server)
@@ -64,8 +65,6 @@ You can optionally provide a pre-registered client:
   }
 }
 ```
-
-
 
 ### Configuration Options
 
@@ -117,6 +116,7 @@ Run the `/mcp-auth` command with the server name:
 Manual `/mcp-auth` is the default flow. If you set `settings.autoAuth: true`, proxy/direct tool execution will trigger OAuth automatically when a server returns `needs-auth`, then retry the original operation once.
 
 This will:
+
 1. Start the callback server lazily on an OS-assigned local port, or on the exact `oauth.redirectUri` port for pre-registered callbacks
 2. Discover OAuth endpoints automatically
 3. Register a dynamic client (if no clientId provided)
@@ -155,6 +155,7 @@ mcp({ tool: "my-tool", args: '{"key": "value"}' })
 ```
 
 The SDK automatically:
+
 - Adds the access token to requests
 - Refreshes expired tokens automatically
 - Re-authenticates if tokens are invalid
@@ -244,6 +245,7 @@ Tokens are stored per-server in `~/.pi/agent/mcp-oauth/sha256-<server-hash>/toke
 ```
 
 Example directory structure:
+
 ```
 ~/.pi/agent/mcp-oauth/
 ├── sha256-<linear-server-name-hash>/
@@ -330,11 +332,9 @@ import {
   auth,
   UnauthorizedError,
   OAuthClientProvider,
-} from "@modelcontextprotocol/sdk/client/auth.js"
+} from "@modelcontextprotocol/sdk/client/auth.js";
 
-import {
-  StreamableHTTPClientTransport,
-} from "@modelcontextprotocol/sdk/client/streamableHttp.js"
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 ```
 
 The `McpOAuthProvider` class implements `OAuthClientProvider` and is passed to `StreamableHTTPClientTransport`:
@@ -342,7 +342,7 @@ The `McpOAuthProvider` class implements `OAuthClientProvider` and is passed to `
 ```typescript
 const transport = new StreamableHTTPClientTransport(url, {
   authProvider: new McpOAuthProvider(serverName, serverUrl, config, callbacks),
-})
+});
 ```
 
 ## References

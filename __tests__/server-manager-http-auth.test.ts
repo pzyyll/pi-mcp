@@ -49,11 +49,13 @@ vi.mock("@modelcontextprotocol/sdk/client/stdio.js", () => ({
 }));
 
 vi.mock("@modelcontextprotocol/sdk/client/streamableHttp.js", () => ({
-  StreamableHTTPClientTransport: vi.fn().mockImplementation((url: URL, options: TransportOptions) => {
-    const transport = { url, options, close: vi.fn(async () => undefined) };
-    mocks.httpTransports.push(transport);
-    return transport;
-  }),
+  StreamableHTTPClientTransport: vi
+    .fn()
+    .mockImplementation((url: URL, options: TransportOptions) => {
+      const transport = { url, options, close: vi.fn(async () => undefined) };
+      mocks.httpTransports.push(transport);
+      return transport;
+    }),
 }));
 
 vi.mock("@modelcontextprotocol/sdk/client/sse.js", () => ({
@@ -96,7 +98,9 @@ describe("McpServerManager HTTP bearer auth", () => {
       bearerToken: "${MCP_TEST_BEARER_TOKEN}",
     });
 
-    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.Authorization).toBe("Bearer placeholder-token");
+    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.Authorization).toBe(
+      "Bearer placeholder-token",
+    );
   });
 
   it("interpolates $env:VAR bearerToken placeholders", async () => {
@@ -110,7 +114,9 @@ describe("McpServerManager HTTP bearer auth", () => {
       bearerToken: "$env:MCP_TEST_BEARER_TOKEN",
     });
 
-    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.Authorization).toBe("Bearer env-prefix-token");
+    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.Authorization).toBe(
+      "Bearer env-prefix-token",
+    );
   });
 
   it("keeps bearerTokenEnv support", async () => {
@@ -124,7 +130,9 @@ describe("McpServerManager HTTP bearer auth", () => {
       bearerTokenEnv: "MCP_TEST_BEARER_TOKEN_ENV",
     });
 
-    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.Authorization).toBe("Bearer named-env-token");
+    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.Authorization).toBe(
+      "Bearer named-env-token",
+    );
   });
 
   it("uses configured headers without implicit OAuth", async () => {
@@ -136,7 +144,9 @@ describe("McpServerManager HTTP bearer auth", () => {
       headers: { "X-Goog-Api-Key": "api-key" },
     });
 
-    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.["X-Goog-Api-Key"]).toBe("api-key");
+    expect(mocks.httpTransports.at(-1)!.options.requestInit?.headers?.["X-Goog-Api-Key"]).toBe(
+      "api-key",
+    );
     expect(mocks.httpTransports.at(-1)!.options.authProvider).toBeUndefined();
   });
 
@@ -171,7 +181,11 @@ describe("McpServerManager HTTP bearer auth", () => {
       requestTimeoutMs: 5000,
     });
 
-    expect(mocks.clients[1].connect).toHaveBeenCalledWith(mocks.httpTransports[0], { timeout: 5000 });
-    expect(mocks.clients[0].connect).toHaveBeenCalledWith(mocks.httpTransports[1], { timeout: 5000 });
+    expect(mocks.clients[1].connect).toHaveBeenCalledWith(mocks.httpTransports[0], {
+      timeout: 5000,
+    });
+    expect(mocks.clients[0].connect).toHaveBeenCalledWith(mocks.httpTransports[1], {
+      timeout: 5000,
+    });
   });
 });

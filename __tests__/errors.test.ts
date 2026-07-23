@@ -59,9 +59,7 @@ describe("ResourceFetchError", () => {
       server: "test-server",
     });
 
-    expect(error.message).toBe(
-      'Failed to fetch UI resource "ui://test/resource": not found'
-    );
+    expect(error.message).toBe('Failed to fetch UI resource "ui://test/resource": not found');
     expect(error.code).toBe("RESOURCE_FETCH_ERROR");
     expect(error.context.uri).toBe("ui://test/resource");
     expect(error.context.server).toBe("test-server");
@@ -104,9 +102,7 @@ describe("ConsentError", () => {
   it("creates denial error", () => {
     const error = new ConsentError("test-server", { denied: true });
 
-    expect(error.message).toBe(
-      'Tool calls for "test-server" were denied for this session'
-    );
+    expect(error.message).toBe('Tool calls for "test-server" were denied for this session');
     expect(error.code).toBe("CONSENT_DENIED");
     expect(error.denied).toBe(true);
     expect(error.recoveryHint).toContain("Start a new session");

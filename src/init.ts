@@ -32,7 +32,7 @@ export function isTuiMode(ctx: Pick<ExtensionContext, "hasUI" | "mode">): boolea
 
 export async function initializeMcp(
   pi: ExtensionAPI,
-  ctx: ExtensionContext
+  ctx: ExtensionContext,
 ): Promise<McpExtensionState> {
   const configPath = pi.getFlag("mcp-config") as string | undefined;
   const config = loadMcpConfig(configPath, ctx.cwd);
@@ -74,7 +74,8 @@ export async function initializeMcp(
     completedUiSessions: [],
     openBrowser: (url: string) => openUrl(pi, url, process.env.BROWSER),
     ui,
-    sendMessage: (message, options) => pi.sendMessage(message as unknown as Parameters<typeof pi.sendMessage>[0], options),
+    sendMessage: (message, options) =>
+      pi.sendMessage(message as unknown as Parameters<typeof pi.sendMessage>[0], options),
   };
 
   const serverEntries = Object.entries(config.mcpServers);
@@ -82,7 +83,8 @@ export async function initializeMcp(
     return state;
   }
 
-  const idleSetting = typeof config.settings?.idleTimeout === "number" ? config.settings.idleTimeout : 10;
+  const idleSetting =
+    typeof config.settings?.idleTimeout === "number" ? config.settings.idleTimeout : 10;
   lifecycle.setGlobalIdleTimeout(idleSetting);
 
   const cachePath = getMetadataCachePath();
@@ -106,7 +108,7 @@ export async function initializeMcp(
     lifecycle.registerServer(
       name,
       definition,
-      idleOverride !== undefined ? { idleTimeout: idleOverride } : undefined
+      idleOverride !== undefined ? { idleTimeout: idleOverride } : undefined,
     );
     if (lifecycleMode === "keep-alive") {
       lifecycle.markKeepAlive(name, definition);
@@ -133,7 +135,12 @@ export async function initializeMcp(
     try {
       const connection = await manager.connect(name, definition, ctx.signal);
       if (connection.status === "needs-auth") {
-        return { name, definition, connection: null, error: `OAuth authentication required. Run /mcp-auth ${name}.` };
+        return {
+          name,
+          definition,
+          connection: null,
+          error: `OAuth authentication required. Run /mcp-auth ${name}.`,
+        };
       }
       return { name, definition, connection, error: null };
     } catch (error) {
@@ -151,25 +158,29 @@ export async function initializeMcp(
       continue;
     }
 
-    const { metadata, failedTools } = buildToolMetadata(connection.tools, connection.resources, definition, name, prefix);
+    const { metadata, failedTools } = buildToolMetadata(
+      connection.tools,
+      connection.resources,
+      definition,
+      name,
+      prefix,
+    );
     toolMetadata.set(name, metadata);
     updateMetadataCache(state, name);
 
     if (failedTools.length > 0 && ctx.hasUI) {
-      ctx.ui.notify(
-        `MCP: ${name} - ${failedTools.length} tools skipped`,
-        "warning"
-      );
+      ctx.ui.notify(`MCP: ${name} - ${failedTools.length} tools skipped`, "warning");
     }
   }
 
-  const connectedCount = results.filter(r => r.connection).length;
-  const failedCount = results.filter(r => r.error).length;
+  const connectedCount = results.filter((r) => r.connection).length;
+  const failedCount = results.filter((r) => r.error).length;
   if (ctx.hasUI && connectedCount > 0) {
     const totalTools = totalToolCount(state);
-    const msg = failedCount > 0
-      ? `MCP: ${connectedCount}/${startupServers.length} servers connected (${totalTools} tools)`
-      : `MCP: ${connectedCount} servers connected (${totalTools} tools)`;
+    const msg =
+      failedCount > 0
+        ? `MCP: ${connectedCount}/${startupServers.length} servers connected (${totalTools} tools)`
+        : `MCP: ${connectedCount} servers connected (${totalTools} tools)`;
     ctx.ui.notify(msg, "info");
   }
 
@@ -180,7 +191,7 @@ export async function initializeMcp(
 
     if (missingCacheServers.length > 0) {
       const bootstrapResults = await parallelLimit(
-        missingCacheServers.filter(name => !results.some(r => r.name === name && r.connection)),
+        missingCacheServers.filter((name) => !results.some((r) => r.name === name && r.connection)),
         10,
         async (name) => {
           const definition = config.mcpServers[name];
@@ -189,7 +200,13 @@ export async function initializeMcp(
             if (connection.status === "needs-auth") {
               return { name, ok: false };
             }
-            const { metadata } = buildToolMetadata(connection.tools, connection.resources, definition, name, prefix);
+            const { metadata } = buildToolMetadata(
+              connection.tools,
+              connection.resources,
+              definition,
+              name,
+              prefix,
+            );
             toolMetadata.set(name, metadata);
             updateMetadataCache(state, name);
             return { name, ok: true };
@@ -200,9 +217,12 @@ export async function initializeMcp(
           }
         },
       );
-      const bootstrapped = bootstrapResults.filter(r => r.ok).map(r => r.name);
+      const bootstrapped = bootstrapResults.filter((r) => r.ok).map((r) => r.name);
       if (bootstrapped.length > 0 && ctx.hasUI) {
-        ctx.ui.notify(`MCP: direct tools for ${bootstrapped.join(", ")} will be available after restart`, "info");
+        ctx.ui.notify(
+          `MCP: direct tools for ${bootstrapped.join(", ")} will be available after restart`,
+          "info",
+        );
       }
     }
   }
@@ -234,7 +254,13 @@ export function updateServerMetadata(state: McpExtensionState, serverName: strin
 
   const prefix = state.config.settings?.toolPrefix ?? "server";
 
-  const { metadata } = buildToolMetadata(connection.tools, connection.resources, definition, serverName, prefix);
+  const { metadata } = buildToolMetadata(
+    connection.tools,
+    connection.resources,
+    definition,
+    serverName,
+    prefix,
+  );
   state.toolMetadata.set(serverName, metadata);
 }
 
@@ -250,7 +276,8 @@ export function updateMetadataCache(state: McpExtensionState, serverName: string
   const existingEntry = existing?.servers?.[serverName];
 
   const tools = serializeTools(connection.tools);
-  let resources = definition.exposeResources === false ? [] : serializeResources(connection.resources);
+  let resources =
+    definition.exposeResources === false ? [] : serializeResources(connection.resources);
 
   if (
     definition.exposeResources !== false &&
@@ -299,7 +326,11 @@ export function getFailureAgeSeconds(state: McpExtensionState, serverName: strin
   return Math.round(ageMs / 1000);
 }
 
-export async function lazyConnect(state: McpExtensionState, serverName: string, signal?: AbortSignal): Promise<boolean> {
+export async function lazyConnect(
+  state: McpExtensionState,
+  serverName: string,
+  signal?: AbortSignal,
+): Promise<boolean> {
   const connection = state.manager.getConnection(serverName);
   if (connection?.status === "needs-auth") {
     return false;
@@ -343,10 +374,14 @@ export async function lazyConnect(state: McpExtensionState, serverName: string, 
 function getEffectiveIdleTimeoutMinutes(state: McpExtensionState, serverName: string): number {
   const definition = state.config.mcpServers[serverName];
   if (!definition) {
-    return typeof state.config.settings?.idleTimeout === "number" ? state.config.settings.idleTimeout : 10;
+    return typeof state.config.settings?.idleTimeout === "number"
+      ? state.config.settings.idleTimeout
+      : 10;
   }
   if (typeof definition.idleTimeout === "number") return definition.idleTimeout;
   const mode = definition.lifecycle ?? "lazy";
   if (mode === "eager") return 0;
-  return typeof state.config.settings?.idleTimeout === "number" ? state.config.settings.idleTimeout : 10;
+  return typeof state.config.settings?.idleTimeout === "number"
+    ? state.config.settings.idleTimeout
+    : 10;
 }

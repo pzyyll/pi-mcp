@@ -20,7 +20,9 @@ const IMPORT_PATHS: Record<ImportKind, string[]> = {
     join(homedir(), ".claude.json"),
     join(homedir(), ".claude", "claude_desktop_config.json"),
   ],
-  "claude-desktop": [join(homedir(), "Library", "Application Support", "Claude", "claude_desktop_config.json")],
+  "claude-desktop": [
+    join(homedir(), "Library", "Application Support", "Claude", "claude_desktop_config.json"),
+  ],
   codex: [join(homedir(), ".codex", "config.json")],
   windsurf: [join(homedir(), ".windsurf", "mcp.json")],
   vscode: [".vscode/mcp.json"],
@@ -105,7 +107,10 @@ export function getProjectPiConfigPath(cwd = process.cwd()): string {
   return resolve(cwd, PROJECT_PI_CONFIG_NAME);
 }
 
-export function getConfigDiscoveryPaths(overridePath?: string, cwd = process.cwd()): ConfigDiscoveryPath[] {
+export function getConfigDiscoveryPaths(
+  overridePath?: string,
+  cwd = process.cwd(),
+): ConfigDiscoveryPath[] {
   return getConfigSources(overridePath, cwd).map((source) => ({
     label: source.label,
     path: source.readPath,
@@ -126,7 +131,10 @@ export function findAvailableImportConfigs(cwd = process.cwd()): DiscoveredImpor
   return discovered;
 }
 
-export function getMcpDiscoverySummary(overridePath?: string, cwd = process.cwd()): McpDiscoverySummary {
+export function getMcpDiscoverySummary(
+  overridePath?: string,
+  cwd = process.cwd(),
+): McpDiscoverySummary {
   const sources = getConfigSources(overridePath, cwd).map((source) => {
     const loaded = readValidatedConfig(source.readPath, `MCP config from ${source.readPath}`);
     return {
@@ -153,10 +161,15 @@ export function getMcpDiscoverySummary(overridePath?: string, cwd = process.cwd(
     .filter((value): value is ImportConfigSummary => value !== null);
 
   const totalServerCount = sources.reduce((sum, source) => sum + source.serverCount, 0);
-  const hasSharedServers = sources.some((source) => source.kind === "shared" && source.serverCount > 0);
-  const hasPiOwnedServers = sources.some((source) => source.kind === "pi" && source.serverCount > 0);
+  const hasSharedServers = sources.some(
+    (source) => source.kind === "shared" && source.serverCount > 0,
+  );
+  const hasPiOwnedServers = sources.some(
+    (source) => source.kind === "pi" && source.serverCount > 0,
+  );
   const hasAnyDetectedPaths = sources.some((source) => source.exists) || imports.length > 0;
-  const hasAnyConfig = totalServerCount > 0 || imports.some((entry) => entry.serverCount > 0) || hasAnyDetectedPaths;
+  const hasAnyConfig =
+    totalServerCount > 0 || imports.some((entry) => entry.serverCount > 0) || hasAnyDetectedPaths;
 
   const summaryWithoutRepoPrompt = {
     sources,
@@ -262,12 +275,15 @@ function mergeServerMaps(
 ): Record<string, ServerEntry> {
   const merged = { ...base };
   for (const [name, definition] of Object.entries(next)) {
-    merged[name] = { ...(merged[name] ?? {}), ...definition };
+    merged[name] = { ...merged[name], ...definition };
   }
   return merged;
 }
 
-function mergeImports(left: ImportKind[] | undefined, right: ImportKind[] | undefined): ImportKind[] | undefined {
+function mergeImports(
+  left: ImportKind[] | undefined,
+  right: ImportKind[] | undefined,
+): ImportKind[] | undefined {
   const merged = [...(left ?? []), ...(right ?? [])];
   if (merged.length === 0) return undefined;
   return [...new Set(merged)];
@@ -394,9 +410,8 @@ function buildUnifiedDiff(beforeText: string, afterText: string): string {
 
   for (let i = rows - 1; i >= 0; i--) {
     for (let j = cols - 1; j >= 0; j--) {
-      lcs[i][j] = before[i] === after[j]
-        ? lcs[i + 1][j + 1] + 1
-        : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+      lcs[i][j] =
+        before[i] === after[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
     }
   }
 
@@ -424,7 +439,10 @@ function buildUnifiedDiff(beforeText: string, afterText: string): string {
   return lines.join("\n");
 }
 
-function buildConfigWritePreview(filePath: string, nextRaw: Record<string, unknown>): ConfigWritePreview {
+function buildConfigWritePreview(
+  filePath: string,
+  nextRaw: Record<string, unknown>,
+): ConfigWritePreview {
   const existed = existsSync(filePath);
   const beforeRaw = readRawConfigObject(filePath);
   const beforeText = existed ? serializeRawConfig(beforeRaw) : "";
@@ -444,7 +462,9 @@ function readRawConfigObject(filePath: string): Record<string, unknown> {
 
   try {
     const raw = JSON.parse(readFileSync(filePath, "utf-8"));
-    return raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+    return raw && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {};
   } catch {
     return {};
   }
@@ -465,7 +485,10 @@ function getServersObject(raw: Record<string, unknown>): Record<string, ServerEn
   return existing as Record<string, ServerEntry>;
 }
 
-function setServersObject(raw: Record<string, unknown>, servers: Record<string, ServerEntry>): void {
+function setServersObject(
+  raw: Record<string, unknown>,
+  servers: Record<string, ServerEntry>,
+): void {
   delete raw["mcp-servers"];
   raw.mcpServers = servers;
 }
@@ -477,21 +500,27 @@ function isRepoPromptServer(name: string, entry: ServerEntry): boolean {
   }
 
   const command = entry.command?.toLowerCase() ?? "";
-  if (command.includes("repoprompt") || command.includes("rp-mcp") || command.endsWith("repoprompt_cli")) {
+  if (
+    command.includes("repoprompt") ||
+    command.includes("rp-mcp") ||
+    command.endsWith("repoprompt_cli")
+  ) {
     return true;
   }
 
-  return (entry.args ?? []).some((arg) => typeof arg === "string" && arg.toLowerCase().includes("repoprompt"));
+  return (entry.args ?? []).some(
+    (arg) => typeof arg === "string" && arg.toLowerCase().includes("repoprompt"),
+  );
 }
 
 function findProjectRoot(cwd = process.cwd()): string | null {
   let current = resolve(cwd);
   while (true) {
     if (
-      existsSync(join(current, ".git"))
-      || existsSync(join(current, "package.json"))
-      || existsSync(join(current, PROJECT_CONFIG_NAME))
-      || existsSync(join(current, ".pi"))
+      existsSync(join(current, ".git")) ||
+      existsSync(join(current, "package.json")) ||
+      existsSync(join(current, PROJECT_CONFIG_NAME)) ||
+      existsSync(join(current, ".pi"))
     ) {
       return current;
     }
@@ -510,7 +539,10 @@ function buildRepoPromptEntry(executablePath: string): ServerEntry {
   };
 }
 
-function detectRepoPrompt(summary: Omit<McpDiscoverySummary, "fingerprint" | "repoPrompt">, cwd = process.cwd()): RepoPromptDiscovery {
+function detectRepoPrompt(
+  summary: Omit<McpDiscoverySummary, "fingerprint" | "repoPrompt">,
+  cwd = process.cwd(),
+): RepoPromptDiscovery {
   for (const source of summary.sources) {
     if (source.kind !== "shared" || source.serverCount === 0) continue;
     const config = readValidatedConfig(source.path, `MCP config from ${source.path}`);
@@ -528,7 +560,9 @@ function detectRepoPrompt(summary: Omit<McpDiscoverySummary, "fingerprint" | "re
   }
 
   const projectRoot = findProjectRoot(cwd);
-  const targetPath = projectRoot ? join(projectRoot, PROJECT_CONFIG_NAME) : GENERIC_GLOBAL_CONFIG_PATH;
+  const targetPath = projectRoot
+    ? join(projectRoot, PROJECT_CONFIG_NAME)
+    : GENERIC_GLOBAL_CONFIG_PATH;
   return {
     configured: false,
     executablePath,
@@ -538,20 +572,30 @@ function detectRepoPrompt(summary: Omit<McpDiscoverySummary, "fingerprint" | "re
   };
 }
 
-export function previewCompatibilityImports(importKinds: ImportKind[], overridePath?: string): ConfigWritePreview {
+export function previewCompatibilityImports(
+  importKinds: ImportKind[],
+  overridePath?: string,
+): ConfigWritePreview {
   const targetPath = getPiGlobalConfigPath(overridePath);
   const raw = readRawConfigObject(targetPath);
-  const currentImports = Array.isArray(raw.imports) ? raw.imports.filter((value): value is ImportKind => typeof value === "string") : [];
+  const currentImports = Array.isArray(raw.imports)
+    ? raw.imports.filter((value): value is ImportKind => typeof value === "string")
+    : [];
   const merged = [...new Set([...currentImports, ...importKinds])];
   const nextRaw = { ...raw, imports: merged };
   setServersObject(nextRaw, getServersObject(nextRaw));
   return buildConfigWritePreview(targetPath, nextRaw);
 }
 
-export function ensureCompatibilityImports(importKinds: ImportKind[], overridePath?: string): { path: string; added: ImportKind[] } {
+export function ensureCompatibilityImports(
+  importKinds: ImportKind[],
+  overridePath?: string,
+): { path: string; added: ImportKind[] } {
   const targetPath = getPiGlobalConfigPath(overridePath);
   const raw = readRawConfigObject(targetPath);
-  const currentImports = Array.isArray(raw.imports) ? raw.imports.filter((value): value is ImportKind => typeof value === "string") : [];
+  const currentImports = Array.isArray(raw.imports)
+    ? raw.imports.filter((value): value is ImportKind => typeof value === "string")
+    : [];
   const merged = [...new Set([...currentImports, ...importKinds])];
   const added = merged.filter((kind) => !currentImports.includes(kind));
   if (added.length === 0) {
@@ -584,7 +628,11 @@ export function writeStarterProjectConfig(cwd = process.cwd()): string {
   return targetPath;
 }
 
-export function previewSharedServerEntry(filePath: string, serverName: string, entry: ServerEntry): ConfigWritePreview {
+export function previewSharedServerEntry(
+  filePath: string,
+  serverName: string,
+  entry: ServerEntry,
+): ConfigWritePreview {
   const raw = readRawConfigObject(filePath);
   const nextRaw = { ...raw };
   const servers = getServersObject(nextRaw);
@@ -593,7 +641,11 @@ export function previewSharedServerEntry(filePath: string, serverName: string, e
   return buildConfigWritePreview(filePath, nextRaw);
 }
 
-export function writeSharedServerEntry(filePath: string, serverName: string, entry: ServerEntry): string {
+export function writeSharedServerEntry(
+  filePath: string,
+  serverName: string,
+  entry: ServerEntry,
+): string {
   const raw = readRawConfigObject(filePath);
   const servers = getServersObject(raw);
   servers[serverName] = entry;
@@ -602,7 +654,10 @@ export function writeSharedServerEntry(filePath: string, serverName: string, ent
   return filePath;
 }
 
-export function getServerProvenance(overridePath?: string, cwd = process.cwd()): Map<string, ServerProvenance> {
+export function getServerProvenance(
+  overridePath?: string,
+  cwd = process.cwd(),
+): Map<string, ServerProvenance> {
   const provenance = new Map<string, ServerProvenance>();
   const userPath = getPiGlobalConfigPath(overridePath);
 
@@ -644,7 +699,10 @@ export function writeDirectToolsConfig(
   provenance: Map<string, ServerProvenance>,
   fullConfig: McpConfig,
 ): void {
-  const byPath = new Map<string, { name: string; value: true | string[] | false; prov: ServerProvenance }[]>();
+  const byPath = new Map<
+    string,
+    { name: string; value: true | string[] | false; prov: ServerProvenance }[]
+  >();
 
   for (const [serverName, value] of changes) {
     const prov = provenance.get(serverName);

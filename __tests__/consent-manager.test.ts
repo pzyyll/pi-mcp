@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { ConsentManager, type ToolConsentMode } from "../src/consent-manager.ts";
+import { ConsentManager } from "../src/consent-manager.ts";
 
 describe("ConsentManager", () => {
   describe("mode: never", () => {
@@ -61,14 +61,14 @@ describe("ConsentManager", () => {
 
     it("ensureApproved throws for unapproved server", () => {
       expect(() => manager.ensureApproved("server-a")).toThrow(
-        'Tool call approval required for "server-a"'
+        'Tool call approval required for "server-a"',
       );
     });
 
     it("ensureApproved throws for denied server", () => {
       manager.registerDecision("server-a", false);
       expect(() => manager.ensureApproved("server-a")).toThrow(
-        'Tool calls for "server-a" were denied for this session'
+        'Tool calls for "server-a" were denied for this session',
       );
     });
 
@@ -118,7 +118,7 @@ describe("ConsentManager", () => {
       expect(() => manager.ensureApproved("server-a")).not.toThrow();
       // Second call fails (approval was consumed)
       expect(() => manager.ensureApproved("server-a")).toThrow(
-        'Tool call approval required for "server-a"'
+        'Tool call approval required for "server-a"',
       );
     });
   });

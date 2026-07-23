@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -43,7 +50,11 @@ describe("cli init helper", () => {
     const logs: string[] = [];
     const errors: string[] = [];
     const { main } = await import("../cli.js");
-    const exitCode = await main(["init"], (line) => logs.push(line), (line) => errors.push(line));
+    const exitCode = await main(
+      ["init"],
+      (line) => logs.push(line),
+      (line) => errors.push(line),
+    );
 
     expect(exitCode).toBe(0);
     expect(errors).toEqual([]);
@@ -72,7 +83,11 @@ describe("cli init helper", () => {
     const logs: string[] = [];
     const errors: string[] = [];
     const { main } = await import("../cli.js");
-    const exitCode = await main(["init"], (line) => logs.push(line), (line) => errors.push(line));
+    const exitCode = await main(
+      ["init"],
+      (line) => logs.push(line),
+      (line) => errors.push(line),
+    );
 
     expect(exitCode).toBe(0);
     expect(errors).toEqual([]);
@@ -111,7 +126,11 @@ describe("cli init helper", () => {
     const logs: string[] = [];
     const errors: string[] = [];
     const { main } = await import("../cli.js");
-    const exitCode = await main(["install"], (line) => logs.push(line), (line) => errors.push(line));
+    const exitCode = await main(
+      ["install"],
+      (line) => logs.push(line),
+      (line) => errors.push(line),
+    );
 
     expect(exitCode).toBe(1);
     expect(errors.join("\n")).toContain("Use `pi install npm:pi-mcp-adapter` instead");

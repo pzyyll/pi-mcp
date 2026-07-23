@@ -8,7 +8,7 @@
 
 - Host continues loading extensions via jiti from TypeScript sources (`pi.extensions: ["./index.ts"]`). Prebuilt `dist/` is a follow-up phase, not required for the first shippable win.
 - Success metric is **adapter module-import wall time** under a fixed micro-benchmark (same machine, warm OS cache + cold process). Target: **≥50% reduction** vs pre-change baseline on the same harness; stretch **≥70%** after all Phase 1 tasks.
-- Functional behavior of tools, OAuth, UI, sampling, elicitation, and search safety remains unchanged; only *when* modules load may change.
+- Functional behavior of tools, OAuth, UI, sampling, elicitation, and search safety remains unchanged; only _when_ modules load may change.
 - Windows cold-disk/AV variance is large; report both harness numbers and optional full `pi` startup log, but gate CI on harness + unit tests.
 
 **Architecture:** Keep a thin factory path that only loads config/cache resolution and registers tools/commands/handlers. Move heavy runtime (MCP SDK client stack, OAuth, UI server, sampling/elicitation, `recheck`, `typebox`, `pi-ai`, large command/proxy modules) behind `await import()` on first use. Prefer extracting light pure helpers over rewriting features. Existing panel lazy-loads (`mcp-panel.ts`, `mcp-setup-panel.ts`) stay as the pattern to copy.

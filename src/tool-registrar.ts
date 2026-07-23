@@ -8,7 +8,7 @@ import type { McpContent, ContentBlock } from "./types.ts";
  * Transform MCP content types to Pi content blocks.
  */
 export function transformMcpContent(content: McpContent[]): ContentBlock[] {
-  return content.map(c => {
+  return content.map((c) => {
     if (c.type === "text") {
       return { type: "text" as const, text: c.text ?? "" };
     }
@@ -21,7 +21,8 @@ export function transformMcpContent(content: McpContent[]): ContentBlock[] {
     }
     if (c.type === "resource") {
       const resourceUri = c.resource?.uri ?? "(no URI)";
-      const resourceContent = c.resource?.text ?? (c.resource ? JSON.stringify(c.resource) : "(no content)");
+      const resourceContent =
+        c.resource?.text ?? (c.resource ? JSON.stringify(c.resource) : "(no content)");
       return {
         type: "text" as const,
         text: `[Resource: ${resourceUri}]\n${resourceContent}`,
@@ -50,7 +51,9 @@ export function transformMcpContent(content: McpContent[]): ContentBlock[] {
  * when content is empty.
  */
 export function resolveMcpResultContent(result: Record<string, unknown>): ContentBlock[] {
-  const blocks = transformMcpContent((Array.isArray(result.content) ? result.content : []) as McpContent[]);
+  const blocks = transformMcpContent(
+    (Array.isArray(result.content) ? result.content : []) as McpContent[],
+  );
   if (blocks.length > 0) return blocks;
 
   if (result.structuredContent !== undefined && result.structuredContent !== null) {

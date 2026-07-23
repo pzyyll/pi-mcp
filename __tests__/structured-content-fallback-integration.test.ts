@@ -56,7 +56,12 @@ describe("structuredContent fallback — direct tool executor", () => {
     const executor = createDirectToolExecutor(
       () => state,
       () => null,
-      { serverName: "demo", originalName: "get-summary", prefixedName: "demo_get-summary", description: "Get summary" },
+      {
+        serverName: "demo",
+        originalName: "get-summary",
+        prefixedName: "demo_get-summary",
+        description: "Get summary",
+      },
     );
 
     const result = await executor("id", {}, undefined as any, () => {}, undefined as any);
@@ -91,7 +96,10 @@ describe("structuredContent fallback — proxy executeCall", () => {
   it("surfaces structuredContent to the model when content is empty", async () => {
     const { executeCall } = await import("../src/proxy-modes.ts");
     const structured = { status: "available", summary: "## Notes" };
-    const state = makeState({ isError: false, content: [], structuredContent: structured }, "get-summary");
+    const state = makeState(
+      { isError: false, content: [], structuredContent: structured },
+      "get-summary",
+    );
 
     const result = await executeCall(state, "demo_get-summary", {}, "demo");
 

@@ -9,10 +9,12 @@ const configPath = path.join(process.env.HOME ?? process.cwd(), ".pi", "agent", 
 const serverName = "interactive-visualizer";
 
 function isInstalledExample(entry) {
-  return !!entry
-    && entry.command === process.execPath
-    && Array.isArray(entry.args)
-    && entry.args[0] === distServer;
+  return (
+    !!entry &&
+    entry.command === process.execPath &&
+    Array.isArray(entry.args) &&
+    entry.args[0] === distServer
+  );
 }
 
 try {
@@ -23,7 +25,9 @@ try {
   if (!entry) {
     console.log(`${serverName} is not installed in ${configPath}`);
   } else if (!isInstalledExample(entry)) {
-    console.log(`Left ${serverName} unchanged because the existing entry does not match this local example install.`);
+    console.log(
+      `Left ${serverName} unchanged because the existing entry does not match this local example install.`,
+    );
   } else {
     delete config.mcpServers[serverName];
     await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf-8");

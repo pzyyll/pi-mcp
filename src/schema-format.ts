@@ -8,9 +8,16 @@ export function formatSchema(schema: unknown, indent = "  "): string {
 
   const s = schema as Record<string, unknown>;
 
-  if (s.type === "object" && s.properties && typeof s.properties === "object" && !Array.isArray(s.properties)) {
+  if (
+    s.type === "object" &&
+    s.properties &&
+    typeof s.properties === "object" &&
+    !Array.isArray(s.properties)
+  ) {
     const props = s.properties as Record<string, unknown>;
-    const required = Array.isArray(s.required) ? s.required.filter((name): name is string => typeof name === "string") : [];
+    const required = Array.isArray(s.required)
+      ? s.required.filter((name): name is string => typeof name === "string")
+      : [];
 
     if (Object.keys(props).length === 0) {
       return `${indent}(no parameters)`;
@@ -36,7 +43,12 @@ export function formatSchema(schema: unknown, indent = "  "): string {
   return `${indent}(complex schema)`;
 }
 
-function formatProperty(name: string, schema: unknown, required: boolean, indent: string): string[] {
+function formatProperty(
+  name: string,
+  schema: unknown,
+  required: boolean,
+  indent: string,
+): string[] {
   if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
     return [`${indent}${name}${required ? " *required*" : ""}`];
   }
@@ -63,8 +75,14 @@ function formatNestedSchema(schema: Record<string, unknown>, indent: string): st
   if (schema.items !== undefined) {
     lines.push(...formatProperty("items", schema.items, false, indent));
   }
-  if (schema.properties && typeof schema.properties === "object" && !Array.isArray(schema.properties)) {
-    const required = Array.isArray(schema.required) ? schema.required.filter((name): name is string => typeof name === "string") : [];
+  if (
+    schema.properties &&
+    typeof schema.properties === "object" &&
+    !Array.isArray(schema.properties)
+  ) {
+    const required = Array.isArray(schema.required)
+      ? schema.required.filter((name): name is string => typeof name === "string")
+      : [];
     for (const [name, propSchema] of Object.entries(schema.properties as Record<string, unknown>)) {
       lines.push(...formatProperty(name, propSchema, required.includes(name), indent));
     }
@@ -99,18 +117,22 @@ function formatType(schema: Record<string, unknown>): string {
   }
 
   if (Array.isArray(schema.enum)) {
-    return `enum: ${schema.enum.map(v => JSON.stringify(v)).join(", ")}`;
+    return `enum: ${schema.enum.map((v) => JSON.stringify(v)).join(", ")}`;
   }
 
   if (Array.isArray(schema.type)) {
-    return schema.type.map(type => String(type)).join(" | ");
+    return schema.type.map((type) => String(type)).join(" | ");
   }
 
   if (schema.type) {
     return String(schema.type);
   }
 
-  if (schema.properties && typeof schema.properties === "object" && !Array.isArray(schema.properties)) {
+  if (
+    schema.properties &&
+    typeof schema.properties === "object" &&
+    !Array.isArray(schema.properties)
+  ) {
     return "object";
   }
 
@@ -126,7 +148,16 @@ function appendSchemaAnnotations(parts: string[], schema: Record<string, unknown
     parts.push(`- ${schema.description}`);
   }
 
-  for (const key of ["minLength", "maxLength", "minimum", "maximum", "minItems", "maxItems", "format", "pattern"] as const) {
+  for (const key of [
+    "minLength",
+    "maxLength",
+    "minimum",
+    "maximum",
+    "minItems",
+    "maxItems",
+    "format",
+    "pattern",
+  ] as const) {
     if (schema[key] !== undefined) {
       parts.push(`[${key}: ${JSON.stringify(schema[key])}]`);
     }

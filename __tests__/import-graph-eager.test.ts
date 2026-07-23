@@ -43,8 +43,11 @@ describe("factory eager import graph", () => {
   it("does not statically import banned heavy modules from index.ts", () => {
     const staticImports = listStaticImportSpecifiers(indexSource);
     const bannedHits = staticImports.filter((specifier) =>
-      BANNED_STATIC_IMPORTS.some((banned) =>
-        specifier === banned || specifier.startsWith(`${banned}/`) || specifier.startsWith(`${banned}.`),
+      BANNED_STATIC_IMPORTS.some(
+        (banned) =>
+          specifier === banned ||
+          specifier.startsWith(`${banned}/`) ||
+          specifier.startsWith(`${banned}.`),
       ),
     );
     expect(bannedHits).toEqual([]);
@@ -60,17 +63,33 @@ describe("factory eager import graph", () => {
       ["schema-format.ts", schemaSource],
     ] as const) {
       const imports = listStaticImportSpecifiers(source);
-      expect(imports, label).not.toEqual(expect.arrayContaining([
-        expect.stringMatching(/@modelcontextprotocol\/sdk|recheck|typebox|@earendil-works\/pi-ai/),
-      ]));
-      for (const banned of ["recheck", "@modelcontextprotocol/sdk", "typebox", "@earendil-works/pi-ai"] as const) {
-        expect(imports.some((s) => s === banned || s.startsWith(`${banned}/`)), `${label} bans ${banned}`).toBe(false);
+      expect(imports, label).not.toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(
+            /@modelcontextprotocol\/sdk|recheck|typebox|@earendil-works\/pi-ai/,
+          ),
+        ]),
+      );
+      for (const banned of [
+        "recheck",
+        "@modelcontextprotocol/sdk",
+        "typebox",
+        "@earendil-works/pi-ai",
+      ] as const) {
+        expect(
+          imports.some((s) => s === banned || s.startsWith(`${banned}/`)),
+          `${label} bans ${banned}`,
+        ).toBe(false);
       }
     }
 
     const registerImports = listStaticImportSpecifiers(registerSource);
     expect(registerImports.some((s) => s === "typebox" || s.startsWith("typebox/"))).toBe(true);
-    for (const banned of ["recheck", "@modelcontextprotocol/sdk", "@earendil-works/pi-ai"] as const) {
+    for (const banned of [
+      "recheck",
+      "@modelcontextprotocol/sdk",
+      "@earendil-works/pi-ai",
+    ] as const) {
       expect(registerImports.some((s) => s === banned || s.startsWith(`${banned}/`))).toBe(false);
     }
   });

@@ -17,7 +17,11 @@ import {
 import { buildDirectToolParameters, buildProxyToolParameters } from "./direct-tool-register.ts";
 import { loadMetadataCache } from "./metadata-cache.ts";
 import { getConfigPathFromArgv, truncateAtWord } from "./utils.ts";
-import { createMcpDirectToolCallRenderer, renderMcpProxyToolCall, renderMcpToolResult } from "./tool-result-renderer.ts";
+import {
+  createMcpDirectToolCallRenderer,
+  renderMcpProxyToolCall,
+  renderMcpToolResult,
+} from "./tool-result-renderer.ts";
 import { toolErrorOverride } from "./error-signal.ts";
 
 type DirectToolExecutor = (
@@ -36,8 +40,8 @@ function createDirectToolTrampoline(
   let executorPromise: Promise<DirectToolExecutor> | null = null;
   return async (toolCallId, params, signal, onUpdate, ctx) => {
     if (!executorPromise) {
-      executorPromise = import("./direct-tools.ts").then((mod) =>
-        mod.createDirectToolExecutor(getState, getInitPromise, spec) as DirectToolExecutor,
+      executorPromise = import("./direct-tools.ts").then(
+        (mod) => mod.createDirectToolExecutor(getState, getInitPromise, spec) as DirectToolExecutor,
       );
     }
     const executor = await executorPromise;
@@ -50,7 +54,10 @@ export default function mcpAdapter(pi: ExtensionAPI) {
   let initPromise: Promise<McpExtensionState> | null = null;
   let lifecycleGeneration = 0;
 
-  async function shutdownState(currentState: McpExtensionState | null, reason: string): Promise<void> {
+  async function shutdownState(
+    currentState: McpExtensionState | null,
+    reason: string,
+  ): Promise<void> {
     if (!currentState) return;
 
     if (currentState.uiServer) {
@@ -87,19 +94,26 @@ export default function mcpAdapter(pi: ExtensionAPI) {
   const prefix = earlyConfig.settings?.toolPrefix ?? "server";
 
   const envRaw = process.env.MCP_DIRECT_TOOLS;
-  const directSpecs = envRaw === "__none__"
-    ? []
-    : resolveDirectTools(
-        earlyConfig,
-        earlyCache,
-        prefix,
-        envRaw?.split(",").map(s => s.trim()).filter(Boolean),
-      );
-  const missingConfiguredDirectToolServers = getMissingConfiguredDirectToolServers(earlyConfig, earlyCache);
+  const directSpecs =
+    envRaw === "__none__"
+      ? []
+      : resolveDirectTools(
+          earlyConfig,
+          earlyCache,
+          prefix,
+          envRaw
+            ?.split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+        );
+  const missingConfiguredDirectToolServers = getMissingConfiguredDirectToolServers(
+    earlyConfig,
+    earlyCache,
+  );
   const shouldRegisterProxyTool =
-    earlyConfig.settings?.disableProxyTool !== true
-    || directSpecs.length === 0
-    || missingConfiguredDirectToolServers.length > 0;
+    earlyConfig.settings?.disableProxyTool !== true ||
+    directSpecs.length === 0 ||
+    missingConfiguredDirectToolServers.length > 0;
 
   for (const spec of directSpecs) {
     (pi.registerTool as (tool: unknown) => unknown)({
@@ -108,7 +122,11 @@ export default function mcpAdapter(pi: ExtensionAPI) {
       description: spec.description || "(no description)",
       promptSnippet: truncateAtWord(spec.description, 100) || `MCP tool from ${spec.serverName}`,
       parameters: buildDirectToolParameters(spec.inputSchema),
-      execute: createDirectToolTrampoline(() => state, () => initPromise, spec),
+      execute: createDirectToolTrampoline(
+        () => state,
+        () => initPromise,
+        spec,
+      ),
       renderCall: createMcpDirectToolCallRenderer(spec.prefixedName),
       renderResult: renderMcpToolResult,
     });
@@ -129,10 +147,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
 
     try {
       const { shutdownOAuth } = await import("./mcp-auth-flow.ts");
-      await Promise.all([
-        shutdownState(previousState, "session_restart"),
-        shutdownOAuth(),
-      ]);
+      await Promise.all([shutdownState(previousState, "session_restart"), shutdownOAuth()]);
     } catch (error) {
       console.error("MCP: failed to shut down previous session state", error);
     }
@@ -142,7 +157,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
     }
 
     const { initializeOAuth } = await import("./mcp-auth-flow.ts");
-    await initializeOAuth().catch(err => {
+    await initializeOAuth().catch((err) => {
       console.error("MCP OAuth initialization failed:", err);
     });
 
@@ -150,29 +165,31 @@ export default function mcpAdapter(pi: ExtensionAPI) {
     const promise = initializeMcp(pi, ctx);
     initPromise = promise;
 
-    promise.then(async (nextState) => {
-      if (generation !== lifecycleGeneration || initPromise !== promise) {
-        try {
-          await shutdownState(nextState, "stale_session_start");
-        } catch (error) {
-          console.error("MCP: failed to clean stale session state", error);
+    promise
+      .then(async (nextState) => {
+        if (generation !== lifecycleGeneration || initPromise !== promise) {
+          try {
+            await shutdownState(nextState, "stale_session_start");
+          } catch (error) {
+            console.error("MCP: failed to clean stale session state", error);
+          }
+          return;
         }
-        return;
-      }
 
-      state = nextState;
-      updateStatusBar(nextState);
-      initPromise = null;
-    }).catch(err => {
-      if (generation !== lifecycleGeneration) {
-        return;
-      }
-      if (initPromise !== promise && initPromise !== null) {
-        return;
-      }
-      console.error("MCP initialization failed:", err);
-      initPromise = null;
-    });
+        state = nextState;
+        updateStatusBar(nextState);
+        initPromise = null;
+      })
+      .catch((err) => {
+        if (generation !== lifecycleGeneration) {
+          return;
+        }
+        if (initPromise !== promise && initPromise !== null) {
+          return;
+        }
+        console.error("MCP initialization failed:", err);
+        initPromise = null;
+      });
   });
 
   pi.on("session_shutdown", async () => {
@@ -183,10 +200,7 @@ export default function mcpAdapter(pi: ExtensionAPI) {
 
     try {
       const { shutdownOAuth } = await import("./mcp-auth-flow.ts");
-      await Promise.all([
-        shutdownState(currentState, "session_shutdown"),
-        shutdownOAuth(),
-      ]);
+      await Promise.all([shutdownState(currentState, "session_shutdown"), shutdownOAuth()]);
     } catch (error) {
       console.error("MCP: session shutdown cleanup failed", error);
     }
@@ -212,14 +226,8 @@ export default function mcpAdapter(pi: ExtensionAPI) {
         return;
       }
 
-      const {
-        showStatus,
-        showTools,
-        reconnectServers,
-        logoutServer,
-        openMcpPanel,
-        openMcpSetup,
-      } = await import("./commands.ts");
+      const { showStatus, showTools, reconnectServers, logoutServer, openMcpPanel, openMcpSetup } =
+        await import("./commands.ts");
 
       const parts = args?.trim()?.split(/\s+/) ?? [];
       const subcommand = parts[0] ?? "";
@@ -330,8 +338,16 @@ export default function mcpAdapter(pi: ExtensionAPI) {
         if (params.args) {
           try {
             parsedArgs = JSON.parse(params.args);
-            if (typeof parsedArgs !== "object" || parsedArgs === null || Array.isArray(parsedArgs)) {
-              const gotType = Array.isArray(parsedArgs) ? "array" : parsedArgs === null ? "null" : typeof parsedArgs;
+            if (
+              typeof parsedArgs !== "object" ||
+              parsedArgs === null ||
+              Array.isArray(parsedArgs)
+            ) {
+              const gotType = Array.isArray(parsedArgs)
+                ? "array"
+                : parsedArgs === null
+                  ? "null"
+                  : typeof parsedArgs;
               throw new Error(`Invalid args: expected a JSON object, got ${gotType}`);
             }
           } catch (error) {
@@ -368,7 +384,12 @@ export default function mcpAdapter(pi: ExtensionAPI) {
         if (params.action === "auth-start") {
           if (!params.server) {
             return {
-              content: [{ type: "text" as const, text: "auth-start requires `server`. Example: mcp({ action: \"auth-start\", server: \"linear-server\" })" }],
+              content: [
+                {
+                  type: "text" as const,
+                  text: 'auth-start requires `server`. Example: mcp({ action: "auth-start", server: "linear-server" })',
+                },
+              ],
               details: { mode: "auth-start", error: "missing_server" },
             };
           }
@@ -384,14 +405,26 @@ export default function mcpAdapter(pi: ExtensionAPI) {
           const input = parsedArgs?.redirectUrl ?? parsedArgs?.code ?? parsedArgs?.input;
           if (typeof input !== "string" || input.trim().length === 0) {
             return {
-              content: [{ type: "text" as const, text: "auth-complete requires args with `redirectUrl`, `code`, or `input`." }],
+              content: [
+                {
+                  type: "text" as const,
+                  text: "auth-complete requires args with `redirectUrl`, `code`, or `input`.",
+                },
+              ],
               details: { mode: "auth-complete", error: "missing_input" },
             };
           }
           return proxyModes.executeAuthComplete(state, params.server, input);
         }
         if (params.tool) {
-          return proxyModes.executeCall(state, params.tool, parsedArgs, params.server, getPiTools, signal);
+          return proxyModes.executeCall(
+            state,
+            params.tool,
+            parsedArgs,
+            params.server,
+            getPiTools,
+            signal,
+          );
         }
         if (params.connect) {
           return proxyModes.executeConnect(state, params.connect, signal);
@@ -400,7 +433,13 @@ export default function mcpAdapter(pi: ExtensionAPI) {
           return proxyModes.executeDescribe(state, params.describe);
         }
         if (params.search) {
-          return proxyModes.executeSearch(state, params.search, params.regex, params.server, params.includeSchemas);
+          return proxyModes.executeSearch(
+            state,
+            params.search,
+            params.regex,
+            params.server,
+            params.includeSchemas,
+          );
         }
         if (params.server) {
           return proxyModes.executeList(state, params.server);

@@ -6,18 +6,15 @@ import type { TextContent, ImageContent } from "@earendil-works/pi-ai";
 import type { UiStreamMode } from "./ui-stream-types.ts";
 
 // Transport type (stdio + HTTP)
-export type Transport = 
-  | StdioClientTransport 
-  | SSEClientTransport 
-  | StreamableHTTPClientTransport;
+export type Transport = StdioClientTransport | SSEClientTransport | StreamableHTTPClientTransport;
 
 // Import sources for config
-export type ImportKind = 
-  | "cursor" 
-  | "claude-code" 
-  | "claude-desktop" 
-  | "codex" 
-  | "windsurf" 
+export type ImportKind =
+  | "cursor"
+  | "claude-code"
+  | "claude-desktop"
+  | "codex"
+  | "windsurf"
   | "vscode";
 
 // Tool definition from MCP server
@@ -161,7 +158,11 @@ export function extractUiPromptText(params: UiMessageParams): string | undefined
 
   if (params.role === "user" && Array.isArray(params.content)) {
     const text = params.content
-      .map((block) => (block && typeof block === "object" && "text" in block ? String((block as { text?: unknown }).text ?? "") : ""))
+      .map((block) =>
+        block && typeof block === "object" && "text" in block
+          ? String((block as { text?: unknown }).text ?? "")
+          : "",
+      )
       .filter(Boolean)
       .join("\n\n");
     return text || undefined;
@@ -289,7 +290,7 @@ export interface ServerEntry {
   // HTTP fields
   url?: string;
   headers?: Record<string, string>;
-  /** 
+  /**
    * Authentication type:
    * - 'oauth' - Use OAuth 2.1 (auto-discovers endpoints, supports dynamic client registration)
    * - 'bearer' - Use static Bearer token
@@ -299,7 +300,7 @@ export interface ServerEntry {
   auth?: "oauth" | "bearer" | false;
   bearerToken?: string;
   bearerTokenEnv?: string;
-  /** 
+  /**
    * OAuth configuration (optional).
    * If not provided, the SDK will attempt dynamic client registration.
    * Set to false to explicitly disable OAuth for this server.
@@ -315,7 +316,7 @@ export interface ServerEntry {
   // Exclude specific MCP tools/resources by original or prefixed name
   excludeTools?: string[];
   // Debug
-  debug?: boolean;  // Show server stderr (default: false)
+  debug?: boolean; // Show server stderr (default: false)
 }
 
 // Output guard tuning (settings.outputGuard object form)
@@ -365,12 +366,12 @@ export interface McpConfig {
 export type ServerDefinition = ServerEntry;
 
 export interface ToolMetadata {
-  name: string;           // Prefixed tool name (e.g., "xcodebuild_list_sims")
-  originalName: string;   // Original MCP tool name (e.g., "list_sims")
+  name: string; // Prefixed tool name (e.g., "xcodebuild_list_sims")
+  originalName: string; // Original MCP tool name (e.g., "list_sims")
   description: string;
-  resourceUri?: string;   // For resource tools: the URI to read
+  resourceUri?: string; // For resource tools: the URI to read
   uiResourceUri?: string; // For app-enabled tools: the UI resource URI
-  inputSchema?: unknown;  // JSON Schema for parameters (stored for describe/errors)
+  inputSchema?: unknown; // JSON Schema for parameters (stored for describe/errors)
   uiStreamMode?: UiStreamMode;
 }
 
@@ -401,7 +402,9 @@ export interface McpPanelCallbacks {
   canAuthenticate: (serverName: string) => boolean;
   authenticate: (serverName: string) => Promise<McpAuthResult>;
   getConnectionStatus: (serverName: string) => "connected" | "idle" | "failed" | "needs-auth";
-  refreshCacheAfterReconnect: (serverName: string) => import("./metadata-cache.ts").ServerCacheEntry | null;
+  refreshCacheAfterReconnect: (
+    serverName: string,
+  ) => import("./metadata-cache.ts").ServerCacheEntry | null;
 }
 
 export interface McpPanelResult {
@@ -412,10 +415,7 @@ export interface McpPanelResult {
 /**
  * Get server prefix based on tool prefix mode.
  */
-export function getServerPrefix(
-  serverName: string,
-  mode: "server" | "none" | "short"
-): string {
+export function getServerPrefix(serverName: string, mode: "server" | "none" | "short"): string {
   if (mode === "none") return "";
   if (mode === "short") {
     let short = serverName.replace(/-?mcp$/i, "").replace(/-/g, "_");
@@ -431,7 +431,7 @@ export function getServerPrefix(
 export function formatToolName(
   toolName: string,
   serverName: string,
-  prefix: "server" | "none" | "short"
+  prefix: "server" | "none" | "short",
 ): string {
   const p = getServerPrefix(serverName, prefix);
   return p ? `${p}_${toolName}` : toolName;
@@ -445,7 +445,7 @@ export function isToolExcluded(
   toolName: string,
   serverName: string,
   prefix: "server" | "none" | "short",
-  excludeTools?: unknown
+  excludeTools?: unknown,
 ): boolean {
   if (!Array.isArray(excludeTools) || excludeTools.length === 0) return false;
 

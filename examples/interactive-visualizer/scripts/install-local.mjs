@@ -9,10 +9,12 @@ const configPath = path.join(process.env.HOME ?? process.cwd(), ".pi", "agent", 
 const serverName = "interactive-visualizer";
 
 function isInstalledExample(entry) {
-  return !!entry
-    && entry.command === process.execPath
-    && Array.isArray(entry.args)
-    && entry.args[0] === distServer;
+  return (
+    !!entry &&
+    entry.command === process.execPath &&
+    Array.isArray(entry.args) &&
+    entry.args[0] === distServer
+  );
 }
 
 async function loadConfig() {
@@ -32,7 +34,9 @@ config.mcpServers = config.mcpServers ?? {};
 const existing = config.mcpServers[serverName];
 
 if (existing && !isInstalledExample(existing)) {
-  console.error(`Refusing to overwrite existing ${serverName} entry in ${configPath} because it does not match this local example install.`);
+  console.error(
+    `Refusing to overwrite existing ${serverName} entry in ${configPath} because it does not match this local example install.`,
+  );
   process.exit(1);
 }
 

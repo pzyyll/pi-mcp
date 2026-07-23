@@ -3,10 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { buildAllowAttribute } from "@modelcontextprotocol/ext-apps/app-bridge";
-import type {
-  CallToolRequest,
-  CallToolResult,
-} from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ConsentManager } from "./consent-manager.ts";
 import { ServerError, wrapError } from "./errors.ts";
 import { buildHostHtmlTemplate, buildCspMetaContent, applyCspMeta } from "./host-html-template.ts";
@@ -69,7 +66,7 @@ export interface UiServerHandle {
 
 export async function startUiServer(options: UiServerOptions): Promise<UiServerHandle> {
   const sessionToken = options.sessionToken ?? randomUUID();
-  const log = logger.child({ 
+  const log = logger.child({
     component: "UiServer",
     server: options.serverName,
     tool: options.toolName,
@@ -122,7 +119,9 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
   };
 
   const updateStreamSummary = (payload: unknown) => {
-    const envelope = getVisualizationStreamEnvelope((payload as { structuredContent?: unknown } | null)?.structuredContent);
+    const envelope = getVisualizationStreamEnvelope(
+      (payload as { structuredContent?: unknown } | null)?.structuredContent,
+    );
     if (!envelope) return;
     if (!streamSummary) {
       streamSummary = {
@@ -147,7 +146,9 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
   const getLatestCheckpointIndex = () => {
     for (let index = eventLog.length - 1; index >= 0; index -= 1) {
       const entry = eventLog[index];
-      const envelope = getVisualizationStreamEnvelope((entry.payload as { structuredContent?: unknown } | null)?.structuredContent);
+      const envelope = getVisualizationStreamEnvelope(
+        (entry.payload as { structuredContent?: unknown } | null)?.structuredContent,
+      );
       if (envelope?.frameType === "checkpoint" || envelope?.frameType === "final") {
         return index;
       }
@@ -268,7 +269,10 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
         });
         res.write(": connected\n\n");
         sseClients.add(res);
-        replayEvents(res, req.headers["last-event-id"] ? String(req.headers["last-event-id"]) : null);
+        replayEvents(
+          res,
+          req.headers["last-event-id"] ? String(req.headers["last-event-id"]) : null,
+        );
         req.on("close", () => {
           sseClients.delete(res);
         });
@@ -333,20 +337,29 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
 
         const connection = options.manager.getConnection(options.serverName);
         if (!connection || connection.status !== "connected") {
-          sendJson(res, 503, { ok: false, error: `Server "${options.serverName}" is not connected` });
+          sendJson(res, 503, {
+            ok: false,
+            error: `Server "${options.serverName}" is not connected`,
+          });
           return;
         }
 
         try {
           options.manager.touch(options.serverName);
           options.manager.incrementInFlight(options.serverName);
-          const result = await connection.client.callTool({
-            name: callParams.name,
-            arguments:
-              callParams.arguments && typeof callParams.arguments === "object" && !Array.isArray(callParams.arguments)
-                ? callParams.arguments
-                : {},
-          }, undefined, options.manager.getRequestOptions?.(options.serverName));
+          const result = await connection.client.callTool(
+            {
+              name: callParams.name,
+              arguments:
+                callParams.arguments &&
+                typeof callParams.arguments === "object" &&
+                !Array.isArray(callParams.arguments)
+                  ? callParams.arguments
+                  : {},
+            },
+            undefined,
+            options.manager.getRequestOptions?.(options.serverName),
+          );
           sendJson(res, 200, { ok: true, result });
         } finally {
           options.manager.decrementInFlight(options.serverName);
@@ -365,7 +378,7 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
       if (url.pathname === "/proxy/ui/message") {
         const msgParams = params as UiMessageParams;
         const promptText = extractUiPromptText(msgParams);
-        
+
         // Track messages by type (order: prompt → intent → notify)
         // Must match the order in index.ts onMessage handler
         if (promptText) {
@@ -374,9 +387,9 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
         } else if (msgParams.type === "intent" || msgParams.intent) {
           const intentName = msgParams.intent ?? "";
           if (intentName) {
-            sessionMessages.intents.push({ 
-              intent: intentName, 
-              params: msgParams.params 
+            sessionMessages.intents.push({
+              intent: intentName,
+              params: msgParams.params,
             });
             log.debug("UI intent received", { intent: intentName });
           }
@@ -387,7 +400,7 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
             log.debug("UI notification", { message: notifyText.slice(0, 100) });
           }
         }
-        
+
         await options.onMessage?.(msgParams);
         sendJson(res, 200, { ok: true, result: {} });
         return;
@@ -442,9 +455,10 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
       }
 
       if (url.pathname === "/proxy/ui/complete") {
-        const reason = typeof (params as { reason?: string }).reason === "string"
-          ? (params as { reason?: string }).reason!
-          : "done";
+        const reason =
+          typeof (params as { reason?: string }).reason === "string"
+            ? (params as { reason?: string }).reason!
+            : "done";
         markCompleted(reason);
         sendJson(res, 200, { ok: true, result: {} });
         setTimeout(() => {
@@ -473,7 +487,7 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
       (error) => {
         const reason = error instanceof Error ? error.message : String(error);
         pushEvent("tool-cancelled", { reason });
-      }
+      },
     );
   }
 
@@ -537,7 +551,8 @@ export async function startUiServer(options: UiServerOptions): Promise<UiServerH
           pushEvent("host-context", context);
         },
         getSessionMessages: () => ({ ...sessionMessages }),
-        getStreamSummary: () => streamSummary ? { ...streamSummary, phases: [...streamSummary.phases] } : undefined,
+        getStreamSummary: () =>
+          streamSummary ? { ...streamSummary, phases: [...streamSummary.phases] } : undefined,
       };
 
       resolve(handle);
@@ -557,7 +572,10 @@ async function parseBody(
     }
     return body as UiProxyRequestBody<Record<string, unknown>>;
   } catch (error) {
-    sendJson(res, 400, { ok: false, error: error instanceof Error ? error.message : "Invalid body" });
+    sendJson(res, 400, {
+      ok: false,
+      error: error instanceof Error ? error.message : "Invalid body",
+    });
     return null;
   }
 }
@@ -610,11 +628,7 @@ function validateTokenBody(
   return true;
 }
 
-function sendJson<T>(
-  res: ServerResponse,
-  status: number,
-  payload: UiProxyResult<T>,
-): void {
+function sendJson<T>(res: ServerResponse, status: number, payload: UiProxyResult<T>): void {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",

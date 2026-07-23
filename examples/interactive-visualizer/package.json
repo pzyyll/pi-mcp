@@ -2,8 +2,8 @@
   "name": "interactive-visualizer-example",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "Local MCP visualizer example for pi-mcp-adapter",
+  "type": "module",
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "install-local": "npm run build && node ./scripts/install-local.mjs",

@@ -163,10 +163,13 @@ describe("McpServerManager sampling", () => {
     };
     const manager = new McpServerManager();
     manager.setElicitationConfig({ allowUrl: true, ui: ui as any });
-    const result = await manager.handleUrlElicitationRequired("demo", new UrlElicitationRequiredError([
-      { mode: "url", message: "First", elicitationId: "one", url: "https://example.com/one" },
-      { mode: "url", message: "Second", elicitationId: "two", url: "https://example.com/two" },
-    ]));
+    const result = await manager.handleUrlElicitationRequired(
+      "demo",
+      new UrlElicitationRequiredError([
+        { mode: "url", message: "First", elicitationId: "one", url: "https://example.com/one" },
+        { mode: "url", message: "Second", elicitationId: "two", url: "https://example.com/two" },
+      ]),
+    );
 
     expect(result).toBe("accept");
     expect(mocks.open).toHaveBeenNthCalledWith(1, "https://example.com/one");
@@ -288,7 +291,11 @@ describe("McpServerManager sampling", () => {
     manager.setDefaultRequestTimeoutMs(2500);
 
     await manager.connect("demo", { command: "node", args: ["server.js"], requestTimeoutMs: 5000 });
-    await manager.connect("sdk-default", { command: "node", args: ["server.js"], requestTimeoutMs: 0 });
+    await manager.connect("sdk-default", {
+      command: "node",
+      args: ["server.js"],
+      requestTimeoutMs: 0,
+    });
 
     const signal = new AbortController().signal;
     expect(manager.getRequestOptions("demo", signal)).toEqual({ signal, timeout: 5000 });

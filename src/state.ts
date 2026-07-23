@@ -22,7 +22,7 @@ export type SendMessageFn = (
     display?: string;
     details?: unknown;
   },
-  options?: { triggerTurn?: boolean }
+  options?: { triggerTurn?: boolean },
 ) => void;
 
 export interface McpExtensionState {

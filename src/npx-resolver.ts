@@ -1,5 +1,17 @@
 // npx-resolver.ts - Resolve npx/npm exec binaries to avoid npm parent processes
-import { existsSync, readFileSync, realpathSync, readdirSync, statSync, writeFileSync, renameSync, mkdirSync, openSync, readSync, closeSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  realpathSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+  renameSync,
+  mkdirSync,
+  openSync,
+  readSync,
+  closeSync,
+} from "node:fs";
 import { join, dirname, extname, resolve, sep } from "node:path";
 import { getAgentPath } from "./agent-dir.ts";
 import { spawn, spawnSync } from "node:child_process";
@@ -33,13 +45,10 @@ interface ParsedInvocation {
 
 export async function resolveNpxBinary(
   command: string,
-  args: string[]
+  args: string[],
 ): Promise<NpxResolution | null> {
-  const parsed = command === "npx"
-    ? parseNpxArgs(args)
-    : command === "npm"
-      ? parseNpmExecArgs(args)
-      : null;
+  const parsed =
+    command === "npx" ? parseNpxArgs(args) : command === "npm" ? parseNpmExecArgs(args) : null;
 
   if (!parsed) return null;
 
@@ -62,7 +71,11 @@ export async function resolveNpxBinary(
   const resolvedAfterInstall = resolveFromNpmCache(parsed.packageSpec, parsed.binName);
   if (resolvedAfterInstall) {
     saveCacheEntry(cacheKey, resolvedAfterInstall);
-    return { binPath: resolvedAfterInstall.resolvedBin, extraArgs: parsed.extraArgs, isJs: resolvedAfterInstall.isJs };
+    return {
+      binPath: resolvedAfterInstall.resolvedBin,
+      extraArgs: parsed.extraArgs,
+      isJs: resolvedAfterInstall.isJs,
+    };
   }
 
   return null;
@@ -236,15 +249,21 @@ async function forceNpxCache(packageSpec: string): Promise<void> {
       const proc = spawn(
         "npm",
         ["exec", "--yes", "--package", packageSpec, "--", "node", "-e", "1"],
-        { stdio: "ignore" }
+        { stdio: "ignore" },
       );
       const timer = setTimeout(() => {
         proc.kill();
         reject(new Error("timeout"));
       }, FORCE_CACHE_TIMEOUT_MS);
       timer.unref();
-      proc.on("close", () => { clearTimeout(timer); resolve(); });
-      proc.on("error", (err) => { clearTimeout(timer); reject(err); });
+      proc.on("close", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      proc.on("error", (err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
     });
   } catch {
     // Ignore failures, resolution will fall back to original command
@@ -295,13 +314,11 @@ function findCachedPackageDir(cacheDir: string, packageName: string): string | n
   const npxDir = join(cacheDir, "_npx");
   if (!existsSync(npxDir)) return null;
 
-  const packagePathParts = packageName.startsWith("@")
-    ? packageName.split("/")
-    : [packageName];
+  const packagePathParts = packageName.startsWith("@") ? packageName.split("/") : [packageName];
 
   const candidates = readdirSync(npxDir, { withFileTypes: true })
-    .filter(entry => entry.isDirectory())
-    .map(entry => {
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => {
       const full = join(npxDir, entry.name);
       const mtime = safeStatMtime(full);
       return { name: entry.name, mtime };

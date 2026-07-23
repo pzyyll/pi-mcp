@@ -15,12 +15,14 @@ const server = new Server(
 );
 
 function urlRequiredError() {
-  return new UrlElicitationRequiredError([{
-    mode: "url",
-    message: "Connect your account",
-    elicitationId: "required-1",
-    url: "https://example.com/connect",
-  }]);
+  return new UrlElicitationRequiredError([
+    {
+      mode: "url",
+      message: "Connect your account",
+      elicitationId: "required-1",
+      url: "https://example.com/connect",
+    },
+  ]);
 }
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -39,48 +41,56 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
   ],
 }));
 
-server.setRequestHandler(ReadResourceRequestSchema, async request => {
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   if (request.params.uri === "test://url-required" || request.params.uri === "ui://url-required") {
     throw urlRequiredError();
   }
   return { contents: [] };
 });
 
-server.setRequestHandler(CallToolRequestSchema, async request => {
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name === "capabilities") {
     return {
-      content: [{ type: "text", text: JSON.stringify(server.getClientCapabilities()?.elicitation ?? null) }],
+      content: [
+        { type: "text", text: JSON.stringify(server.getClientCapabilities()?.elicitation ?? null) },
+      ],
     };
   }
 
   if (request.params.name === "url-required") throw urlRequiredError();
 
   if (request.params.name === "form") {
-    const result = await server.request({
-      method: "elicitation/create",
-      params: {
-        mode: "form",
-        message: "Provide a name",
-        requestedSchema: {
-          type: "object",
-          properties: { name: { type: "string", minLength: 1 } },
-          required: ["name"],
+    const result = await server.request(
+      {
+        method: "elicitation/create",
+        params: {
+          mode: "form",
+          message: "Provide a name",
+          requestedSchema: {
+            type: "object",
+            properties: { name: { type: "string", minLength: 1 } },
+            required: ["name"],
+          },
         },
       },
-    }, ElicitResultSchema);
+      ElicitResultSchema,
+    );
     return { content: [{ type: "text", text: JSON.stringify(result) }] };
   }
 
   if (request.params.name === "url") {
-    const result = await server.request({
-      method: "elicitation/create",
-      params: {
-        mode: "url",
-        message: "Connect your account",
-        elicitationId: "requested-1",
-        url: "https://example.com/authorize",
+    const result = await server.request(
+      {
+        method: "elicitation/create",
+        params: {
+          mode: "url",
+          message: "Connect your account",
+          elicitationId: "requested-1",
+          url: "https://example.com/authorize",
+        },
       },
-    }, ElicitResultSchema);
+      ElicitResultSchema,
+    );
     if (result.action === "accept") {
       for (const elicitationId of ["unknown", "requested-1", "requested-1"]) {
         await server.notification({

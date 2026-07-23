@@ -31,9 +31,7 @@ describe("mcp-panel excludeTools", () => {
             { name: "get_screenshot", description: "Screenshot" },
             { name: "get_nodes", description: "Nodes" },
           ],
-          resources: [
-            { name: "figjam", uri: "ui://figjam", description: "FigJam" },
-          ],
+          resources: [{ name: "figjam", uri: "ui://figjam", description: "FigJam" }],
         },
       },
     };

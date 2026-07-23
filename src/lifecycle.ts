@@ -13,11 +13,11 @@ export class McpLifecycleManager {
   private healthCheckInterval?: NodeJS.Timeout;
   private onReconnect?: ReconnectCallback;
   private onIdleShutdown?: (serverName: string) => void;
-  
+
   constructor(manager: McpServerManager) {
     this.manager = manager;
   }
-  
+
   /**
    * Set callback to be invoked after a successful auto-reconnect.
    * Use this to update tool metadata when a server reconnects.
@@ -25,12 +25,16 @@ export class McpLifecycleManager {
   setReconnectCallback(callback: ReconnectCallback): void {
     this.onReconnect = callback;
   }
-  
+
   markKeepAlive(name: string, definition: ServerDefinition): void {
     this.keepAliveServers.set(name, definition);
   }
 
-  registerServer(name: string, definition: ServerDefinition, settings?: { idleTimeout?: number }): void {
+  registerServer(
+    name: string,
+    definition: ServerDefinition,
+    settings?: { idleTimeout?: number },
+  ): void {
     this.allServers.set(name, definition);
     if (settings?.idleTimeout !== undefined) {
       this.serverSettings.set(name, settings);
@@ -44,18 +48,18 @@ export class McpLifecycleManager {
   setIdleShutdownCallback(callback: (serverName: string) => void): void {
     this.onIdleShutdown = callback;
   }
-  
+
   startHealthChecks(intervalMs = 30000): void {
     this.healthCheckInterval = setInterval(() => {
       this.checkConnections();
     }, intervalMs);
     this.healthCheckInterval.unref();
   }
-  
+
   private async checkConnections(): Promise<void> {
     for (const [name, definition] of this.keepAliveServers) {
       const connection = this.manager.getConnection(name);
-      
+
       if (!connection || connection.status !== "connected") {
         try {
           await this.manager.connect(name, definition);
@@ -83,7 +87,7 @@ export class McpLifecycleManager {
     if (perServer !== undefined) return perServer * 60 * 1000;
     return this.globalIdleTimeout;
   }
-  
+
   async gracefulShutdown(): Promise<void> {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);

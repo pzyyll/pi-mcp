@@ -11,7 +11,9 @@ const UI_RESOURCE_URI_SCHEME_PREFIX = "ui://";
  * Resolve a tool's UI resource URI from `_meta`.
  * Mirrors `@modelcontextprotocol/ext-apps/app-bridge` `getToolUiResourceUri`.
  */
-export function getToolUiResourceUri(tool: { _meta?: Record<string, unknown> | undefined }): string | undefined {
+export function getToolUiResourceUri(tool: {
+  _meta?: Record<string, unknown> | undefined;
+}): string | undefined {
   const meta = tool._meta;
   if (!meta || typeof meta !== "object") return undefined;
 

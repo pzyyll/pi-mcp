@@ -1,7 +1,10 @@
 // ABOUTME: MCP Apps UI session lifecycle (start, stream, messages, close).
 // ABOUTME: Defers loading ui-server until a session actually starts.
 import { randomUUID } from "node:crypto";
-import { UrlElicitationRequiredError, type CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import {
+  UrlElicitationRequiredError,
+  type CallToolResult,
+} from "@modelcontextprotocol/sdk/types.js";
 import type { McpExtensionState } from "./state.ts";
 import {
   extractUiPromptText,
@@ -54,18 +57,22 @@ function withStreamEnvelope(
     return result;
   }
 
-  const structuredContent = result.structuredContent && typeof result.structuredContent === "object" && !Array.isArray(result.structuredContent)
-    ? { ...result.structuredContent }
-    : {};
+  const structuredContent =
+    result.structuredContent &&
+    typeof result.structuredContent === "object" &&
+    !Array.isArray(result.structuredContent)
+      ? { ...result.structuredContent }
+      : {};
 
   const rawEnvelope = structuredContent[UI_STREAM_STRUCTURED_CONTENT_KEY];
-  const envelope = rawEnvelope && typeof rawEnvelope === "object" && !Array.isArray(rawEnvelope)
-    ? { ...rawEnvelope as Record<string, unknown> }
-    : {
-        frameType: "final",
-        phase: "settled",
-        status: result.isError ? "error" : "ok",
-      };
+  const envelope =
+    rawEnvelope && typeof rawEnvelope === "object" && !Array.isArray(rawEnvelope)
+      ? { ...(rawEnvelope as Record<string, unknown>) }
+      : {
+          frameType: "final",
+          phase: "settled",
+          status: result.isError ? "error" : "ok",
+        };
 
   structuredContent[UI_STREAM_STRUCTURED_CONTENT_KEY] = {
     ...envelope,
@@ -172,7 +179,10 @@ export async function maybeStartUiSession(
       };
     }
 
-    const resource = await state.uiResourceHandler.readUiResource(request.serverName, request.uiResourceUri);
+    const resource = await state.uiResourceHandler.readUiResource(
+      request.serverName,
+      request.uiResourceUri,
+    );
 
     if (state.uiServer) {
       state.uiServer.close("replaced");
@@ -186,16 +196,17 @@ export async function maybeStartUiSession(
     const streamMode = request.streamMode;
     const streamId = streamMode ? randomUUID() : undefined;
     const streamToken = streamMode ? randomUUID() : undefined;
-    const hostContext: UiHostContext | undefined = streamMode && streamId
-      ? {
-          [UI_STREAM_HOST_CONTEXT_KEY]: {
-            mode: streamMode,
-            streamId,
-            intermediateResultPatches: streamMode === "stream-first",
-            partialInput: false,
-          },
-        }
-      : undefined;
+    const hostContext: UiHostContext | undefined =
+      streamMode && streamId
+        ? {
+            [UI_STREAM_HOST_CONTEXT_KEY]: {
+              mode: streamMode,
+              streamId,
+              intermediateResultPatches: streamMode === "stream-first",
+              partialInput: false,
+            },
+          }
+        : undefined;
 
     let active = true;
     let nextStreamSequence = 0;
@@ -224,7 +235,12 @@ export async function maybeStartUiSession(
             state.sendMessage(
               {
                 customType: "mcp-ui-prompt",
-                content: [{ type: "text", text: `User sent prompt from ${request.serverName} UI: "${prompt}"` }],
+                content: [
+                  {
+                    type: "text",
+                    text: `User sent prompt from ${request.serverName} UI: "${prompt}"`,
+                  },
+                ],
                 display: `💬 UI Prompt: ${prompt}`,
                 details: { server: request.serverName, tool: request.toolName, prompt },
               },
@@ -240,9 +256,19 @@ export async function maybeStartUiSession(
             state.sendMessage(
               {
                 customType: "mcp-ui-intent",
-                content: [{ type: "text", text: `User triggered intent from ${request.serverName} UI: ${intent}${paramsStr}` }],
+                content: [
+                  {
+                    type: "text",
+                    text: `User triggered intent from ${request.serverName} UI: ${intent}${paramsStr}`,
+                  },
+                ],
                 display: `🎯 UI Intent: ${intent}`,
-                details: { server: request.serverName, tool: request.toolName, intent, params: intentParams },
+                details: {
+                  server: request.serverName,
+                  tool: request.toolName,
+                  intent,
+                  params: intentParams,
+                },
               },
               { triggerTurn: true },
             );
@@ -313,7 +339,9 @@ export async function maybeStartUiSession(
         if (!active || state.uiServer !== handle) return;
         if (serverName !== request.serverName) return;
         nextStreamSequence += 1;
-        handle.sendResultPatch(withStreamEnvelope(notification.result as CallToolResult, streamId, nextStreamSequence));
+        handle.sendResultPatch(
+          withStreamEnvelope(notification.result as CallToolResult, streamId, nextStreamSequence),
+        );
       });
     }
 
@@ -321,8 +349,7 @@ export async function maybeStartUiSession(
 
     const glimpseDetected = isGlimpseAvailable();
     const viewerPref = process.env.MCP_UI_VIEWER?.toLowerCase();
-    const useGlimpse = viewerPref === "glimpse" ||
-      (viewerPref !== "browser" && glimpseDetected);
+    const useGlimpse = viewerPref === "glimpse" || (viewerPref !== "browser" && glimpseDetected);
 
     if (useGlimpse) {
       try {

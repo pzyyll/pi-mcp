@@ -2,46 +2,25 @@
   "name": "pi-mcp-adapter",
   "version": "2.11.0",
   "description": "MCP (Model Context Protocol) adapter extension for Pi coding agent",
-  "type": "module",
+  "keywords": [
+    "ai",
+    "claude",
+    "coding-agent",
+    "extension",
+    "llm",
+    "mcp",
+    "model-context-protocol",
+    "pi",
+    "pi-package"
+  ],
   "license": "MIT",
   "author": "Nico Bailon",
-  "packageManager": "pnpm@11.16.0",
-  "engines": {
-    "node": ">=22"
-  },
-  "bin": {
-    "pi-mcp-adapter": "cli.js"
-  },
-  "scripts": {
-    "build": "tsdown",
-    "postinstall": "npm run build",
-    "prepublishOnly": "pnpm run build",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:oauth-provider": "node --import tsx --test src/mcp-oauth-provider.test.ts",
-    "bench:import": "node scripts/bench-import.mjs"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nicobailon/pi-mcp-adapter.git"
   },
-  "keywords": [
-    "pi-package",
-    "pi",
-    "mcp",
-    "model-context-protocol",
-    "ai",
-    "coding-agent",
-    "extension",
-    "claude",
-    "llm"
-  ],
-  "pi": {
-    "extensions": [
-      "./dist/index.js"
-    ],
-    "video": "https://github.com/nicobailon/pi-mcp-adapter/raw/refs/heads/main/pi-mcp.mp4"
+  "bin": {
+    "pi-mcp-adapter": "cli.js"
   },
   "files": [
     "cli.js",
@@ -51,6 +30,21 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
+  "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "postinstall": "npm run build",
+    "prepublishOnly": "pnpm run build",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:oauth-provider": "node --import tsx --test src/mcp-oauth-provider.test.ts",
+    "bench:import": "node scripts/bench-import.mjs"
+  },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.7.4",
     "@modelcontextprotocol/sdk": "^1.25.1",
@@ -58,21 +52,33 @@
     "recheck": "^4.5.0",
     "zod": "^3.25.0 || ^4.0.0"
   },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "0.81.1",
+    "@earendil-works/pi-coding-agent": "0.81.1",
+    "@earendil-works/pi-tui": "0.81.1",
+    "@types/node": "^26.1.1",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
+    "tsdown": "^0.22.13",
+    "tsx": "^4.23.1",
+    "typebox": "^1.1.24",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
   "peerDependencies": {
     "@earendil-works/pi-ai": "*",
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*",
     "typebox": "*"
   },
-  "devDependencies": {
-    "@earendil-works/pi-ai": "0.81.1",
-    "@earendil-works/pi-coding-agent": "0.81.1",
-    "@earendil-works/pi-tui": "0.81.1",
-    "@types/node": "^26.1.1",
-    "tsdown": "^0.22.13",
-    "tsx": "^4.23.1",
-    "typebox": "^1.1.24",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.16.0",
+  "pi": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "video": "https://github.com/nicobailon/pi-mcp-adapter/raw/refs/heads/main/pi-mcp.mp4"
   }
 }

@@ -39,7 +39,10 @@ interface ServerConnection {
   status: "connected" | "closed" | "needs-auth";
 }
 
-type UiStreamListener = (serverName: string, notification: ServerStreamResultPatchNotification["params"]) => void;
+type UiStreamListener = (
+  serverName: string,
+  notification: ServerStreamResultPatchNotification["params"],
+) => void;
 
 export class McpServerManager {
   private connections = new Map<string, ServerConnection>();
@@ -93,7 +96,11 @@ export class McpServerManager {
     };
   }
 
-  async connect(name: string, definition: ServerDefinition, signal?: AbortSignal): Promise<ServerConnection> {
+  async connect(
+    name: string,
+    definition: ServerDefinition,
+    signal?: AbortSignal,
+  ): Promise<ServerConnection> {
     throwIfAborted(signal);
     // Dedupe concurrent connection attempts
     if (this.connectPromises.has(name)) {
@@ -233,10 +240,10 @@ export class McpServerManager {
       registerElicitationHandler(client, {
         ...this.elicitationConfig,
         serverName,
-        onUrlAccepted: elicitationId => this.rememberUrlElicitation(serverName, elicitationId),
+        onUrlAccepted: (elicitationId) => this.rememberUrlElicitation(serverName, elicitationId),
       });
       if (this.elicitationConfig.allowUrl) {
-        client.setNotificationHandler(ElicitationCompleteNotificationSchema, notification => {
+        client.setNotificationHandler(ElicitationCompleteNotificationSchema, (notification) => {
           const accepted = this.acceptedUrlElicitations.get(serverName);
           if (!accepted?.delete(notification.params.elicitationId)) return;
           this.elicitationConfig?.ui.notify(
@@ -256,11 +263,14 @@ export class McpServerManager {
     if (!this.elicitationConfig?.allowUrl) return "cancel";
     const { handleUrlElicitation } = await import("./elicitation-handler.ts");
     for (const params of error.elicitations) {
-      const result = await handleUrlElicitation({
-        ...this.elicitationConfig,
-        serverName,
-        onUrlAccepted: elicitationId => this.rememberUrlElicitation(serverName, elicitationId),
-      }, params);
+      const result = await handleUrlElicitation(
+        {
+          ...this.elicitationConfig,
+          serverName,
+          onUrlAccepted: (elicitationId) => this.rememberUrlElicitation(serverName, elicitationId),
+        },
+        params,
+      );
       if (result.action !== "accept") return result.action;
     }
     return "accept";
@@ -301,16 +311,11 @@ export class McpServerManager {
     let authProvider: McpOAuthProvider | undefined;
     if (supportsOAuth(definition)) {
       const oauthConfig = extractOAuthConfig(definition);
-      authProvider = new McpOAuthProvider(
-        serverName,
-        definition.url!,
-        oauthConfig,
-        {
-          onRedirect: async (_authUrl) => {
-            // URL is captured by startAuth, no need to log
-          },
-        }
-      );
+      authProvider = new McpOAuthProvider(serverName, definition.url!, oauthConfig, {
+        onRedirect: async (_authUrl) => {
+          // URL is captured by startAuth, no need to log
+        },
+      });
     }
 
     // Try StreamableHTTP first (modern MCP servers)
@@ -362,7 +367,10 @@ export class McpServerManager {
     return allTools;
   }
 
-  private async fetchAllResources(client: Client, requestOptions?: RequestOptions): Promise<McpResource[]> {
+  private async fetchAllResources(
+    client: Client,
+    requestOptions?: RequestOptions,
+  ): Promise<McpResource[]> {
     try {
       const allResources: McpResource[] = [];
       let cursor: string | undefined;
@@ -431,7 +439,7 @@ export class McpServerManager {
 
   async closeAll(): Promise<void> {
     const names = [...this.connections.keys()];
-    await Promise.all(names.map(name => this.close(name)));
+    await Promise.all(names.map((name) => this.close(name)));
   }
 
   getConnection(name: string): ServerConnection | undefined {
@@ -467,7 +475,7 @@ export class McpServerManager {
     const connection = this.connections.get(name);
     if (!connection || connection.status !== "connected") return false;
     if (connection.inFlight > 0) return false;
-    return (Date.now() - connection.lastUsedAt) > timeoutMs;
+    return Date.now() - connection.lastUsedAt > timeoutMs;
   }
 }
 

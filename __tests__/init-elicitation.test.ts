@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   managers: [] as any[],
 }));
 
-vi.mock("../src/config.ts", async importOriginal => ({
+vi.mock("../src/config.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../src/config.ts")>()),
   loadMcpConfig: mocks.loadMcpConfig,
 }));

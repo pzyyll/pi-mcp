@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "**/*.bundle.js",
+    "banner.png",
+    "pi-mcp.mp4",
+    "pnpm-lock.yaml",
+    "CHANGELOG.md"
+  ]
+}

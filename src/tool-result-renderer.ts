@@ -56,7 +56,12 @@ function formatJsonish(value: unknown, maxChars: number): string {
 }
 
 function hasUsefulObjectContent(value: unknown): boolean {
-  return typeof value === "object" && value !== null && !Array.isArray(value) && Object.keys(value).length > 0;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.keys(value).length > 0
+  );
 }
 
 export function formatMcpProxyToolCallLines(
@@ -101,7 +106,7 @@ export function formatMcpDirectToolCallLines(
 function renderToolCallLines(lines: string[], theme: RenderTheme) {
   const [title = "mcp", ...rest] = lines;
   const styledTitle = theme.fg("toolTitle", theme.bold ? theme.bold(title) : title);
-  const styledRest = rest.map(line => theme.fg("muted", line));
+  const styledRest = rest.map((line) => theme.fg("muted", line));
   return new Text([styledTitle, ...styledRest].join("\n"), 0, 0);
 }
 
@@ -151,13 +156,15 @@ export function renderMcpToolResult(
   }
 
   const hasErrorDetails = Boolean(result.details.error);
-  const display = formatMcpToolResultLines(result, options.expanded || context?.isError === true || hasErrorDetails);
+  const display = formatMcpToolResultLines(
+    result,
+    options.expanded || context?.isError === true || hasErrorDetails,
+  );
   const output = display.lines
-    .map((line) => line === "…" ? theme.fg("muted", line) : theme.fg("toolOutput", line))
+    .map((line) => (line === "…" ? theme.fg("muted", line) : theme.fg("toolOutput", line)))
     .join("\n");
-  const hint = display.truncated && !options.expanded
-    ? `\n${theme.fg("muted", "(Ctrl+O to expand)")}`
-    : "";
+  const hint =
+    display.truncated && !options.expanded ? `\n${theme.fg("muted", "(Ctrl+O to expand)")}` : "";
 
   return new Text(`${output}${hint}`, 0, 0);
 }

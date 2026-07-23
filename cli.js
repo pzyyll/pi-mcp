@@ -28,7 +28,9 @@ const IMPORT_PATHS = {
     path.join(HOME, ".claude.json"),
     path.join(HOME, ".claude", "claude_desktop_config.json"),
   ],
-  "claude-desktop": [path.join(HOME, "Library", "Application Support", "Claude", "claude_desktop_config.json")],
+  "claude-desktop": [
+    path.join(HOME, "Library", "Application Support", "Claude", "claude_desktop_config.json"),
+  ],
   codex: [path.join(HOME, ".codex", "config.json")],
   windsurf: [path.join(HOME, ".windsurf", "mcp.json")],
   vscode: [path.resolve(process.cwd(), ".vscode", "mcp.json")],
@@ -55,13 +57,17 @@ function loadPiConfig() {
   const raw = readJsonFile(PI_CONFIG_PATH);
   const mcpServers = raw.mcpServers ?? raw["mcp-servers"] ?? {};
   if (!mcpServers || typeof mcpServers !== "object" || Array.isArray(mcpServers)) {
-    throw new Error(`Invalid MCP config at ${PI_CONFIG_PATH}: expected \"mcpServers\" to be an object`);
+    throw new Error(
+      `Invalid MCP config at ${PI_CONFIG_PATH}: expected "mcpServers" to be an object`,
+    );
   }
 
   const normalized = { ...raw };
   delete normalized["mcp-servers"];
 
-  const imports = Array.isArray(raw.imports) ? raw.imports.filter((value) => typeof value === "string") : undefined;
+  const imports = Array.isArray(raw.imports)
+    ? raw.imports.filter((value) => typeof value === "string")
+    : undefined;
   return {
     ...normalized,
     mcpServers,
@@ -126,7 +132,9 @@ async function runInit(argv, log = console.log) {
 
   if (importsToAdd.length === 0) {
     log("\nNo Pi config changes needed.");
-    log("Standard MCP configs are discovered automatically, and host-specific imports are already configured or unavailable.");
+    log(
+      "Standard MCP configs are discovered automatically, and host-specific imports are already configured or unavailable.",
+    );
     return 0;
   }
 
@@ -145,7 +153,9 @@ async function runInit(argv, log = console.log) {
 
   writePiConfig(nextConfig);
   log(`Updated ${PI_CONFIG_PATH}`);
-  log("Pi will now keep reading standard MCP configs automatically, while these imports cover host-specific config formats.");
+  log(
+    "Pi will now keep reading standard MCP configs automatically, while these imports cover host-specific config formats.",
+  );
   return 0;
 }
 
@@ -159,7 +169,9 @@ export async function main(argv = process.argv.slice(2), log = console.log, erro
 
   if (command === "install") {
     error("The custom downloader has been retired.");
-    error("Use `pi install npm:pi-mcp-adapter` instead, then optionally run `pi-mcp-adapter init`.");
+    error(
+      "Use `pi install npm:pi-mcp-adapter` instead, then optionally run `pi-mcp-adapter init`.",
+    );
     return 1;
   }
 
@@ -173,13 +185,16 @@ export async function main(argv = process.argv.slice(2), log = console.log, erro
 }
 
 const resolvedEntrypoint = process.argv[1] ? fs.realpathSync(process.argv[1]) : undefined;
-const isEntrypoint = resolvedEntrypoint && import.meta.url === pathToFileURL(resolvedEntrypoint).href;
+const isEntrypoint =
+  resolvedEntrypoint && import.meta.url === pathToFileURL(resolvedEntrypoint).href;
 
 if (isEntrypoint) {
-  main().then((code) => {
-    process.exitCode = code;
-  }).catch((err) => {
-    console.error(`\nHelper failed: ${err instanceof Error ? err.message : String(err)}`);
-    process.exit(1);
-  });
+  main()
+    .then((code) => {
+      process.exitCode = code;
+    })
+    .catch((err) => {
+      console.error(`\nHelper failed: ${err instanceof Error ? err.message : String(err)}`);
+      process.exit(1);
+    });
 }

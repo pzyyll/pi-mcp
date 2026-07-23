@@ -30,7 +30,8 @@ export function loadOnboardingState(): McpOnboardingState {
       version: 1,
       sharedConfigHintShown: raw.sharedConfigHintShown === true,
       setupCompleted: raw.setupCompleted === true,
-      lastDiscoveryFingerprint: typeof raw.lastDiscoveryFingerprint === "string" ? raw.lastDiscoveryFingerprint : undefined,
+      lastDiscoveryFingerprint:
+        typeof raw.lastDiscoveryFingerprint === "string" ? raw.lastDiscoveryFingerprint : undefined,
     };
   } catch {
     return { ...DEFAULT_STATE };
@@ -45,7 +46,9 @@ export function saveOnboardingState(state: McpOnboardingState): void {
   renameSync(tmpPath, path);
 }
 
-export function updateOnboardingState(updater: (state: McpOnboardingState) => McpOnboardingState): McpOnboardingState {
+export function updateOnboardingState(
+  updater: (state: McpOnboardingState) => McpOnboardingState,
+): McpOnboardingState {
   const next = updater(loadOnboardingState());
   saveOnboardingState(next);
   return next;

@@ -1,4 +1,11 @@
-import { complete, type Api, type AssistantMessage, type Message, type Model, type TextContent } from "@earendil-works/pi-ai";
+import {
+  complete,
+  type Api,
+  type AssistantMessage,
+  type Message,
+  type Model,
+  type TextContent,
+} from "@earendil-works/pi-ai";
 import { truncateAtWord } from "./utils.ts";
 import type { ExtensionUIContext, ModelRegistry } from "@earendil-works/pi-coding-agent";
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -55,7 +62,12 @@ export async function handleSamplingRequest(
   await confirmSampling(
     options,
     "Approve MCP sampling request",
-    formatRequestApproval(options.serverName, `${model.provider}/${model.id}`, params.systemPrompt, messages),
+    formatRequestApproval(
+      options.serverName,
+      `${model.provider}/${model.id}`,
+      params.systemPrompt,
+      messages,
+    ),
   );
 
   const result = await complete(
@@ -89,7 +101,9 @@ function formatRequestApproval(
   systemPrompt: string | undefined,
   messages: Message[],
 ): string {
-  const lines = [`${serverName} wants to sample ${messages.length} message${messages.length === 1 ? "" : "s"} with ${modelName}.`];
+  const lines = [
+    `${serverName} wants to sample ${messages.length} message${messages.length === 1 ? "" : "s"} with ${modelName}.`,
+  ];
   if (systemPrompt) {
     lines.push(`System: ${truncateAtWord(systemPrompt, 400)}`);
   }
@@ -100,19 +114,22 @@ function formatRequestApproval(
 }
 
 function formatResponseApproval(serverName: string, response: CreateMessageResult): string {
-  const text = response.content.type === "text" ? response.content.text : `[${response.content.type} content]`;
+  const text =
+    response.content.type === "text" ? response.content.text : `[${response.content.type} content]`;
   return `${serverName} will receive this response from ${response.model}:\n\n${truncateAtWord(text, 1000)}`;
 }
 
 function messageText(message: Message): string {
   if (typeof message.content === "string") return message.content;
-  return message.content.map((block) => {
-    if (block.type === "text") return block.text;
-    if (block.type === "image") return `[image: ${block.mimeType}]`;
-    if (block.type === "thinking") return "[thinking]";
-    if (block.type === "toolCall") return `[tool call: ${block.name}]`;
-    return "[content]";
-  }).join("\n");
+  return message.content
+    .map((block) => {
+      if (block.type === "text") return block.text;
+      if (block.type === "image") return `[image: ${block.mimeType}]`;
+      if (block.type === "thinking") return "[thinking]";
+      if (block.type === "toolCall") return `[tool call: ${block.name}]`;
+      return "[content]";
+    })
+    .join("\n");
 }
 
 async function resolveSamplingModel(
@@ -161,15 +178,25 @@ async function resolveSamplingModel(
 }
 
 function addSamplingCandidate(candidates: Model<Api>[], model: Model<Api>): void {
-  if (!candidates.some((candidate) => candidate.provider === model.provider && candidate.id === model.id)) {
+  if (
+    !candidates.some(
+      (candidate) => candidate.provider === model.provider && candidate.id === model.id,
+    )
+  ) {
     candidates.push(model);
   }
 }
 
-async function confirmSampling(options: SamplingHandlerOptions, title: string, message: string): Promise<void> {
+async function confirmSampling(
+  options: SamplingHandlerOptions,
+  title: string,
+  message: string,
+): Promise<void> {
   if (options.autoApprove) return;
   if (!options.ui) {
-    throw new Error("MCP sampling requires interactive approval. Set settings.samplingAutoApprove to true to allow it without UI.");
+    throw new Error(
+      "MCP sampling requires interactive approval. Set settings.samplingAutoApprove to true to allow it without UI.",
+    );
   }
   const approved = await options.ui.confirm(title, message);
   if (!approved) {

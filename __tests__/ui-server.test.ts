@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import http from "node:http";
 import { startUiServer, type UiServerOptions, type UiServerHandle } from "../src/ui-server.ts";
 import type { McpServerManager } from "../src/server-manager.ts";
@@ -12,7 +12,7 @@ async function request(
     method?: string;
     body?: unknown;
     headers?: Record<string, string>;
-  } = {}
+  } = {},
 ): Promise<{ status: number; body: unknown; headers: http.IncomingHttpHeaders }> {
   return new Promise((resolve, reject) => {
     const parsed = new URL(url);
@@ -40,7 +40,7 @@ async function request(
           }
           resolve({ status: res.statusCode ?? 0, body, headers: res.headers });
         });
-      }
+      },
     );
     req.on("error", reject);
     if (options.body) {
@@ -78,7 +78,7 @@ function connectSSE(
           buffer += chunk.toString();
           const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
-          
+
           for (const line of lines) {
             if (line.startsWith("id: ")) {
               eventId = line.slice(4);
@@ -101,7 +101,7 @@ function connectSSE(
             req.destroy();
           },
         });
-      }
+      },
     );
     req.on("error", reject);
     req.end();
@@ -199,10 +199,12 @@ describe("UiServer", () => {
     });
 
     it("includes server and tool name in handle", async () => {
-      handle = await startUiServer(createServerOptions({
-        serverName: "my-server",
-        toolName: "my_tool",
-      }));
+      handle = await startUiServer(
+        createServerOptions({
+          serverName: "my-server",
+          toolName: "my_tool",
+        }),
+      );
 
       expect(handle.serverName).toBe("my-server");
       expect(handle.toolName).toBe("my_tool");
@@ -720,9 +722,11 @@ describe("UiServer", () => {
     });
 
     it("rejects unavailable mode", async () => {
-      handle = await startUiServer(createServerOptions({
-        hostContext: { displayMode: "inline", availableDisplayModes: ["inline"] },
-      }));
+      handle = await startUiServer(
+        createServerOptions({
+          hostContext: { displayMode: "inline", availableDisplayModes: ["inline"] },
+        }),
+      );
 
       const res = await request(`http://localhost:${handle.port}/proxy/ui/request-display-mode`, {
         method: "POST",
@@ -861,7 +865,9 @@ describe("UiServer", () => {
     it("returns 404 for unknown GET routes", async () => {
       handle = await startUiServer(createServerOptions());
 
-      const res = await request(`http://localhost:${handle.port}/unknown?session=${handle.sessionToken}`);
+      const res = await request(
+        `http://localhost:${handle.port}/unknown?session=${handle.sessionToken}`,
+      );
 
       expect(res.status).toBe(404);
     });
@@ -930,7 +936,7 @@ describe("UiServer", () => {
 
       const cancelled = events.find((e) => e.name === "tool-cancelled");
       expect(cancelled).toBeTruthy();
-      expect((cancelled?.data as { reason: string }).reason).toContain("Tool failed");
+      expect((cancelled!.data as { reason: string }).reason).toContain("Tool failed");
     });
   });
 
@@ -963,7 +969,7 @@ describe("UiServer", () => {
           (res) => {
             res.on("data", () => {});
             res.on("end", () => resolve({ status: res.statusCode ?? 0 }));
-          }
+          },
         );
         req.on("error", reject);
         req.end(); // No body

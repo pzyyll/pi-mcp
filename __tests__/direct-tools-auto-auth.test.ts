@@ -81,7 +81,13 @@ describe("direct tools auto auth", () => {
     );
 
     const controller = new AbortController();
-    const result = await executor("id", { q: "hello" }, controller.signal, () => {}, undefined as any);
+    const result = await executor(
+      "id",
+      { q: "hello" },
+      controller.signal,
+      () => {},
+      undefined as any,
+    );
 
     expect(mocks.authenticate).toHaveBeenCalledWith(
       "demo",
@@ -127,12 +133,16 @@ describe("direct tools auto auth", () => {
     } as any;
     mocks.lazyConnect.mockResolvedValue(true);
 
-    const executor = createDirectToolExecutor(() => state, () => null, {
-      serverName: "demo",
-      originalName: "search",
-      prefixedName: "demo_search",
-      description: "Search",
-    });
+    const executor = createDirectToolExecutor(
+      () => state,
+      () => null,
+      {
+        serverName: "demo",
+        originalName: "search",
+        prefixedName: "demo_search",
+        description: "Search",
+      },
+    );
 
     const inFlight = executor("id", {}, controller.signal, undefined, undefined as any);
     await Promise.resolve();
@@ -195,12 +205,14 @@ describe("direct tools auto auth", () => {
   it("runs URL elicitations returned by a URL-required tool error", async () => {
     const { UrlElicitationRequiredError } = await import("@modelcontextprotocol/sdk/types.js");
     const { createDirectToolExecutor } = await import("../src/direct-tools.ts");
-    const error = new UrlElicitationRequiredError([{
-      mode: "url",
-      message: "Connect your account",
-      elicitationId: "connect-1",
-      url: "https://example.com/connect",
-    }]);
+    const error = new UrlElicitationRequiredError([
+      {
+        mode: "url",
+        message: "Connect your account",
+        elicitationId: "connect-1",
+        url: "https://example.com/connect",
+      },
+    ]);
     const connection = {
       status: "connected",
       client: { callTool: vi.fn().mockRejectedValue(error) },
@@ -219,12 +231,16 @@ describe("direct tools auto auth", () => {
     } as any;
     mocks.lazyConnect.mockResolvedValue(true);
 
-    const executor = createDirectToolExecutor(() => state, () => null, {
-      serverName: "demo",
-      originalName: "search",
-      prefixedName: "demo_search",
-      description: "Search",
-    });
+    const executor = createDirectToolExecutor(
+      () => state,
+      () => null,
+      {
+        serverName: "demo",
+        originalName: "search",
+        prefixedName: "demo_search",
+        description: "Search",
+      },
+    );
     const result = await executor("id", {}, undefined, undefined, undefined as any);
 
     expect(state.manager.handleUrlElicitationRequired).toHaveBeenCalledWith("demo", error);

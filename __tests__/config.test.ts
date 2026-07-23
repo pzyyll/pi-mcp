@@ -26,7 +26,6 @@ describe("config discovery", () => {
     const project = mkdtempSync(join(tmpdir(), "pi-mcp-config-project-"));
     process.env.HOME = home;
     process.chdir(project);
-    const realProject = realpathSync(project);
 
     writeJson(join(home, ".config", "mcp", "mcp.json"), {
       settings: { idleTimeout: 5, requestTimeoutMs: 1500 },
@@ -86,7 +85,9 @@ describe("config discovery", () => {
 
     writeJson(join(home, ".claude", "mcp.json"), { mcpServers: { modern: { command: "modern" } } });
     writeJson(join(home, ".claude.json"), { mcpServers: { old: { command: "old" } } });
-    writeJson(join(project, ".vscode", "mcp.json"), { mcpServers: { editor: { command: "code" } } });
+    writeJson(join(project, ".vscode", "mcp.json"), {
+      mcpServers: { editor: { command: "code" } },
+    });
 
     const { findAvailableImportConfigs } = await import("../src/config.ts");
     const imports = findAvailableImportConfigs();
@@ -113,7 +114,11 @@ describe("config discovery", () => {
 
     writeJson(join(home, ".cursor", "mcp.json"), {
       mcpServers: {
-        importedStdio: { command: "cursor-stdio", args: ["--from-cursor"], env: { TOKEN: "cursor-token" } },
+        importedStdio: {
+          command: "cursor-stdio",
+          args: ["--from-cursor"],
+          env: { TOKEN: "cursor-token" },
+        },
         importedHttp: {
           url: "https://api.example.com/mcp",
           headers: { Authorization: "Bearer imported" },
@@ -250,9 +255,7 @@ describe("config discovery", () => {
     expect(summary.hasSharedServers).toBe(true);
     expect(summary.sources.find((source) => source.id === "shared-global")?.serverCount).toBe(1);
     expect(summary.imports).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ kind: "cursor", serverCount: 1 }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ kind: "cursor", serverCount: 1 })]),
     );
     expect(summary.repoPrompt).toMatchObject({
       configured: false,
@@ -284,7 +287,8 @@ describe("config discovery", () => {
       },
     });
 
-    const { getServerProvenance, loadMcpConfig, writeDirectToolsConfig, getPiGlobalConfigPath } = await import("../src/config.ts");
+    const { getServerProvenance, loadMcpConfig, writeDirectToolsConfig, getPiGlobalConfigPath } =
+      await import("../src/config.ts");
     const fullConfig = loadMcpConfig();
     const provenance = getServerProvenance();
 
@@ -298,10 +302,16 @@ describe("config discovery", () => {
     );
 
     const userConfig = JSON.parse(readFileSync(getPiGlobalConfigPath(), "utf-8"));
-    expect(userConfig.mcpServers.genericServer).toMatchObject({ command: "generic", directTools: true });
+    expect(userConfig.mcpServers.genericServer).toMatchObject({
+      command: "generic",
+      directTools: true,
+    });
 
     const projectConfig = JSON.parse(readFileSync(join(project, ".mcp.json"), "utf-8"));
-    expect(projectConfig.mcpServers.projectServer).toMatchObject({ command: "project", directTools: ["search"] });
+    expect(projectConfig.mcpServers.projectServer).toMatchObject({
+      command: "project",
+      directTools: ["search"],
+    });
   });
 
   it("builds real diff previews for compatibility imports and shared server writes", async () => {
@@ -317,11 +327,8 @@ describe("config discovery", () => {
       },
     });
 
-    const {
-      previewCompatibilityImports,
-      previewSharedServerEntry,
-      getGenericGlobalConfigPath,
-    } = await import("../src/config.ts");
+    const { previewCompatibilityImports, previewSharedServerEntry, getGenericGlobalConfigPath } =
+      await import("../src/config.ts");
 
     const importsPreview = previewCompatibilityImports(["cursor", "codex"]);
     expect(importsPreview.path).toContain(".pi/agent/mcp.json");
@@ -345,7 +352,8 @@ describe("config discovery", () => {
     process.env.HOME = home;
     process.chdir(project);
 
-    const { ensureCompatibilityImports, getPiGlobalConfigPath, writeStarterProjectConfig } = await import("../src/config.ts");
+    const { ensureCompatibilityImports, getPiGlobalConfigPath, writeStarterProjectConfig } =
+      await import("../src/config.ts");
     const importResult = ensureCompatibilityImports(["cursor", "codex"]);
     expect(importResult.added).toEqual(["cursor", "codex"]);
 

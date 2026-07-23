@@ -16,7 +16,8 @@ describe("onboarding state", () => {
 
   it("returns the default state when no file exists", async () => {
     process.env.HOME = mkdtempSync(join(tmpdir(), "pi-mcp-onboarding-home-"));
-    const { loadOnboardingState, getOnboardingStatePath } = await import("../src/onboarding-state.ts");
+    const { loadOnboardingState, getOnboardingStatePath } =
+      await import("../src/onboarding-state.ts");
 
     expect(loadOnboardingState()).toEqual({
       version: 1,

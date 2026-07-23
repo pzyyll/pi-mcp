@@ -68,13 +68,9 @@ describe("proxy discovery", () => {
   });
 
   it("tells callers to invoke native Pi tools directly", async () => {
-    const result = await executeCall(
-      createState(),
-      "read",
-      undefined,
-      undefined,
-      () => [{ name: "read", description: "Read a file" } as any],
-    );
+    const result = await executeCall(createState(), "read", undefined, undefined, () => [
+      { name: "read", description: "Read a file" } as any,
+    ]);
 
     expect(result.content[0]).toMatchObject({
       type: "text",

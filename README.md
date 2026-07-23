@@ -28,11 +28,11 @@ Restart Pi after installation.
 
 The adapter reads standard MCP files automatically. No extra setup needed if you already have them.
 
-| You already have... | What happens |
-|---------------------|--------------|
-| `.mcp.json` or `~/.config/mcp/mcp.json` | Pi uses it immediately. The first time you open `/mcp`, you'll see a short heads-up explaining which file Pi detected and that Pi only writes adapter-specific overrides to its own files. |
-| Host-specific configs (Cursor, Claude Code, Codex, etc.) but no standard MCP files | Run `/mcp setup` to adopt those host configs into Pi. The setup flow shows exactly what it found, lets you pick which ones to import, and previews the exact file changes before writing. |
-| Nothing configured yet | Run `/mcp setup` to scaffold a minimal `.mcp.json`, quick-add RepoPrompt, or inspect what the adapter discovered on your machine. |
+| You already have...                                                                | What happens                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.mcp.json` or `~/.config/mcp/mcp.json`                                            | Pi uses it immediately. The first time you open `/mcp`, you'll see a short heads-up explaining which file Pi detected and that Pi only writes adapter-specific overrides to its own files. |
+| Host-specific configs (Cursor, Claude Code, Codex, etc.) but no standard MCP files | Run `/mcp setup` to adopt those host configs into Pi. The setup flow shows exactly what it found, lets you pick which ones to import, and previews the exact file changes before writing.  |
+| Nothing configured yet                                                             | Run `/mcp setup` to scaffold a minimal `.mcp.json`, quick-add RepoPrompt, or inspect what the adapter discovered on your machine.                                                          |
 
 If you prefer the terminal, you can also run `pi-mcp-adapter init` after install to scan for host-specific configs and add missing compatibility imports to the Pi agent dir (`~/.pi/agent/mcp.json` by default, or `$PI_CODING_AGENT_DIR/mcp.json` when set).
 
@@ -70,6 +70,7 @@ Servers are **lazy by default** — they won't connect until you actually call o
 ```
 mcp({ search: "screenshot" })
 ```
+
 ```
 chrome_devtools_take_screenshot
   Take a screenshot of the page or element.
@@ -78,6 +79,7 @@ chrome_devtools_take_screenshot
     format (enum: "png", "jpeg", "webp") [default: "png"]
     fullPage (boolean) - Full page instead of viewport
 ```
+
 ```
 mcp({ tool: "chrome_devtools_take_screenshot", args: '{"format": "png"}' })
 ```
@@ -92,12 +94,12 @@ Two calls instead of 26 tools cluttering the context.
 
 Use the shared MCP files when you want one setup to work across hosts, and Pi-owned files when you need Pi-specific overrides or settings.
 
-| File | Purpose |
-|------|---------|
-| `~/.config/mcp/mcp.json` | User-global shared MCP config |
-| `.mcp.json` | Project-local shared MCP config |
+| File                      | Purpose                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `~/.config/mcp/mcp.json`  | User-global shared MCP config                                                    |
+| `.mcp.json`               | Project-local shared MCP config                                                  |
 | `<Pi agent dir>/mcp.json` | Pi global override and compatibility imports (`~/.pi/agent/mcp.json` by default) |
-| `.pi/mcp.json` | Pi project override |
+| `.pi/mcp.json`            | Pi project override                                                              |
 
 Pi-specific files are the write targets for imported or shared global servers when Pi needs to persist adapter-only settings such as `directTools`.
 
@@ -119,30 +121,30 @@ In the configuration examples below, `30000` is illustrative only. If `requestTi
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `command` | Executable for stdio transport |
-| `args` | Command arguments |
-| `env` | Environment variables; supports `${VAR}` and `$env:VAR` interpolation |
-| `cwd` | Working directory; supports `${VAR}`, `$env:VAR`, and `~` expansion |
-| `url` | HTTP endpoint (StreamableHTTP with SSE fallback) |
-| `headers` | HTTP headers; supports `${VAR}` and `$env:VAR` interpolation |
-| `auth` | `"bearer"` or `"oauth"` |
-| `oauth.grantType` | `"authorization_code"` (default) or `"client_credentials"` for non-interactive machine auth |
-| `oauth.clientId` | Pre-registered OAuth client ID; dynamic registration is used when omitted |
-| `oauth.clientSecret` | OAuth client secret for confidential clients |
-| `oauth.scope` | Requested OAuth scopes |
-| `oauth.redirectUri` | Exact localhost redirect URI for browser OAuth, including port and path, for providers that pre-register callbacks |
-| `oauth.clientName` | Client display name advertised during dynamic registration |
-| `oauth.clientUri` | Client homepage URI advertised during dynamic registration |
-| `bearerToken` / `bearerTokenEnv` | Token or env var name; `bearerToken` supports `${VAR}` and `$env:VAR` interpolation |
-| `lifecycle` | `"lazy"` (default), `"eager"`, or `"keep-alive"` |
-| `idleTimeout` | Minutes before idle disconnect (overrides global) |
-| `requestTimeoutMs` | Request timeout in milliseconds for live MCP calls (overrides global; if omitted or `<= 0`, the MCP SDK default timeout is used) |
-| `exposeResources` | Expose MCP resources as tools (default: true) |
-| `directTools` | `true`, `string[]`, or `false` — register tools individually instead of through proxy |
-| `excludeTools` | `string[]` of tool names to hide (matches original names like `get_screenshot` and prefixed names like `figma_get_screenshot`) |
-| `debug` | Show server stderr (default: false) |
+| Field                            | Description                                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `command`                        | Executable for stdio transport                                                                                                   |
+| `args`                           | Command arguments                                                                                                                |
+| `env`                            | Environment variables; supports `${VAR}` and `$env:VAR` interpolation                                                            |
+| `cwd`                            | Working directory; supports `${VAR}`, `$env:VAR`, and `~` expansion                                                              |
+| `url`                            | HTTP endpoint (StreamableHTTP with SSE fallback)                                                                                 |
+| `headers`                        | HTTP headers; supports `${VAR}` and `$env:VAR` interpolation                                                                     |
+| `auth`                           | `"bearer"` or `"oauth"`                                                                                                          |
+| `oauth.grantType`                | `"authorization_code"` (default) or `"client_credentials"` for non-interactive machine auth                                      |
+| `oauth.clientId`                 | Pre-registered OAuth client ID; dynamic registration is used when omitted                                                        |
+| `oauth.clientSecret`             | OAuth client secret for confidential clients                                                                                     |
+| `oauth.scope`                    | Requested OAuth scopes                                                                                                           |
+| `oauth.redirectUri`              | Exact localhost redirect URI for browser OAuth, including port and path, for providers that pre-register callbacks               |
+| `oauth.clientName`               | Client display name advertised during dynamic registration                                                                       |
+| `oauth.clientUri`                | Client homepage URI advertised during dynamic registration                                                                       |
+| `bearerToken` / `bearerTokenEnv` | Token or env var name; `bearerToken` supports `${VAR}` and `$env:VAR` interpolation                                              |
+| `lifecycle`                      | `"lazy"` (default), `"eager"`, or `"keep-alive"`                                                                                 |
+| `idleTimeout`                    | Minutes before idle disconnect (overrides global)                                                                                |
+| `requestTimeoutMs`               | Request timeout in milliseconds for live MCP calls (overrides global; if omitted or `<= 0`, the MCP SDK default timeout is used) |
+| `exposeResources`                | Expose MCP resources as tools (default: true)                                                                                    |
+| `directTools`                    | `true`, `string[]`, or `false` — register tools individually instead of through proxy                                            |
+| `excludeTools`                   | `string[]` of tool names to hide (matches original names like `get_screenshot` and prefixed names like `figma_get_screenshot`)   |
+| `debug`                          | Show server stderr (default: false)                                                                                              |
 
 For pre-registered browser OAuth clients, set `oauth.redirectUri` to the exact callback registered with the provider, for example `"http://localhost:3118/callback"`. Dynamic clients normally omit it and use a lazy OS-assigned localhost callback port.
 
@@ -151,7 +153,7 @@ For pre-registered browser OAuth clients, set `oauth.redirectUri` to the exact c
 If Pi is running on a remote server and cannot open a local browser, start OAuth through the proxy tool:
 
 ```js
-mcp({ action: "auth-start", server: "linear-server" })
+mcp({ action: "auth-start", server: "linear-server" });
 ```
 
 Open the returned authorization URL in your local browser. After approval, your browser redirects to a localhost URL. On a remote server that local page may fail to load; copy the full URL from the browser address bar anyway and complete the flow in the same Pi session:
@@ -160,8 +162,8 @@ Open the returned authorization URL in your local browser. After approval, your 
 mcp({
   action: "auth-complete",
   server: "linear-server",
-  args: '{"redirectUrl":"http://localhost:19876/callback?code=...&state=..."}'
-})
+  args: '{"redirectUrl":"http://localhost:19876/callback?code=...&state=..."}',
+});
 ```
 
 You can also pass only the `code` query parameter with `args: '{"code":"..."}'`. Treat authorization URLs and codes as sensitive; they can grant access to the MCP server until the flow expires or completes.
@@ -181,22 +183,22 @@ You can also pass only the `code` query parameter with `args: '{"code":"..."}'`.
     "idleTimeout": 10,
     "requestTimeoutMs": 30000
   },
-  "mcpServers": { }
+  "mcpServers": {}
 }
 ```
 
-| Setting | Description |
-|---------|-------------|
-| `toolPrefix` | `"server"` (default), `"short"` (strips `-mcp` suffix), or `"none"` |
-| `idleTimeout` | Global idle timeout in minutes (default: 10, 0 to disable) |
-| `requestTimeoutMs` | Global request timeout in milliseconds for live MCP calls (if omitted or `<= 0`, the MCP SDK default timeout is used) |
-| `directTools` | Global default for all servers (default: false). Per-server overrides this. |
-| `disableProxyTool` | Hide the `mcp` proxy tool once configured direct tools are fully available from cache. |
-| `autoAuth` | Auto-run OAuth on `connect`/tool calls when a server needs auth, then retry once (default: false). |
-| `sampling` | Allow MCP servers to sample through Pi models, honoring `modelPreferences.hints` before current/default fallback (default: true when UI approval is available). |
-| `samplingAutoApprove` | Skip sampling confirmation prompts. Required for sampling in non-UI sessions (default: false). |
-| `elicitation` | Allow MCP servers to request user input through Pi dialogs (default: true when Pi UI is available). |
-| `outputGuard` | Guard oversized MCP output: `true` (default), `false`, or `{ maxBytes, maxLines, detailsMaxBytes }`. See [Output Guard](#output-guard). |
+| Setting               | Description                                                                                                                                                     |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toolPrefix`          | `"server"` (default), `"short"` (strips `-mcp` suffix), or `"none"`                                                                                             |
+| `idleTimeout`         | Global idle timeout in minutes (default: 10, 0 to disable)                                                                                                      |
+| `requestTimeoutMs`    | Global request timeout in milliseconds for live MCP calls (if omitted or `<= 0`, the MCP SDK default timeout is used)                                           |
+| `directTools`         | Global default for all servers (default: false). Per-server overrides this.                                                                                     |
+| `disableProxyTool`    | Hide the `mcp` proxy tool once configured direct tools are fully available from cache.                                                                          |
+| `autoAuth`            | Auto-run OAuth on `connect`/tool calls when a server needs auth, then retry once (default: false).                                                              |
+| `sampling`            | Allow MCP servers to sample through Pi models, honoring `modelPreferences.hints` before current/default fallback (default: true when UI approval is available). |
+| `samplingAutoApprove` | Skip sampling confirmation prompts. Required for sampling in non-UI sessions (default: false).                                                                  |
+| `elicitation`         | Allow MCP servers to request user input through Pi dialogs (default: true when Pi UI is available).                                                             |
+| `outputGuard`         | Guard oversized MCP output: `true` (default), `false`, or `{ maxBytes, maxLines, detailsMaxBytes }`. See [Output Guard](#output-guard).                         |
 
 Per-server `idleTimeout` and `requestTimeoutMs` override the global settings.
 
@@ -253,11 +255,11 @@ Per-server:
 }
 ```
 
-| Value | Behavior |
-|-------|----------|
-| `true` | Register all tools from this server as individual Pi tools |
-| `["tool_a", "tool_b"]` | Register only these tools (use original MCP names) |
-| Omitted or `false` | Proxy only (default) |
+| Value                  | Behavior                                                   |
+| ---------------------- | ---------------------------------------------------------- |
+| `true`                 | Register all tools from this server as individual Pi tools |
+| `["tool_a", "tool_b"]` | Register only these tools (use original MCP names)         |
+| Omitted or `false`     | Proxy only (default)                                       |
 
 To set a global default for all servers:
 
@@ -323,13 +325,13 @@ MCP servers can ship interactive UIs via the [MCP UI](https://github.com/MCP-UI-
 
 **Message types from UI:**
 
-| Type | Purpose |
-|------|---------|
-| `prompt` | User message that triggers an agent response |
-| `intent` | Structured action with name + params |
-| `notify` | Fire-and-forget notification |
-| `message` | Generic message payload |
-| (custom) | Any other type forwarded as intent |
+| Type      | Purpose                                      |
+| --------- | -------------------------------------------- |
+| `prompt`  | User message that triggers an agent response |
+| `intent`  | Structured action with name + params         |
+| `notify`  | Fire-and-forget notification                 |
+| `message` | Generic message payload                      |
+| (custom)  | Any other type forwarded as intent           |
 
 **Retrieving UI messages:**
 
@@ -370,7 +372,7 @@ Shared MCP files are loaded automatically. Use `imports` only for host-specific 
 ```json
 {
   "imports": ["cursor", "claude-code", "claude-desktop"],
-  "mcpServers": { }
+  "mcpServers": {}
 }
 ```
 
@@ -384,16 +386,16 @@ Prefer `.mcp.json` for project-local shared MCP config. Use `.pi/mcp.json` only 
 
 ## Usage
 
-| Mode | Example |
-|------|---------|
-| Status | `mcp({ })` |
-| List server | `mcp({ server: "name" })` |
-| Search | `mcp({ search: "screenshot navigate" })` |
-| Describe | `mcp({ describe: "tool_name" })` |
-| Call | `mcp({ tool: "...", args: '{"key": "value"}' })` |
-| Connect | `mcp({ connect: "server-name" })` |
-| UI messages | `mcp({ action: "ui-messages" })` |
-| Auth start | `mcp({ action: "auth-start", server: "name" })` |
+| Mode          | Example                                                                           |
+| ------------- | --------------------------------------------------------------------------------- |
+| Status        | `mcp({ })`                                                                        |
+| List server   | `mcp({ server: "name" })`                                                         |
+| Search        | `mcp({ search: "screenshot navigate" })`                                          |
+| Describe      | `mcp({ describe: "tool_name" })`                                                  |
+| Call          | `mcp({ tool: "...", args: '{"key": "value"}' })`                                  |
+| Connect       | `mcp({ connect: "server-name" })`                                                 |
+| UI messages   | `mcp({ action: "ui-messages" })`                                                  |
+| Auth start    | `mcp({ action: "auth-start", server: "name" })`                                   |
 | Auth complete | `mcp({ action: "auth-complete", server: "name", args: '{"redirectUrl":"..."}' })` |
 
 MCP proxy and direct-tool results render compactly by default: long text shows the first three lines plus a `Ctrl+O to expand` hint, while the full result remains available when expanded and is still returned unchanged to the model.
@@ -404,16 +406,16 @@ Tool names are fuzzy-matched on hyphens and underscores — `context7_resolve_li
 
 ## Commands
 
-| Command | What it does |
-|---------|--------------|
-| `/mcp` | Interactive panel and first-run onboarding surface |
-| `/mcp setup` | Guided setup for imports, a minimal `.mcp.json`, RepoPrompt quick-add, and config-path inspection |
-| `/mcp tools` | List all tools |
-| `/mcp reconnect` | Reconnect all servers |
-| `/mcp reconnect <server>` | Connect or reconnect a single server |
-| `/mcp logout <server>` | Clear stored OAuth credentials for a server and disconnect it |
-| `/mcp-auth` | Open an OAuth server picker in interactive UI sessions |
-| `/mcp-auth <server>` | OAuth setup for a specific server |
+| Command                   | What it does                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `/mcp`                    | Interactive panel and first-run onboarding surface                                                |
+| `/mcp setup`              | Guided setup for imports, a minimal `.mcp.json`, RepoPrompt quick-add, and config-path inspection |
+| `/mcp tools`              | List all tools                                                                                    |
+| `/mcp reconnect`          | Reconnect all servers                                                                             |
+| `/mcp reconnect <server>` | Connect or reconnect a single server                                                              |
+| `/mcp logout <server>`    | Clear stored OAuth credentials for a server and disconnect it                                     |
+| `/mcp-auth`               | Open an OAuth server picker in interactive UI sessions                                            |
+| `/mcp-auth <server>`      | OAuth setup for a specific server                                                                 |
 
 If `settings.autoAuth` is `true`, `mcp({ connect: ... })`, `mcp({ tool: ... })`, and direct tool calls automatically run OAuth when needed and retry once.
 
