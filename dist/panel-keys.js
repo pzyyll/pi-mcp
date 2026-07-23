@@ -1,4 +1,4 @@
-import { getHostPiTui } from "./host-peers.js";
+import { r as getHostPiTui } from "./host-peers.js";
 //#region src/panel-keys.ts
 function createPanelKeys(keybindings) {
 	if (keybindings) return {
@@ -14,4 +14,4 @@ function createPanelKeys(keybindings) {
 	};
 }
 //#endregion
-export { createPanelKeys };
+export { createPanelKeys as t };

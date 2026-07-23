@@ -1,5 +1,5 @@
-import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+import { homedir } from "node:os";
 //#region src/agent-dir.ts
 function getAgentDir() {
 	const configured = process.env.PI_CODING_AGENT_DIR?.trim();
@@ -12,4 +12,4 @@ function getAgentPath(...segments) {
 	return join(getAgentDir(), ...segments);
 }
 //#endregion
-export { getAgentDir, getAgentPath };
+export { getAgentPath as t };

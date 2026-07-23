@@ -1,12 +1,63 @@
-import { ensureHostPiTui } from "./host-peers.js";
-import { ensureCompatibilityImports, getMcpDiscoverySummary, getServerProvenance, previewCompatibilityImports, previewSharedServerEntry, previewStarterProjectConfig, writeDirectToolsConfig, writeSharedServerEntry, writeStarterProjectConfig } from "./config.js";
-import { openPath } from "./utils.js";
-import { loadMetadataCache } from "./metadata-cache.js";
-import { getAuthForUrl } from "./mcp-auth.js";
-import { authenticate, removeAuth, supportsOAuth } from "./mcp-auth-flow.js";
-import { buildToolMetadata } from "./tool-metadata.js";
-import { getFailureAgeSeconds, lazyConnect, updateMetadataCache, updateStatusBar } from "./init.js";
-import { loadOnboardingState, markSetupCompleted, markSharedConfigHintShown } from "./onboarding-state.js";
+import { a as removeAuth, l as getAuthForUrl, s as supportsOAuth, t as authenticate } from "./mcp-auth-flow.js";
+import { n as ensureHostPiTui } from "./host-peers.js";
+import { t as getAgentPath } from "./agent-dir.js";
+import { S as writeStarterProjectConfig, _ as previewCompatibilityImports, b as writeDirectToolsConfig, h as getServerProvenance, m as getMcpDiscoverySummary, p as ensureCompatibilityImports, s as loadMetadataCache, v as previewSharedServerEntry, x as writeSharedServerEntry, y as previewStarterProjectConfig } from "./direct-tools-resolve.js";
+import { o as openPath } from "./utils.js";
+import { g as buildToolMetadata, i as updateMetadataCache, o as updateStatusBar, r as lazyConnect, t as getFailureAgeSeconds } from "./init.js";
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+//#region src/onboarding-state.ts
+const DEFAULT_STATE = {
+	version: 1,
+	sharedConfigHintShown: false,
+	setupCompleted: false
+};
+function getOnboardingStatePath() {
+	return getAgentPath("mcp-onboarding.json");
+}
+function loadOnboardingState() {
+	const path = getOnboardingStatePath();
+	if (!existsSync(path)) return { ...DEFAULT_STATE };
+	try {
+		const raw = JSON.parse(readFileSync(path, "utf-8"));
+		if (!raw || typeof raw !== "object") return { ...DEFAULT_STATE };
+		return {
+			version: 1,
+			sharedConfigHintShown: raw.sharedConfigHintShown === true,
+			setupCompleted: raw.setupCompleted === true,
+			lastDiscoveryFingerprint: typeof raw.lastDiscoveryFingerprint === "string" ? raw.lastDiscoveryFingerprint : void 0
+		};
+	} catch {
+		return { ...DEFAULT_STATE };
+	}
+}
+function saveOnboardingState(state) {
+	const path = getOnboardingStatePath();
+	mkdirSync(dirname(path), { recursive: true });
+	const tmpPath = `${path}.${process.pid}.tmp`;
+	writeFileSync(tmpPath, `${JSON.stringify(state, null, 2)}\n`, "utf-8");
+	renameSync(tmpPath, path);
+}
+function updateOnboardingState(updater) {
+	const next = updater(loadOnboardingState());
+	saveOnboardingState(next);
+	return next;
+}
+function markSharedConfigHintShown(fingerprint) {
+	return updateOnboardingState((state) => ({
+		...state,
+		sharedConfigHintShown: true,
+		lastDiscoveryFingerprint: fingerprint ?? state.lastDiscoveryFingerprint
+	}));
+}
+function markSetupCompleted(fingerprint) {
+	return updateOnboardingState((state) => ({
+		...state,
+		setupCompleted: true,
+		lastDiscoveryFingerprint: fingerprint ?? state.lastDiscoveryFingerprint
+	}));
+}
+//#endregion
 //#region src/commands.ts
 async function showStatus(state, ctx) {
 	if (!ctx.hasUI) return;

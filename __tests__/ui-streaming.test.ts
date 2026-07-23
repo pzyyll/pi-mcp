@@ -3,6 +3,7 @@ import http from "node:http";
 import { McpServerManager } from "../src/server-manager.ts";
 import { startUiServer, type UiServerOptions, type UiServerHandle } from "../src/ui-server.ts";
 import type { ConsentManager } from "../src/consent-manager.ts";
+import type { UiResourceContent } from "../src/types.ts";
 import {
   UI_STREAM_HOST_CONTEXT_KEY,
   UI_STREAM_STRUCTURED_CONTENT_KEY,
@@ -10,9 +11,8 @@ import {
   getVisualizationStreamEnvelope,
   getUiStreamHostContext,
   serverStreamResultPatchNotificationSchema,
-  type UiResourceContent,
   type VisualizationStreamEnvelope,
-} from "../src/types.ts";
+} from "../src/ui-stream-types.ts";
 
 // Helper to connect to SSE and collect events
 function connectSSE(

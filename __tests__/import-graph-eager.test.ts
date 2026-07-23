@@ -65,7 +65,9 @@ describe("factory eager import graph", () => {
       const source = readFileSync(join(srcDir, relative.replace("./", "")), "utf-8");
       const imports = listStaticImportSpecifiers(source);
       expect(
-        imports.some((s) => s === "@earendil-works/pi-tui" || s.startsWith("@earendil-works/pi-tui/")),
+        imports.some(
+          (s) => s === "@earendil-works/pi-tui" || s.startsWith("@earendil-works/pi-tui/"),
+        ),
         `${relative} must not import @earendil-works/pi-tui`,
       ).toBe(false);
     }
@@ -75,24 +77,23 @@ describe("factory eager import graph", () => {
     const resolveSource = readFileSync(join(srcDir, "direct-tools-resolve.ts"), "utf-8");
     const schemaSource = readFileSync(join(srcDir, "schema-format.ts"), "utf-8");
     const registerSource = readFileSync(join(srcDir, "direct-tool-register.ts"), "utf-8");
+    const metadataSource = readFileSync(join(srcDir, "metadata-cache.ts"), "utf-8");
+    const toolNamesSource = readFileSync(join(srcDir, "tool-names.ts"), "utf-8");
 
     for (const [label, source] of [
       ["direct-tools-resolve.ts", resolveSource],
       ["schema-format.ts", schemaSource],
+      ["metadata-cache.ts", metadataSource],
+      ["tool-names.ts", toolNamesSource],
     ] as const) {
       const imports = listStaticImportSpecifiers(source);
-      expect(imports, label).not.toEqual(
-        expect.arrayContaining([
-          expect.stringMatching(
-            /@modelcontextprotocol\/sdk|recheck|typebox|@earendil-works\/pi-ai/,
-          ),
-        ]),
-      );
       for (const banned of [
         "recheck",
         "@modelcontextprotocol/sdk",
         "typebox",
+        "zod",
         "@earendil-works/pi-ai",
+        "./ui-stream-types.ts",
       ] as const) {
         expect(
           imports.some((s) => s === banned || s.startsWith(`${banned}/`)),
@@ -101,7 +102,14 @@ describe("factory eager import graph", () => {
       }
     }
 
+    // Cold naming helpers must come from tool-names, not types (avoids stream re-export traps).
+    const resolveImports = listStaticImportSpecifiers(resolveSource);
+    const metadataImports = listStaticImportSpecifiers(metadataSource);
+    expect(resolveImports).toContain("./tool-names.ts");
+    expect(metadataImports).toContain("./tool-names.ts");
+
     const registerImports = listStaticImportSpecifiers(registerSource);
+    // P0/P1 keep Pi-official TypeBox parameters; typebox stays on the register module only.
     expect(registerImports.some((s) => s === "typebox" || s.startsWith("typebox/"))).toBe(true);
     for (const banned of [
       "recheck",

@@ -1,10 +1,4 @@
-import type {
-  Api,
-  AssistantMessage,
-  Message,
-  Model,
-  TextContent,
-} from "@earendil-works/pi-ai";
+import type { Api, AssistantMessage, Message, Model, TextContent } from "@earendil-works/pi-ai";
 import { ensureHostPiAi } from "./host-peers.ts";
 import { truncateAtWord } from "./utils.ts";
 import type { ExtensionUIContext, ModelRegistry } from "@earendil-works/pi-coding-agent";

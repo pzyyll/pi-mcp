@@ -8,12 +8,7 @@ import type { McpOnboardingState } from "./onboarding-state.ts";
 function matchesKey(data: string, key: string): boolean {
   return getHostPiTui().matchesKey(data, key);
 }
-function truncateToWidth(
-  text: string,
-  width: number,
-  ellipsis?: string,
-  pad?: boolean,
-): string {
+function truncateToWidth(text: string, width: number, ellipsis?: string, pad?: boolean): string {
   return getHostPiTui().truncateToWidth(text, width, ellipsis, pad);
 }
 function visibleWidth(text: string): number {

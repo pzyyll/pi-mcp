@@ -1,5 +1,5 @@
-import { getHostPiTui } from "./host-peers.js";
-import { createPanelKeys } from "./panel-keys.js";
+import { r as getHostPiTui } from "./host-peers.js";
+import { t as createPanelKeys } from "./panel-keys.js";
 //#region src/mcp-setup-panel.ts
 /** Local aliases so call sites stay stable; peers come from the process bridge. */
 function matchesKey(data, key) {
@@ -467,4 +467,4 @@ function createMcpSetupPanel(discovery, callbacks, options, tui, done) {
 	return new McpSetupPanel(discovery, callbacks, options, tui, done);
 }
 //#endregion
-export { McpSetupPanel, createMcpSetupPanel };
+export { createMcpSetupPanel };

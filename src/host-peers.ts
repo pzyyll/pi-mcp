@@ -7,12 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 /** Minimal pi-tui surface used by the adapter (keeps the bridge small). */
 export interface HostPiTui {
   matchesKey: (data: string, key: string) => boolean;
-  truncateToWidth: (
-    text: string,
-    width: number,
-    ellipsis?: string,
-    pad?: boolean,
-  ) => string;
+  truncateToWidth: (text: string, width: number, ellipsis?: string, pad?: boolean) => string;
   visibleWidth: (text: string) => number;
   // Constructor shape only — full pi-tui Text API is unused beyond construction.
   Text: new (text: string, x: number, y: number) => unknown;
@@ -92,9 +87,7 @@ function hostSearchRoots(): string[] {
 }
 
 function packageDirCandidates(packageName: string): string[] {
-  const parts = packageName.startsWith("@")
-    ? packageName.split("/")
-    : [packageName];
+  const parts = packageName.startsWith("@") ? packageName.split("/") : [packageName];
   const out: string[] = [];
   for (const root of hostSearchRoots()) {
     let dir = dirname(root);
@@ -102,14 +95,7 @@ function packageDirCandidates(packageName: string): string[] {
       out.push(join(dir, "node_modules", ...parts));
       // Nested under pi-coding-agent (npm may hoist peers here only).
       out.push(
-        join(
-          dir,
-          "node_modules",
-          "@earendil-works",
-          "pi-coding-agent",
-          "node_modules",
-          ...parts,
-        ),
+        join(dir, "node_modules", "@earendil-works", "pi-coding-agent", "node_modules", ...parts),
       );
       const parent = dirname(dir);
       if (parent === dir) break;
@@ -147,10 +133,7 @@ async function importHostPackageFile<T>(
   return (await import(pathToFileURL(entryPath).href)) as T;
 }
 
-async function importPackageEntry<T>(
-  packageName: string,
-  entryRelativePath: string,
-): Promise<T> {
+async function importPackageEntry<T>(packageName: string, entryRelativePath: string): Promise<T> {
   try {
     return (await import(packageName)) as T;
   } catch {
@@ -228,10 +211,7 @@ async function importPiAiCompatModule(): Promise<Record<string, unknown>> {
     // fall through
   }
   // Do not bare-import the package root here: it resolves without complete().
-  return importHostPackageFile<Record<string, unknown>>(
-    "@earendil-works/pi-ai",
-    "dist/compat.js",
-  );
+  return importHostPackageFile<Record<string, unknown>>("@earendil-works/pi-ai", "dist/compat.js");
 }
 
 /** Ensure pi-ai peers are available without putting them on the eager import graph. */

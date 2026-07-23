@@ -1,7 +1,7 @@
 // ABOUTME: Guards package publish surface for the prebuilt dist-based Pi extension.
 // ABOUTME: Ensures pi.extensions points at dist and published files stay minimal.
 import { describe, it, expect } from "vitest";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -33,25 +33,13 @@ describe("package.json publish surface", () => {
     expect(publishedTsSources).toEqual([]);
   });
 
-  it("builds every src runtime TypeScript module into dist when dist exists", () => {
+  it("ships the split-bundle entry and app-bridge asset when dist exists", () => {
     const distDir = join(repoRoot, "dist");
     if (!existsSync(distDir)) {
       // Local checkouts may not have run `pnpm run build` yet.
       return;
     }
 
-    const srcDir = join(repoRoot, "src");
-    const runtimeModules = readdirSync(srcDir)
-      .filter((entry) => entry.endsWith(".ts"))
-      .filter((entry) => !entry.endsWith(".test.ts"));
-
-    expect(runtimeModules.length).toBeGreaterThan(0);
-
-    const missingOutputs = runtimeModules
-      .map((entry) => entry.replace(/\.ts$/, ".js"))
-      .filter((output) => !existsSync(join(distDir, output)));
-
-    expect(missingOutputs).toEqual([]);
     expect(existsSync(join(distDir, "index.js"))).toBe(true);
     expect(existsSync(join(distDir, "app-bridge.bundle.js"))).toBe(true);
   });

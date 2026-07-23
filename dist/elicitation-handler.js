@@ -287,4 +287,4 @@ function humanizeName(name) {
 	return name.replace(/[_-]+/g, " ").replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/^./, (char) => char.toUpperCase());
 }
 //#endregion
-export { coerceAndValidateFormValues, handleElicitationRequest, handleFormElicitation, handleUrlElicitation, registerElicitationHandler };
+export { handleUrlElicitation, registerElicitationHandler };

@@ -1,5 +1,5 @@
-import { ensureHostPiAi } from "./host-peers.js";
-import { truncateAtWord } from "./utils.js";
+import { t as ensureHostPiAi } from "./host-peers.js";
+import { d as truncateAtWord } from "./utils.js";
 import { CreateMessageRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 //#region src/sampling-handler.ts
 function registerSamplingHandler(client, options) {
@@ -166,4 +166,4 @@ function zeroUsage() {
 	};
 }
 //#endregion
-export { handleSamplingRequest, registerSamplingHandler };
+export { registerSamplingHandler };

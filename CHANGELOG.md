@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Performance
+- Ship a split-bundle `dist/` entry that inlines `typebox`/`zod` while keeping host peers and the MCP SDK external, cutting cold extension import time.
+- Isolate pure tool-name helpers from stream schema modules so cache/resolve paths no longer pull `zod` on the factory graph.
 - Deferred heavy MCP runtime imports (SDK client stack, OAuth, UI server, sampling/elicitation, `recheck`, direct-tool executors) until first use to cut Pi cold-start extension load time.
 
 ## [2.11.0] - 2026-07-03

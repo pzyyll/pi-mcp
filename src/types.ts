@@ -1,4 +1,5 @@
-// types.ts - Core type definitions
+// ABOUTME: Core MCP adapter type definitions and light UI/prompt helpers.
+// ABOUTME: Stream runtime schemas live in ui-stream-types; tool names in tool-names.
 import type { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import type { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
@@ -105,36 +106,24 @@ export interface UiHostContext {
 
 export type UiDisplayMode = "inline" | "fullscreen" | "pip";
 
-// Re-export stream types from the shared lightweight module.
-// This allows the example package to import stream schemas without pulling the full types.ts dependency graph.
-export {
-  UI_STREAM_HOST_CONTEXT_KEY,
-  UI_STREAM_REQUEST_META_KEY,
-  UI_STREAM_RESULT_PATCH_METHOD,
-  SERVER_STREAM_RESULT_PATCH_METHOD,
-  UI_STREAM_STRUCTURED_CONTENT_KEY,
-  uiStreamModeSchema,
-  visualizationStreamPhaseSchema,
-  visualizationStreamFrameTypeSchema,
-  visualizationStreamStatusSchema,
-  uiStreamHostContextSchema,
-  visualizationStreamEnvelopeSchema,
-  uiStreamCallToolResultSchema,
-  uiStreamResultPatchNotificationSchema,
-  serverStreamResultPatchNotificationSchema,
-  getUiStreamHostContext,
-  getVisualizationStreamEnvelope,
-  type UiStreamMode,
-  type VisualizationStreamPhase,
-  type VisualizationStreamFrameType,
-  type VisualizationStreamStatus,
-  type UiStreamHostContext,
-  type VisualizationStreamEnvelope,
-  type UiStreamCallToolResult,
-  type UiStreamResultPatchNotification,
-  type ServerStreamResultPatchNotification,
-  type UiStreamSummary,
+// Type-only stream re-exports. Runtime schemas/constants live in ui-stream-types.ts
+// so cold paths that import types.ts values do not evaluate zod.
+export type {
+  UiStreamMode,
+  VisualizationStreamPhase,
+  VisualizationStreamFrameType,
+  VisualizationStreamStatus,
+  UiStreamHostContext,
+  VisualizationStreamEnvelope,
+  UiStreamCallToolResult,
+  UiStreamResultPatchNotification,
+  ServerStreamResultPatchNotification,
+  UiStreamSummary,
 } from "./ui-stream-types.ts";
+
+// Back-compat re-exports for tool naming helpers (implementations in tool-names.ts).
+export { formatToolName, getServerPrefix, isToolExcluded } from "./tool-names.ts";
+export type { ToolPrefixMode } from "./tool-names.ts";
 
 export interface UiMessageParams {
   role?: string;
@@ -410,58 +399,4 @@ export interface McpPanelCallbacks {
 export interface McpPanelResult {
   changes: Map<string, true | string[] | false>;
   cancelled: boolean;
-}
-
-/**
- * Get server prefix based on tool prefix mode.
- */
-export function getServerPrefix(serverName: string, mode: "server" | "none" | "short"): string {
-  if (mode === "none") return "";
-  if (mode === "short") {
-    let short = serverName.replace(/-?mcp$/i, "").replace(/-/g, "_");
-    if (!short) short = "mcp";
-    return short;
-  }
-  return serverName.replace(/-/g, "_");
-}
-
-/**
- * Format a tool name with server prefix.
- */
-export function formatToolName(
-  toolName: string,
-  serverName: string,
-  prefix: "server" | "none" | "short",
-): string {
-  const p = getServerPrefix(serverName, prefix);
-  return p ? `${p}_${toolName}` : toolName;
-}
-
-function normalizeToolName(value: string): string {
-  return value.replace(/-/g, "_");
-}
-
-export function isToolExcluded(
-  toolName: string,
-  serverName: string,
-  prefix: "server" | "none" | "short",
-  excludeTools?: unknown,
-): boolean {
-  if (!Array.isArray(excludeTools) || excludeTools.length === 0) return false;
-
-  const candidates = new Set<string>([
-    normalizeToolName(toolName),
-    normalizeToolName(formatToolName(toolName, serverName, prefix)),
-    normalizeToolName(formatToolName(toolName, serverName, "server")),
-    normalizeToolName(formatToolName(toolName, serverName, "short")),
-  ]);
-
-  for (const excluded of excludeTools) {
-    if (typeof excluded !== "string") continue;
-    if (candidates.has(normalizeToolName(excluded))) {
-      return true;
-    }
-  }
-
-  return false;
 }

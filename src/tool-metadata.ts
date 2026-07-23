@@ -2,7 +2,7 @@
 // ABOUTME: Re-exports formatSchema for back-compat; pure schema formatting lives in schema-format.ts.
 import type { McpExtensionState } from "./state.ts";
 import type { ToolMetadata, McpTool, McpResource, ServerEntry } from "./types.ts";
-import { formatToolName, isToolExcluded } from "./types.ts";
+import { formatToolName, isToolExcluded } from "./tool-names.ts";
 import { resourceNameToToolName } from "./resource-tools.ts";
 import { extractToolUiStreamMode } from "./utils.ts";
 import { getToolUiResourceUri } from "./tool-ui-uri.ts";

@@ -4,7 +4,8 @@ import type { AgentToolResult, ToolInfo } from "@earendil-works/pi-coding-agent"
 import { UrlElicitationRequiredError } from "@modelcontextprotocol/sdk/types.js";
 import type { McpExtensionState } from "./state.ts";
 import type { ToolMetadata, McpContent } from "./types.ts";
-import { getServerPrefix, parseUiPromptHandoff } from "./types.ts";
+import { getServerPrefix } from "./tool-names.ts";
+import { parseUiPromptHandoff } from "./types.ts";
 import {
   lazyConnect,
   updateServerMetadata,

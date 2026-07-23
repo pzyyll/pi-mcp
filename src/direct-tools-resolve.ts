@@ -4,7 +4,7 @@
 import type { DirectToolSpec, McpConfig } from "./types.ts";
 import type { MetadataCache } from "./metadata-cache.ts";
 import { isServerCacheValid } from "./metadata-cache.ts";
-import { formatToolName, isToolExcluded } from "./types.ts";
+import { formatToolName, isToolExcluded } from "./tool-names.ts";
 import { resourceNameToToolName } from "./resource-tools.ts";
 
 const BUILTIN_NAMES = new Set(["read", "bash", "edit", "write", "grep", "find", "ls", "mcp"]);

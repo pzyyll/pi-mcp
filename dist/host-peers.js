@@ -1,5 +1,5 @@
-import { dirname, join } from "node:path";
 import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 //#region src/host-peers.ts
 const HOST_PEER_STORE_KEY = Symbol.for("pi-mcp-adapter.host-peers");
@@ -13,17 +13,9 @@ function getStore() {
 function seedHostPiTui(peers) {
 	getStore().piTui = peers;
 }
-function seedHostPiAi(peers) {
-	getStore().piAi = peers;
-}
 function getHostPiTui() {
 	const peers = getStore().piTui;
 	if (!peers) throw new Error("Host @earendil-works/pi-tui peers are not seeded. The extension entry must import seed-host-pi-tui before panel code runs.");
-	return peers;
-}
-function getHostPiAi() {
-	const peers = getStore().piAi;
-	if (!peers) throw new Error("Host @earendil-works/pi-ai peers are not seeded. Call ensureHostPiAi() before sampling.");
 	return peers;
 }
 /** Roots used to discover the running pi install's node_modules tree. */
@@ -126,13 +118,5 @@ async function ensureHostPiAi() {
 	});
 	return store.piAiPromise;
 }
-/** Test helper: clear seeded peers (does not unload node modules). */
-function resetHostPeersForTests() {
-	const store = getStore();
-	store.piTui = void 0;
-	store.piAi = void 0;
-	store.piTuiPromise = void 0;
-	store.piAiPromise = void 0;
-}
 //#endregion
-export { ensureHostPiAi, ensureHostPiTui, getHostPiAi, getHostPiTui, resetHostPeersForTests, seedHostPiAi, seedHostPiTui };
+export { seedHostPiTui as i, ensureHostPiTui as n, getHostPiTui as r, ensureHostPiAi as t };
